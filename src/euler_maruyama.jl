@@ -24,7 +24,7 @@ function DiffEqBase.solve(prob::SDEProblem,alg::SimpleEM;
       else
           r = randn()
       end
-      u[i] = f(uprev,p,tprev)*dt + sqdt*g(uprev,p,tprev).*randn()
+      u[i] = f(uprev,p,tprev)*dt + sqdt*g(uprev,p,tprev).*r
   end
 
   sol = build_solution(prob,alg,t,u,
