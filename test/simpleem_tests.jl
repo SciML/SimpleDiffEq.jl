@@ -1,4 +1,4 @@
-using SimpleDiffEq, Base.Test
+using SimpleDiffEq, Base.Test, StaticArrays
 
 # dX_t = 2u dt + dW_t
 f(u,p,t) = 2u
@@ -12,3 +12,9 @@ sol = solve(prob,SimpleEM(),dt=0.25)
 @test sol.t == collect(0:0.25:1.0)
 @test length(sol.u) == 5
 @test typeof(sol) <: DESolution
+
+u0 = @SVector [0.1,0.2]
+prob = SDEProblem(f,g,u0,tspan)
+sol = solve(prob,SimpleEM(),dt=0.25)
+
+@test typeof(sol.u) <: Vector{SVector{2,Float64}}
