@@ -1,5 +1,6 @@
 using SimpleDiffEq
 using Base.Test
 
-# write your own tests here
-@test 1 == 2
+tic()
+@time @testset "Discrete Tests" begin include("discrete_tests.jl") end
+toc()

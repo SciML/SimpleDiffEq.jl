@@ -1,5 +1,10 @@
+__precompile__()
+
 module SimpleDiffEq
 
-# package code goes here
+using Reexport
+@reexport using DiffEqBase
+
+include("functionmap.jl")
 
 end # module
