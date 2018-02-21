@@ -19,12 +19,7 @@ function DiffEqBase.solve(prob::SDEProblem,alg::SimpleEM;
   for i in 2:n
       uprev = u[i-1]
       tprev = t[i-1]
-      if typeof(uprev) <: SArray
-          r = randn(size(uprev))
-      else
-          r = randn()
-      end
-      u[i] = f(uprev,p,tprev)*dt + sqdt*g(uprev,p,tprev).*r
+      u[i] = f(uprev,p,tprev)*dt + sqdt*g(uprev,p,tprev).*randn(typeof(uprev))
   end
 
   sol = build_solution(prob,alg,t,u,
