@@ -20,6 +20,7 @@ function DiffEqBase.solve(prob::DiscreteProblem{uType,tType,false},
         end
     end
     sol = build_solution(prob,alg,t,u,dense=false,
+                         interp = DiffEqBase.ConstantInterpolation(t,u),
                          calculate_error = false)
 end
 
@@ -43,6 +44,7 @@ function DiffEqBase.solve(prob::DiscreteProblem{uType,tType,true},
         end
     end
     sol = build_solution(prob,alg,t,u,dense=false,
+                         interp = DiffEqBase.ConstantInterpolation(t,u),
                          calculate_error = false)
 end
 
