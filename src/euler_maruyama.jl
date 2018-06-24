@@ -18,7 +18,7 @@ function DiffEqBase.solve(prob::SDEProblem,alg::SimpleEM,args...;
   for i in 2:n
       uprev = u[i-1]
       tprev = t[i-1]
-      u[i] = f(uprev,p,tprev)*dt + sqdt*g(uprev,p,tprev).*randn(typeof(u0))
+      u[i] = uprev + f(uprev,p,tprev)*dt + sqdt*g(uprev,p,tprev).*randn(typeof(u0))
   end
 
   sol = build_solution(prob,alg,t,u,
