@@ -2,9 +2,10 @@ struct SimpleFunctionMap end
 export SimpleFunctionMap
 
 # ConstantCache version
-function DiffEqBase.solve(prob::DiscreteProblem{uType,tType,false},
+function DiffEqBase.__solve(prob::DiffEqBase.DiscreteProblem{uType,tupType,false},
                           alg::SimpleFunctionMap;
-                          calculate_values=true) where {uType,tType}
+                          calculate_values=true) where {uType,tupType}
+    tType = eltype(tupType)
     tspan = prob.tspan
     f = prob.f
     u0 = prob.u0
@@ -19,15 +20,16 @@ function DiffEqBase.solve(prob::DiscreteProblem{uType,tType,false},
             u[i] = f(u[i-1],p,t[i])
         end
     end
-    sol = build_solution(prob,alg,t,u,dense=false,
+    sol = DiffEqBase.build_solution(prob,alg,t,u,dense=false,
                          interp = DiffEqBase.ConstantInterpolation(t,u),
                          calculate_error = false)
 end
 
 # Cache version
-function DiffEqBase.solve(prob::DiscreteProblem{uType,tType,true},
+function DiffEqBase.__solve(prob::DiscreteProblem{uType,tupType,true},
                           alg::SimpleFunctionMap;
-                          calculate_values=true) where {uType,tType}
+                          calculate_values=true) where {uType,tupType}
+    tType = eltype(tupType)
     tspan = prob.tspan
     f = prob.f
     u0 = prob.u0
@@ -43,7 +45,7 @@ function DiffEqBase.solve(prob::DiscreteProblem{uType,tType,true},
             f(u[i],u[i-1],p,t[i])
         end
     end
-    sol = build_solution(prob,alg,t,u,dense=false,
+    sol = DiffEqBase.build_solution(prob,alg,t,u,dense=false,
                          interp = DiffEqBase.ConstantInterpolation(t,u),
                          calculate_error = false)
 end
@@ -52,7 +54,7 @@ end
 
 # Integrator version
 
-mutable struct DiscreteIntegrator{F,uType,tType,P,S} <: DEIntegrator
+mutable struct DiscreteIntegrator{F,uType,tType,P,S} <: DiffEqBase.DEIntegrator
     f::F
     u::uType
     t::tType
@@ -62,7 +64,7 @@ mutable struct DiscreteIntegrator{F,uType,tType,P,S} <: DEIntegrator
     i::Int
 end
 
-function DiffEqBase.init(prob::DiscreteProblem,
+function DiffEqBase.__init(prob::DiscreteProblem,
                          alg::SimpleFunctionMap)
     sol = solve(prob,alg;calculate_values=false)
     DiscreteIntegrator(prob.f,prob.u0,prob.tspan[1],copy(prob.u0),prob.p,sol,1)

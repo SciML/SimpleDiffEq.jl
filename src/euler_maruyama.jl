@@ -1,4 +1,4 @@
-struct SimpleEM <: DEAlgorithm end
+struct SimpleEM <: DiffEqBase.AbstractSDEAlgorithm end
 export SimpleEM
 
 function DiffEqBase.solve(prob::SDEProblem,alg::SimpleEM,args...;
@@ -21,6 +21,6 @@ function DiffEqBase.solve(prob::SDEProblem,alg::SimpleEM,args...;
       u[i] = uprev + f(uprev,p,tprev)*dt + sqdt*g(uprev,p,tprev).*randn(typeof(u0))
   end
 
-  sol = build_solution(prob,alg,t,u,
+  sol = DiffEqBase.build_solution(prob,alg,t,u,
                        calculate_error = false)
 end

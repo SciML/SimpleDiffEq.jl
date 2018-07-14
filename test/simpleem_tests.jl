@@ -1,4 +1,4 @@
-using SimpleDiffEq, Base.Test, StaticArrays
+using SimpleDiffEq, Test, StaticArrays
 
 # dX_t = 2u dt + dW_t
 f(u,p,t) = 2u
