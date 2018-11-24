@@ -166,18 +166,23 @@ end
 # %%
 begin
     u0 = 10ones(3)
+
     oop = init(MinimalTsit5(), loop, false, SVector{3}(u0), 0.0, 0.0001, [10, 28, 8/3])
     step!(oop)
     for i in 1:10000;
         step!(oop);
-        isnan(oop.u[1]) || isnan(oop.u[2]) || isnan(oop.u[3]) || error("oop nan")
+        if isnan(oop.u[1]) || isnan(oop.u[2]) || isnan(oop.u[3])
+            error("oop nan")
+        end
     end
 
     iip = init(MinimalTsit5(), liip, true, copy(u0), 0.0, 0.0001, [10, 28, 8/3])
     step!(iip)
     for i in 1:10000;
         step!(iip);
-        isnan(iip.u[1]) || isnan(iip.u[2]) || isnan(iip.u[3]) || error("iip nan")
+        if isnan(iip.u[1]) || isnan(iip.u[2]) || isnan(iip.u[3])
+            error("iip nan")
+        end
     end
 end
 
@@ -198,22 +203,22 @@ end
 # end
 
 
-# using BenchmarkTools
-# function bench()
-#     u0 = 10ones(3)
-#     oop = init(MinimalTsit5(), loop, false, SVector{3}(u0), 0.0, 0.01, [10, 28, 8/3])
-#     step!(oop)
-#
-#     iip = init(MinimalTsit5(), liip, true, u0, 0.0, 0.01, [10, 28, 8/3])
-#     step!(iip)
-#
-#     println("Minimal integrator times")
-#     println("In-place time")
-#     @btime step!($iip)
-#
-#     println("Out of place time")
-#     @btime step!($oop)
-#
-# end
-#
-# bench()
+using BenchmarkTools
+function bench()
+    u0 = 10ones(3)
+    oop = init(MinimalTsit5(), loop, false, SVector{3}(u0), 0.0, 0.01, [10, 28, 8/3])
+    step!(oop)
+
+    iip = init(MinimalTsit5(), liip, true, u0, 0.0, 0.01, [10, 28, 8/3])
+    step!(iip)
+
+    println("Minimal integrator times")
+    println("In-place time")
+    @btime step!($iip)
+
+    println("Out of place time")
+    @btime step!($oop)
+
+end
+
+bench()
