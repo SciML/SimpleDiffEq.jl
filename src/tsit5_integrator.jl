@@ -135,9 +135,8 @@ function step!(integ::MinimalTsit5Integrator{false, T, S}) where {T, S}
     k7 = f(integ.u, p, t+dt)
 
     @inbounds begin # Necessary for interpolation
-        integ.ks[1] = integ.ks[7] = k7
-        integ.ks[2] = k2; integ.ks[3] = k3; integ.ks[4] = k4
-        integ.ks[5] = k5; integ.ks[6] = k6
+        integ.ks[1] = k7; integ.ks[2] = k2; integ.ks[3] = k3
+        integ.ks[4] = k4; integ.ks[5] = k5; integ.ks[6] = k6
     end
 
     integ.t += dt
