@@ -19,8 +19,8 @@ end
 # %%
 begin
     u0 = 10ones(3)
-
-    oop = init(MinimalTsit5(), loop, false, SVector{3}(u0), 0.0, 0.0001, [10, 28, 8/3])
+    dt = 0.01
+    oop = init(MinimalTsit5(), loop, false, SVector{3}(u0), 0.0, dt, [10, 28, 8/3])
     step!(oop)
     for i in 1:10000;
         step!(oop);
@@ -28,8 +28,9 @@ begin
             error("oop nan")
         end
     end
+    # @profiler for i in 1:1000000; step!(oop); end
 
-    iip = init(MinimalTsit5(), liip, true, copy(u0), 0.0, 0.0001, [10, 28, 8/3])
+    iip = init(MinimalTsit5(), liip, true, copy(u0), 0.0, dt, [10, 28, 8/3])
     step!(iip)
     for i in 1:10000;
         step!(iip);
@@ -37,22 +38,23 @@ begin
             error("iip nan")
         end
     end
-
-    @profiler for i in 1:1000000; step!(iip); end
-
+    # @profiler for i in 1:1000000; step!(iip); end
 end
 
-# @profiler for i in 1:1000000; step!(integ); end
-# using PyPlot
-#
-# for integ in (iip, oop)
-#     N = 10000
-#     xs = zeros(N); ys = copy(xs); zs = copy(xs)
-#
-#     for i in 1:N
-#         step!(integ)
-#         xs[i], ys[i], zs[i] = integ.u
-#     end
-#
-#     plot3D(xs, ys, zs)
-# end
+using PyPlot
+begin
+    u0 = 10ones(3)
+    oop = init(MinimalTsit5(), loop, false, SVector{3}(u0), 0.0, 0.01, [10, 28, 8/3])
+    iip = init(MinimalTsit5(), liip, true, copy(u0), 0.0, 0.01, [10, 28, 8/3])
+    N = 1000
+    for (j, integ) in enumerate((iip, oop))
+        xs = zeros(N); ys = copy(xs); zs = copy(xs)
+
+        for i in 1:N
+            step!(integ)
+            xs[i], ys[i], zs[i] = integ.u
+        end
+
+        plot3D(xs, ys, zs, ls = j==1 ? "solid" : "dashed")
+    end
+end

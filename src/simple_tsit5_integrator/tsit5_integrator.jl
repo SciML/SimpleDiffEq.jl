@@ -1,33 +1,39 @@
 using StaticArrays
-import DiffEqBase: init, step!
+import DiffEqBase: init, step!, isinplace
 
 struct MinimalTsit5 end
 
 mutable struct MinimalTsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F}
-    f::F                      # eom
-    uprev::S                  # previous state
-    u::S                      # current state
-    tmp::S                    # dummy, same as state
-    tprev::T                  # previous time
-    t::T                      # current time
-    t0::T                     # initial time, only for reinit
-    dt::T                     # step size
-    p::P                      # parameter container
-    ks::Vector{S}             # interpolants of the algorithm
-    cs::SVector{6, T}         # ci factors cache
-    as::SVector{21, T}        # aij factors cache
+    f::F                  # eom
+    uprev::S              # previous state
+    u::S                  # current state
+    tmp::S                # dummy, same as state
+    tprev::T              # previous time
+    t::T                  # current time
+    t0::T                 # initial time, only for reinit
+    dt::T                 # step size
+    p::P                  # parameter container
+    ks::Vector{S}         # interpolants of the algorithm
+    cs::SVector{6, T}     # ci factors cache: time coefficients
+    as::SVector{21, T}    # aij factors cache: solution coefficients
+    rs::SVector{22, T}    # rij factors cache: interpolation coefficients
 end
 
-function DiffEqBase.init(alg::MinimalTsit5, f::F, IIP::Bool, u0::S, t0::T, dt::T, p::P
+isinplace(::MinimalTsit5Integrator{IIP}) where {IIP} = IIP
+
+#######################################################################################
+# Initialization
+#######################################################################################
+function init(alg::MinimalTsit5, f::F, IIP::Bool, u0::S, t0::T, dt::T, p::P
     ) where {F, P, T, S<:AbstractArray{T}}
 
-    cs, as = _build_caches(alg, T)
+    cs, as, rs = _build_caches(alg, T)
     ks = [zero(u0) for i in 1:6]
 
     !IIP && @assert S <: SArray
 
     integ = MinimalTsit5Integrator{IIP, T, S, P, F}(
-        f, copy(u0), copy(u0), copy(u0), t0, t0, t0, dt, p, ks, cs, as
+        f, copy(u0), copy(u0), copy(u0), t0, t0, t0, dt, p, ks, cs, as, rs
     )
 end
 
@@ -38,34 +44,62 @@ function _build_caches(::MinimalTsit5, ::Type{T}) where {T}
     cs = SVector{6, T}(0.161, 0.327, 0.9, 0.9800255409045097, 1.0, 1.0)
 
     as = SVector{21, T}(
-        convert(T,0.161),                    # a21
-        convert(T,-0.008480655492356989),    # a31
-        convert(T,0.335480655492357),        # ⋮
-        convert(T,2.8971530571054935),
-        convert(T,-6.359448489975075),
-        convert(T,4.3622954328695815),
-        convert(T,5.325864828439257),
-        convert(T,-11.748883564062828),
-        convert(T,7.4955393428898365),
-        convert(T,-0.09249506636175525),
-        convert(T,5.86145544294642),
-        convert(T,-12.92096931784711),
-        convert(T,8.159367898576159),
-        convert(T,-0.071584973281401),
-        convert(T,-0.028269050394068383),
-        convert(T,0.09646076681806523),
-        convert(T,0.01),
-        convert(T,0.4798896504144996),
-        convert(T,1.379008574103742),
-        convert(T,-3.290069515436081),
-        convert(T,2.324710524099774)         # a76
+        #=a21=# convert(T,0.161),
+        #=a31=# convert(T,-0.008480655492356989),
+        #=a32=# convert(T,0.335480655492357),
+        #=a41=# convert(T,2.8971530571054935),
+        #=a42=# convert(T,-6.359448489975075),
+        #=a43=# convert(T,4.3622954328695815),
+        #=a51=# convert(T,5.325864828439257),
+        #=a52=# convert(T,-11.748883564062828),
+        #=a53=# convert(T,7.4955393428898365),
+        #=a54=# convert(T,-0.09249506636175525),
+        #=a61=# convert(T,5.86145544294642),
+        #=a62=# convert(T,-12.92096931784711),
+        #=a63=# convert(T,8.159367898576159),
+        #=a64=# convert(T,-0.071584973281401),
+        #=a65=# convert(T,-0.028269050394068383),
+        #=a71=# convert(T,0.09646076681806523),
+        #=a72=# convert(T,0.01),
+        #=a73=# convert(T,0.4798896504144996),
+        #=a74=# convert(T,1.379008574103742),
+        #=a75=# convert(T,-3.290069515436081),
+        #=a76=# convert(T,2.324710524099774)
     )
 
-    return cs, as
+    rs = SVector{22, T}(
+        #=r11=# convert(T,1.0),
+        #=r12=# convert(T,-2.763706197274826),
+        #=r13=# convert(T,2.9132554618219126),
+        #=r14=# convert(T,-1.0530884977290216),
+        #=r22=# convert(T,0.13169999999999998),
+        #=r23=# convert(T,-0.2234),
+        #=r24=# convert(T,0.1017),
+        #=r32=# convert(T,3.9302962368947516),
+        #=r33=# convert(T,-5.941033872131505),
+        #=r34=# convert(T,2.490627285651253),
+        #=r42=# convert(T,-12.411077166933676),
+        #=r43=# convert(T,30.33818863028232),
+        #=r44=# convert(T,-16.548102889244902),
+        #=r52=# convert(T,37.50931341651104),
+        #=r53=# convert(T,-88.1789048947664),
+        #=r54=# convert(T,47.37952196281928),
+        #=r62=# convert(T,-27.896526289197286),
+        #=r63=# convert(T,65.09189467479366),
+        #=r64=# convert(T,-34.87065786149661),
+        #=r72=# convert(T,1.5),
+        #=r73=# convert(T,-4),
+        #=r74=# convert(T,2.5),
+    )
+
+    return cs, as, rs
 end
 
+#######################################################################################
+# Stepping
+#######################################################################################
 # IIP version for vectors and matrices
-function DiffEqBase.step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S}
+function step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S}
 
     L = length(integ.u)
 
@@ -100,7 +134,6 @@ function DiffEqBase.step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S
         tmp[i] = uprev[i]+dt*(a61*k1[i]+a62*k2[i]+a63*k3[i]+a64*k4[i]+a65*k5[i])
     end
     f!(k6, tmp, p, t+dt)
-
     for i in 1:L
         integ.u[i] = uprev[i]+dt*(a71*k1[i]+a72*k2[i]+a73*k3[i]+a74*k4[i]+a75*k5[i]+a76*k6[i])
     end
@@ -113,7 +146,7 @@ function DiffEqBase.step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S
 end
 
 # OOP version for vectors and matrices
-function DiffEqBase.step!(integ::MinimalTsit5Integrator{false, T, S}) where {T, S}
+function step!(integ::MinimalTsit5Integrator{false, T, S}) where {T, S}
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
     dt = integ.dt; t = integ.t; p = integ.p
@@ -147,4 +180,45 @@ function DiffEqBase.step!(integ::MinimalTsit5Integrator{false, T, S}) where {T, 
     integ.t += dt
 
     return  nothing
+end
+
+#######################################################################################
+# Interpolation
+#######################################################################################
+# Interpolation function, OOP
+function (integ::MinimalTsit5)(t::T) where {T}
+    tnext, tprev, dt = integ.t, integ.tprev, integ.dt
+    @assert tprev ≤ t ≤ tnext
+    θ = (t - tprev)/dt
+    b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ = btildes(integ.rs, θ)
+
+    ks = integ.ks
+    if !isinplace(integ)
+        u = @inbounds integ.uprev + dt*(b1θ*ks[1] + b2θ*ks[2] + b3θ*ks[3] + b4θ*ks[4] +
+                      b5θ*ks[5] + b6θ*ks[6] + b7θ*ks[1])
+        return u
+    else
+        u = similar(integ.u)
+        @inbounds for i in 1:length(u)
+            u[i] = integ.uprev[i] + dt*(b1θ*ks[1][i] + b2θ*ks[2][i] + b3θ*ks[3][i] +
+                   b4θ*ks[4][i] + b5θ*ks[5][i] + b6θ*ks[6][i] + b7θ*ks[1][i])
+        end
+        return u
+    end
+end
+# Interpolation coefficients
+function btildes(rs::SVector{22, T}, θ::T) where {T}
+    # θ in (0, 1) !
+    r11,r12,r13,r14,r22,r23,r24,r32,r33,r34,r42,r43,r44,r52,r53,
+    r54,r62,r63,r64,r72,r73,r74 = rs
+
+    b1θ::T = @evalpoly(θ, 0.0, r11, r12, r13, r14)
+    b2θ::T = @evalpoly(θ, 0.0, 0.0, r22, r23, r24)
+    b3θ::T = @evalpoly(θ, 0.0, 0.0, r32, r33, r34)
+    b4θ::T = @evalpoly(θ, 0.0, 0.0, r42, r43, r44)
+    b5θ::T = @evalpoly(θ, 0.0, 0.0, r52, r53, r54)
+    b6θ::T = @evalpoly(θ, 0.0, 0.0, r62, r63, r64)
+    b7θ::T = @evalpoly(θ, 0.0, 0.0, r72, r73, r74)
+
+    return b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ
 end

@@ -56,3 +56,31 @@ function bench()
 end
 
 bench()
+
+function bench_only_step()
+  u0 = 10ones(3)
+  dt = 0.01
+  oop = init(SimpleDiffEq.MinimalTsit5(), loop, false, SVector{3}(u0), 0.0, dt, [10, 28, 8/3])
+  DiffEqBase.step!(oop)
+  iip = init(SimpleDiffEq.MinimalTsit5(), liip, true, u0, 0.0, dt, [10, 28, 8/3])
+  DiffEqBase.step!(iip)
+  odeoop = ODEProblem{false}(loop, SVector{3}(u0), (0.0, Inf),  [10, 28, 8/3])
+  deoop = DiffEqBase.init(odeoop, Tsit5();
+  adaptive = false, save_everystep = false, dt = dt, maxiters = Inf)
+  DiffEqBase.step!(deoop)
+  odeiip = ODEProblem{true}(liip, u0, (0.0, Inf),  [10, 28, 8/3])
+  deiip = DiffEqBase.init(odeiip, Tsit5();
+  adaptive = false, save_everystep = false, dt = dt, maxiters = Inf)
+  DiffEqBase.step!(deiip)
+  println("Minimal integrator times")
+  println("In-place time")
+  @btime DiffEqBase.step!($iip)
+  println("Out of place time")
+  @btime DiffEqBase.step!($oop)
+  println("Standard Tsit5 times")
+  println("In-place time")
+  @btime OrdinaryDiffEq.perform_step!($deiip,$(deiip.cache))
+  println("Out of place time")
+  @btime OrdinaryDiffEq.perform_step!($deoop,$(deoop.cache))
+end
+bench_only_step()
