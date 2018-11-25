@@ -140,6 +140,7 @@ function step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S}
     end
     f!(k7, integ.u, p, t+dt)
 
+    integ.tprev = t
     integ.t += dt
 
     return  nothing
@@ -177,6 +178,7 @@ function step!(integ::MinimalTsit5Integrator{false, T, S}) where {T, S}
         integ.ks[4] = k4; integ.ks[5] = k5; integ.ks[6] = k6
     end
 
+    integ.tprev = t
     integ.t += dt
 
     return  nothing
@@ -186,7 +188,7 @@ end
 # Interpolation
 #######################################################################################
 # Interpolation function, OOP
-function (integ::MinimalTsit5)(t::T) where {T}
+function (integ::MinimalTsit5Integrator)(t::T) where {T}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
     @assert tprev ≤ t ≤ tnext
     θ = (t - tprev)/dt
