@@ -1,4 +1,5 @@
 using StaticArrays
+import DiffEqBase: init, step!
 
 struct MinimalTsit5 end
 
@@ -17,7 +18,7 @@ mutable struct MinimalTsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F}
     as::SVector{21, T}    # aij factors cache
 end
 
-function init(alg::MinimalTsit5, f::F, IIP::Bool, u0::S, t0::T, dt::T, p::P
+function DiffEqBase.init(alg::MinimalTsit5, f::F, IIP::Bool, u0::S, t0::T, dt::T, p::P
     ) where {F, P, T, S<:AbstractArray{T}}
 
     cs, as = _build_caches(alg, T)
@@ -75,7 +76,7 @@ function _build_caches(::MinimalTsit5, ::Type{T}) where {T}
 end
 
 # IIP version for vectors and matrices
-function step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S}
+function DiffEqBase.step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S}
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
     dt = integ.dt; t = integ.t; p = integ.p
@@ -108,7 +109,7 @@ function step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S}
 end
 
 # OOP version for vectors and matrices
-function step!(integ::MinimalTsit5Integrator{false, T, S}) where {T, S}
+function DiffEqBase.step!(integ::MinimalTsit5Integrator{false, T, S}) where {T, S}
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
     dt = integ.dt; t = integ.t; p = integ.p
@@ -144,7 +145,6 @@ function step!(integ::MinimalTsit5Integrator{false, T, S}) where {T, S}
     return  nothing
 end
 
-# %%
 function loop(u, p, t)
     @inbounds begin
         σ = p[1]; ρ = p[2]; β = p[3]
@@ -163,27 +163,27 @@ function liip(du, u, p, t)
 end
 
 # %%
-begin
-    u0 = 10ones(3)
-
-    oop = init(MinimalTsit5(), loop, false, SVector{3}(u0), 0.0, 0.0001, [10, 28, 8/3])
-    step!(oop)
-    for i in 1:10000;
-        step!(oop);
-        if isnan(oop.u[1]) || isnan(oop.u[2]) || isnan(oop.u[3])
-            error("oop nan")
-        end
-    end
-
-    iip = init(MinimalTsit5(), liip, true, copy(u0), 0.0, 0.0001, [10, 28, 8/3])
-    step!(iip)
-    for i in 1:10000;
-        step!(iip);
-        if isnan(iip.u[1]) || isnan(iip.u[2]) || isnan(iip.u[3])
-            error("iip nan")
-        end
-    end
-end
+# begin
+#     u0 = 10ones(3)
+#
+#     oop = init(MinimalTsit5(), loop, false, SVector{3}(u0), 0.0, 0.0001, [10, 28, 8/3])
+#     step!(oop)
+#     for i in 1:10000;
+#         step!(oop);
+#         if isnan(oop.u[1]) || isnan(oop.u[2]) || isnan(oop.u[3])
+#             error("oop nan")
+#         end
+#     end
+#
+#     iip = init(MinimalTsit5(), liip, true, copy(u0), 0.0, 0.0001, [10, 28, 8/3])
+#     step!(iip)
+#     for i in 1:10000;
+#         step!(iip);
+#         if isnan(iip.u[1]) || isnan(iip.u[2]) || isnan(iip.u[3])
+#             error("iip nan")
+#         end
+#     end
+# end
 
 # @profiler for i in 1:1000000; step!(integ); end
 
@@ -200,24 +200,3 @@ end
 #
 #     plot3D(xs, ys, zs)
 # end
-
-
-using BenchmarkTools
-function bench()
-    u0 = 10ones(3)
-    oop = init(MinimalTsit5(), loop, false, SVector{3}(u0), 0.0, 0.01, [10, 28, 8/3])
-    step!(oop)
-
-    iip = init(MinimalTsit5(), liip, true, u0, 0.0, 0.01, [10, 28, 8/3])
-    step!(iip)
-
-    println("Minimal integrator times")
-    println("In-place time")
-    @btime step!($iip)
-
-    println("Out of place time")
-    @btime step!($oop)
-
-end
-
-bench()
