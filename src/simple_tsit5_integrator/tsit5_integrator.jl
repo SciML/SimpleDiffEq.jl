@@ -78,6 +78,8 @@ end
 # IIP version for vectors and matrices
 function DiffEqBase.step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S}
 
+    L = length(integ.u)
+
     c1, c2, c3, c4, c5, c6 = integ.cs;
     dt = integ.dt; t = integ.t; p = integ.p
     a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
@@ -88,19 +90,32 @@ function DiffEqBase.step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S
 
     integ.uprev .= integ.u; uprev = integ.uprev
 
-    @. tmp = uprev+dt*a21*k1
+    @inbounds begin
+    for i in 1:L
+        tmp[i] = uprev[i]+dt*a21*k1[i]
+    end
     f!(k2, tmp, p, t+c1*dt)
-    @. tmp = uprev+dt*(a31*k1+a32*k2)
+    for i in 1:L
+        tmp[i] = uprev[i]+dt*(a31*k1[i]+a32*k2[i])
+    end
     f!(k3, tmp, p, t+c2*dt)
-    @. tmp = uprev+dt*(a41*k1+a42*k2+a43*k3)
+    for i in 1:L
+        tmp[i] = uprev[i]+dt*(a41*k1[i]+a42*k2[i]+a43*k3[i])
+    end
     f!(k4, tmp, p, t+c3*dt)
-    @. tmp = uprev+dt*(a51*k1+a52*k2+a53*k3+a54*k4)
+    for i in 1:L
+        tmp[i] = uprev[i]+dt*(a51*k1[i]+a52*k2[i]+a53*k3[i]+a54*k4[i])
+    end
     f!(k5, tmp, p, t+c4*dt)
-    @. tmp = uprev+dt*(a61*k1+a62*k2+a63*k3+a64*k4+a65*k5)
+    for i in 1:L
+        tmp[i] = uprev[i]+dt*(a61*k1[i]+a62*k2[i]+a63*k3[i]+a64*k4[i]+a65*k5[i])
+    end
     f!(k6, tmp, p, t+dt)
 
-    @. integ.u = uprev+dt*(a71*k1+a72*k2+a73*k3+a74*k4+a75*k5+a76*k6)
-
+    for i in 1:L
+        integ.u[i] = uprev[i]+dt*(a71*k1[i]+a72*k2[i]+a73*k3[i]+a74*k4[i]+a75*k5[i]+a76*k6[i])
+    end
+    end
     f!(k7, integ.u, p, t+dt)
 
     integ.t += dt
@@ -163,30 +178,32 @@ function liip(du, u, p, t)
 end
 
 # %%
-# begin
-#     u0 = 10ones(3)
-#
-#     oop = init(MinimalTsit5(), loop, false, SVector{3}(u0), 0.0, 0.0001, [10, 28, 8/3])
-#     step!(oop)
-#     for i in 1:10000;
-#         step!(oop);
-#         if isnan(oop.u[1]) || isnan(oop.u[2]) || isnan(oop.u[3])
-#             error("oop nan")
-#         end
-#     end
-#
-#     iip = init(MinimalTsit5(), liip, true, copy(u0), 0.0, 0.0001, [10, 28, 8/3])
-#     step!(iip)
-#     for i in 1:10000;
-#         step!(iip);
-#         if isnan(iip.u[1]) || isnan(iip.u[2]) || isnan(iip.u[3])
-#             error("iip nan")
-#         end
-#     end
-# end
+begin
+    u0 = 10ones(3)
+
+    oop = init(MinimalTsit5(), loop, false, SVector{3}(u0), 0.0, 0.0001, [10, 28, 8/3])
+    step!(oop)
+    for i in 1:10000;
+        step!(oop);
+        if isnan(oop.u[1]) || isnan(oop.u[2]) || isnan(oop.u[3])
+            error("oop nan")
+        end
+    end
+
+    iip = init(MinimalTsit5(), liip, true, copy(u0), 0.0, 0.0001, [10, 28, 8/3])
+    step!(iip)
+    for i in 1:10000;
+        step!(iip);
+        if isnan(iip.u[1]) || isnan(iip.u[2]) || isnan(iip.u[3])
+            error("iip nan")
+        end
+    end
+
+    @profiler for i in 1:1000000; step!(iip); end
+
+end
 
 # @profiler for i in 1:1000000; step!(integ); end
-
 # using PyPlot
 #
 # for integ in (iip, oop)
