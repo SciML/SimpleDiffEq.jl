@@ -1,5 +1,5 @@
 using StaticArrays
-import DiffEqBase: init, step!, isinplace
+import DiffEqBase
 
 struct MinimalTsit5 end
 
@@ -19,12 +19,12 @@ mutable struct MinimalTsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F}
     rs::SVector{22, T}    # rij factors cache: interpolation coefficients
 end
 
-isinplace(::MinimalTsit5Integrator{IIP}) where {IIP} = IIP
+DiffEqBase.isinplace(::MinimalTsit5Integrator{IIP}) where {IIP} = IIP
 
 #######################################################################################
 # Initialization
 #######################################################################################
-function init(alg::MinimalTsit5, f::F, IIP::Bool, u0::S, t0::T, dt::T, p::P
+function DiffEqBase.init(alg::MinimalTsit5, f::F, IIP::Bool, u0::S, t0::T, dt::T, p::P
     ) where {F, P, T, S<:AbstractArray{T}}
 
     cs, as, rs = _build_caches(alg, T)
@@ -99,7 +99,7 @@ end
 # Stepping
 #######################################################################################
 # IIP version for vectors and matrices
-function step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S}
+function DiffEqBase.step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S}
 
     L = length(integ.u)
 
@@ -147,7 +147,7 @@ function step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S}
 end
 
 # OOP version for vectors and matrices
-function step!(integ::MinimalTsit5Integrator{false, T, S}) where {T, S}
+function DiffEqBase.step!(integ::MinimalTsit5Integrator{false, T, S}) where {T, S}
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
     dt = integ.dt; t = integ.t; p = integ.p
