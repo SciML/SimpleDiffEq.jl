@@ -1,6 +1,3 @@
-using StaticArrays
-import DiffEqBase
-
 struct SimpleTsit5 end
 
 mutable struct SimpleTsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F} <: DiffEqBase.DEIntegrator
@@ -26,13 +23,13 @@ DiffEqBase.isinplace(::ST5I{IIP}) where {IIP} = IIP
 #######################################################################################
 # Initialization
 #######################################################################################
-function DiffEqBase.init(prob::ODEProblem,alg::SimpleTsit5;
+function DiffEqBase.__init(prob::ODEProblem,alg::SimpleTsit5;
                          dt = error("dt is required for this algorithm"))
   simpletsit5_init(prob.f,DiffEqBase.isinplace(prob),prob.u0,
                    prob.tspan[1], dt, prob.p)
 end
 
-function DiffEqBase.solve(prob::ODEProblem,alg::SimpleTsit5;
+function DiffEqBase.__solve(prob::ODEProblem,alg::SimpleTsit5;
                           dt = error("dt is required for this algorithm"))
   u0 = prob.u0
   tspan = prob.tspan
@@ -235,13 +232,13 @@ function (integ::ST5I)(t::T) where {T}
     ks = integ.ks
     if !isinplace(integ)
         u = @inbounds integ.uprev + dt*(b1θ*ks[1] + b2θ*ks[2] + b3θ*ks[3] + b4θ*ks[4] +
-                      b5θ*ks[5] + b6θ*ks[6] + b7θ*ks[1])
+                      b5θ*ks[5] + b6θ*ks[6] + b7θ*ks[7])
         return u
     else
         u = similar(integ.u)
         @inbounds for i in 1:length(u)
             u[i] = integ.uprev[i] + dt*(b1θ*ks[1][i] + b2θ*ks[2][i] + b3θ*ks[3][i] +
-                   b4θ*ks[4][i] + b5θ*ks[5][i] + b6θ*ks[6][i] + b7θ*ks[1][i])
+                   b4θ*ks[4][i] + b5θ*ks[5][i] + b6θ*ks[6][i] + b7θ*ks[7][i])
         end
         return u
     end
