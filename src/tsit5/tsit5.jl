@@ -55,7 +55,7 @@ function simpletsit5_init(f::F,
                          ) where {F, P, T, S<:AbstractArray{T}}
 
     cs, as, rs = _build_tsit5_caches(T)
-    ks = [zero(u0) for i in 1:6]
+    ks = [zero(u0) for i in 1:7]
 
     !IIP && @assert S <: SArray
 
@@ -141,6 +141,8 @@ function DiffEqBase.step!(integ::ST5I{true, T, S}) where {T, S}
     if integ.u_modified
       f!(k1, uprev, p, t)
       integ.u_modified=false
+    else
+      k1 .= k7
     end
 
     @inbounds begin
@@ -191,7 +193,7 @@ function DiffEqBase.step!(integ::ST5I{false, T, S}) where {T, S}
       k1 = f(uprev, p, t)
       integ.u_modified=false
     else
-      @inbounds k1 = integ.ks[1];
+      @inbounds k1 = integ.ks[7];
     end
 
     tmp = uprev+dt*a21*k1
@@ -211,6 +213,7 @@ function DiffEqBase.step!(integ::ST5I{false, T, S}) where {T, S}
     @inbounds begin # Necessary for interpolation
         integ.ks[1] = k7; integ.ks[2] = k2; integ.ks[3] = k3
         integ.ks[4] = k4; integ.ks[5] = k5; integ.ks[6] = k6
+        integ.ks[7]
     end
 
     integ.tprev = t
