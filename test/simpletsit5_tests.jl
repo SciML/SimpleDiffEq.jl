@@ -67,10 +67,10 @@ function bench()
     u0 = 10ones(3)
     dt = 0.01
 
-    oop = init(SimpleTsit5(), loop, false, SVector{3}(u0), 0.0, dt, [10, 28, 8/3])
+    oop = SimpleDiffEq.simpletsit5_init(loop, false, SVector{3}(u0), 0.0, dt, [10, 28, 8/3])
     step!(oop)
 
-    iip = init(SimpleTsit5(), liip, true, u0, 0.0, dt, [10, 28, 8/3])
+    iip = SimpleDiffEq.simpletsit5_init(liip, true, u0, 0.0, dt, [10, 28, 8/3])
     step!(iip)
 
     odeoop = ODEProblem{false}(loop, SVector{3}(u0), (0.0, Inf),  [10, 28, 8/3])
@@ -105,9 +105,9 @@ bench()
 function bench_only_step()
   u0 = 10ones(3)
   dt = 0.01
-  oop = init(SimpleDiffEq.SimpleTsit5(), loop, false, SVector{3}(u0), 0.0, dt, [10, 28, 8/3])
+  oop = SimpleDiffEq.simpletsit5_init(loop, false, SVector{3}(u0), 0.0, dt, [10, 28, 8/3])
   DiffEqBase.step!(oop)
-  iip = init(SimpleDiffEq.SimpleTsit5(), liip, true, u0, 0.0, dt, [10, 28, 8/3])
+  iip = SimpleDiffEq.simpletsit5_init(liip, true, u0, 0.0, dt, [10, 28, 8/3])
   DiffEqBase.step!(iip)
   odeoop = ODEProblem{false}(loop, SVector{3}(u0), (0.0, Inf),  [10, 28, 8/3])
   deoop = DiffEqBase.init(odeoop, Tsit5();
@@ -117,7 +117,7 @@ function bench_only_step()
   deiip = DiffEqBase.init(odeiip, Tsit5();
   adaptive = false, save_everystep = false, dt = dt, maxiters = Inf)
   DiffEqBase.step!(deiip)
-  println("Minimal integrator times")
+  println("Only Step times")
   println("In-place time")
   @btime DiffEqBase.step!($iip)
   println("Out of place time")
