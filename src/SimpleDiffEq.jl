@@ -8,5 +8,6 @@ using StaticArrays
 
 include("functionmap.jl")
 include("euler_maruyama.jl")
+include("tsit5.jl")
 
 end # module

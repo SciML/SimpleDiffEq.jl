@@ -70,7 +70,7 @@ function DiffEqBase.__init(prob::DiscreteProblem,
     DiscreteIntegrator(prob.f,prob.u0,prob.tspan[1],copy(prob.u0),prob.p,sol,1)
 end
 
-function step!(integrator::DiscreteIntegrator)
+function DiffEqBase.step!(integrator::DiscreteIntegrator)
     integrator.t = integrator.i
     integrator.i += 1
     u = integrator.u

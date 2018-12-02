@@ -1,4 +1,4 @@
-using BenchmarkTools, OrdinaryDiffEq
+using SimpleDiffEq, StaticArrays, OrdinaryDiffEq, Test
 
 function loop(u, p, t)
     @inbounds begin
@@ -17,15 +17,60 @@ function liip(du, u, p, t)
     return nothing
 end
 
+u0 = 10ones(3)
+dt = 0.01
+oop = SimpleDiffEq.simpletsit5_init(loop, false, SVector{3}(u0), 0.0, dt, [10, 28, 8/3])
+step!(oop)
+for i in 1:10000;
+    step!(oop);
+    if isnan(oop.u[1]) || isnan(oop.u[2]) || isnan(oop.u[3])
+        error("oop nan")
+    end
+end
+
+iip = SimpleDiffEq.simpletsit5_init(liip, true, copy(u0), 0.0, dt, [10, 28, 8/3])
+step!(iip)
+for i in 1:10000;
+    step!(iip);
+    if isnan(iip.u[1]) || isnan(iip.u[2]) || isnan(iip.u[3])
+        error("iip nan")
+    end
+end
+
+u0 = 10ones(3)
+dt = 0.01
+
+odeoop = ODEProblem{false}(loop, SVector{3}(u0), (0.0, Inf),  [10, 28, 8/3])
+odeiip = ODEProblem{true}(liip, u0, (0.0, Inf),  [10, 28, 8/3])
+
+oop = init(odeoop,SimpleTsit5(),dt=dt)
+step!(oop); step!(oop)
+
+iip = init(odeiip,SimpleTsit5(),dt=dt)
+step!(iip); step!(iip)
+
+deoop = DiffEqBase.init(odeoop, Tsit5(); adaptive = false,
+                        save_everystep = false, dt = dt)
+step!(deoop); step!(deoop)
+@test oop.u == deoop.u
+
+deiip = DiffEqBase.init(odeiip, Tsit5();
+                        adaptive = false, save_everystep = false,
+                        dt = dt)
+step!(deiip); step!(deiip)
+@test iip.u ≈ deiip.u atol=1e-14
+
+#=
+using BenchmarkTools
 
 function bench()
     u0 = 10ones(3)
     dt = 0.01
 
-    oop = init(MinimalTsit5(), loop, false, SVector{3}(u0), 0.0, dt, [10, 28, 8/3])
+    oop = init(SimpleTsit5(), loop, false, SVector{3}(u0), 0.0, dt, [10, 28, 8/3])
     step!(oop)
 
-    iip = init(MinimalTsit5(), liip, true, u0, 0.0, dt, [10, 28, 8/3])
+    iip = init(SimpleTsit5(), liip, true, u0, 0.0, dt, [10, 28, 8/3])
     step!(iip)
 
     odeoop = ODEProblem{false}(loop, SVector{3}(u0), (0.0, Inf),  [10, 28, 8/3])
@@ -60,9 +105,9 @@ bench()
 function bench_only_step()
   u0 = 10ones(3)
   dt = 0.01
-  oop = init(SimpleDiffEq.MinimalTsit5(), loop, false, SVector{3}(u0), 0.0, dt, [10, 28, 8/3])
+  oop = init(SimpleDiffEq.SimpleTsit5(), loop, false, SVector{3}(u0), 0.0, dt, [10, 28, 8/3])
   DiffEqBase.step!(oop)
-  iip = init(SimpleDiffEq.MinimalTsit5(), liip, true, u0, 0.0, dt, [10, 28, 8/3])
+  iip = init(SimpleDiffEq.SimpleTsit5(), liip, true, u0, 0.0, dt, [10, 28, 8/3])
   DiffEqBase.step!(iip)
   odeoop = ODEProblem{false}(loop, SVector{3}(u0), (0.0, Inf),  [10, 28, 8/3])
   deoop = DiffEqBase.init(odeoop, Tsit5();
@@ -84,3 +129,4 @@ function bench_only_step()
   @btime OrdinaryDiffEq.perform_step!($deoop,$(deoop.cache))
 end
 bench_only_step()
+=#

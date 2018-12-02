@@ -1,9 +1,9 @@
 using StaticArrays
 import DiffEqBase
 
-struct MinimalTsit5 end
+struct SimpleTsit5 end
 
-mutable struct MinimalTsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F}
+mutable struct SimpleTsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F} <: DiffEqBase.DEIntegrator
     f::F                  # eom
     uprev::S              # previous state
     u::S                  # current state
@@ -13,33 +13,40 @@ mutable struct MinimalTsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F}
     t0::T                 # initial time, only for reinit
     dt::T                 # step size
     p::P                  # parameter container
+    u_modified::Bool
     ks::Vector{S}         # interpolants of the algorithm
     cs::SVector{6, T}     # ci factors cache: time coefficients
     as::SVector{21, T}    # aij factors cache: solution coefficients
     rs::SVector{22, T}    # rij factors cache: interpolation coefficients
 end
+const ST5I = SimpleTsit5Integrator
 
-DiffEqBase.isinplace(::MinimalTsit5Integrator{IIP}) where {IIP} = IIP
+DiffEqBase.isinplace(::ST5I{IIP}) where {IIP} = IIP
 
 #######################################################################################
 # Initialization
 #######################################################################################
-function DiffEqBase.init(alg::MinimalTsit5, f::F, IIP::Bool, u0::S, t0::T, dt::T, p::P
-    ) where {F, P, T, S<:AbstractArray{T}}
+function DiffEqBase.init(prob::ODEProblem,alg::SimpleTsit5;
+                         dt = error("dt is required for this algorithm"))
+  simpletsit5_init(prob.f,DiffEqBase.isinplace(prob),prob.u0,
+                   prob.tspan[1], dt, prob.p)
+end
 
-    cs, as, rs = _build_caches(alg, T)
+function simpletsit5_init(f::F,
+                         IIP::Bool, u0::S, t0::T, dt::T, p::P
+                         ) where {F, P, T, S<:AbstractArray{T}}
+
+    cs, as, rs = _build_tsit5_caches(T)
     ks = [zero(u0) for i in 1:6]
 
     !IIP && @assert S <: SArray
 
-    integ = MinimalTsit5Integrator{IIP, T, S, P, F}(
-        f, copy(u0), copy(u0), copy(u0), t0, t0, t0, dt, p, ks, cs, as, rs
+    integ = ST5I{IIP, T, S, P, F}(
+        f, copy(u0), copy(u0), copy(u0), t0, t0, t0, dt, p, true, ks, cs, as, rs
     )
 end
 
-const MT5I = MinimalTsit5Integrator
-
-function _build_caches(::MinimalTsit5, ::Type{T}) where {T}
+function _build_tsit5_caches(::Type{T}) where {T}
 
     cs = SVector{6, T}(0.161, 0.327, 0.9, 0.9800255409045097, 1.0, 1.0)
 
@@ -99,7 +106,7 @@ end
 # Stepping
 #######################################################################################
 # IIP version for vectors and matrices
-function DiffEqBase.step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S}
+function DiffEqBase.step!(integ::ST5I{true, T, S}) where {T, S}
 
     L = length(integ.u)
 
@@ -112,6 +119,11 @@ function DiffEqBase.step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S
     tmp = integ.tmp; f! = integ.f
 
     integ.uprev .= integ.u; uprev = integ.uprev
+
+    if integ.u_modified
+      f!(k1, uprev, p, t)
+      integ.u_modified=false
+    end
 
     @inbounds begin
     for i in 1:L
@@ -147,17 +159,22 @@ function DiffEqBase.step!(integ::MinimalTsit5Integrator{true, T, S}) where {T, S
 end
 
 # OOP version for vectors and matrices
-function DiffEqBase.step!(integ::MinimalTsit5Integrator{false, T, S}) where {T, S}
+function DiffEqBase.step!(integ::ST5I{false, T, S}) where {T, S}
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
     dt = integ.dt; t = integ.t; p = integ.p
     a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
     a61, a62, a63, a64, a65, a71, a72, a73, a74, a75, a76 = integ.as
 
-    @inbounds k1 = integ.ks[1];
     tmp = integ.tmp; f = integ.f
-
     integ.uprev = integ.u; uprev = integ.u
+
+    if integ.u_modified
+      k1 = f(uprev, p, t)
+      integ.u_modified=false
+    else
+      @inbounds k1 = integ.ks[1];
+    end
 
     tmp = uprev+dt*a21*k1
     k2 = f(tmp, p, t+c1*dt)
@@ -188,11 +205,11 @@ end
 # Interpolation
 #######################################################################################
 # Interpolation function, OOP
-function (integ::MinimalTsit5Integrator)(t::T) where {T}
+function (integ::ST5I)(t::T) where {T}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
     @assert tprev ≤ t ≤ tnext
     θ = (t - tprev)/dt
-    b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ = btildes(integ.rs, θ)
+    b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ = bθs(integ.rs, θ)
 
     ks = integ.ks
     if !isinplace(integ)
@@ -209,7 +226,7 @@ function (integ::MinimalTsit5Integrator)(t::T) where {T}
     end
 end
 # Interpolation coefficients
-function btildes(rs::SVector{22, T}, θ::T) where {T}
+function bθs(rs::SVector{22, T}, θ::T) where {T}
     # θ in (0, 1) !
     r11,r12,r13,r14,r22,r23,r24,r32,r33,r34,r42,r43,r44,r52,r53,
     r54,r62,r63,r64,r72,r73,r74 = rs
@@ -224,3 +241,5 @@ function btildes(rs::SVector{22, T}, θ::T) where {T}
 
     return b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ
 end
+
+export SimpleTsit5
