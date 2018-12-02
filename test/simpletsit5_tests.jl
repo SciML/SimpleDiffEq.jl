@@ -40,8 +40,8 @@ end
 u0 = 10ones(3)
 dt = 0.01
 
-odeoop = ODEProblem{false}(loop, SVector{3}(u0), (0.0, Inf),  [10, 28, 8/3])
-odeiip = ODEProblem{true}(liip, u0, (0.0, Inf),  [10, 28, 8/3])
+odeoop = ODEProblem{false}(loop, SVector{3}(u0), (0.0, 100.0),  [10, 28, 8/3])
+odeiip = ODEProblem{true}(liip, u0, (0.0, 100.0),  [10, 28, 8/3])
 
 oop = init(odeoop,SimpleTsit5(),dt=dt)
 step!(oop); step!(oop)
@@ -59,6 +59,8 @@ deiip = DiffEqBase.init(odeiip, Tsit5();
                         dt = dt)
 step!(deiip); step!(deiip)
 @test iip.u ≈ deiip.u atol=1e-14
+
+sol = solve(odeoop,SimpleTsit5(),dt=dt)
 
 #=
 using BenchmarkTools

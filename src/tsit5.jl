@@ -32,6 +32,27 @@ function DiffEqBase.init(prob::ODEProblem,alg::SimpleTsit5;
                    prob.tspan[1], dt, prob.p)
 end
 
+function DiffEqBase.solve(prob::ODEProblem,alg::SimpleTsit5;
+                          dt = error("dt is required for this algorithm"))
+  u0 = prob.u0
+  tspan = prob.tspan
+  ts = Array(tspan[1]:dt:tspan[2])
+  n = length(ts)
+  us = Vector{typeof(u0)}(undef,n)
+  us[1] = copy(u0)
+  integ = simpletsit5_init(prob.f,DiffEqBase.isinplace(prob),prob.u0,
+                           prob.tspan[1], dt, prob.p)
+  # FSAL
+  for i in 1:n-1
+    step!(integ)
+    us[i+1] = copy(integ.u)
+  end
+  sol = DiffEqBase.build_solution(prob,alg,ts,us,
+                                  calculate_error = false)
+  DiffEqBase.has_analytic(prob.f) && DiffEqBase.calculate_solution_errors!(sol;timeseries_errors=true,dense_errors=false)
+  sol
+end
+
 function simpletsit5_init(f::F,
                          IIP::Bool, u0::S, t0::T, dt::T, p::P
                          ) where {F, P, T, S<:AbstractArray{T}}
