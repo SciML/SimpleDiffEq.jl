@@ -1,5 +1,8 @@
 struct SimpleATsit5 end
 
+const beta1 = 7/50
+const beta2 = 2/25
+
 mutable struct SimpleATsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F} <: DiffEqBase.DEIntegrator
     f::F                  # eom
     uprev::S              # previous state
@@ -22,8 +25,6 @@ mutable struct SimpleATsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F} <: D
     qoldinit::Float64
     qmax::Float64
     qmin::Float64
-    beta1::Float64
-    beta2::Float64
     abstol::Float64
     reltol::Float64
 end
@@ -75,15 +76,13 @@ function simpleatsit5_init(f::F,
     qold = 1e-4
     qmax = 10.0
     qmin = 1/5
-    beta1 = 7/50
-    beta2 = 2/25
     abstol = 1e-6
     reltol = 1e-3
 
     integ = SAT5I{IIP, T, S, P, F}(
         f, copy(u0), copy(u0), copy(u0), t0, t0, t0, tf, dt,
         p, true, ks, cs, as, btildes, rs,
-        gamma,qold,qold,qmax,qmin,beta1,beta2,abstol,reltol
+        gamma,qold,qold,qmax,qmin,abstol,reltol
     )
 end
 
@@ -177,8 +176,6 @@ function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S}
     qoldinit = integ.qoldinit
     qmax = integ.qmax
     qmin = integ.qmin
-    beta1 = integ.beta1
-    beta2 = integ.beta2
     abstol = integ.abstol
     reltol = integ.reltol
 
@@ -276,8 +273,6 @@ function DiffEqBase.step!(integ::SAT5I{false, T, S}) where {T, S}
     qoldinit = integ.qoldinit
     qmax = integ.qmax
     qmin = integ.qmin
-    beta1 = integ.beta1
-    beta2 = integ.beta2
     abstol = integ.abstol
     reltol = integ.reltol
 
