@@ -9,6 +9,14 @@ const gamma = 9/10
 const qoldinit = 1e-4
 
 defaultnorm(tmp) = @fastmath sqrt(sum(abs2,tmp)/length(tmp))
+function defaultnorm(tmp::Vector{<:AbstractVector{T}}) where {T<:Number}
+    x = zero(T)
+    M = length(tmp)
+    @inbounds for j in 1:M
+        x += @fastmath sqrt(sum(abs2,tmp[j])/length(tmp[j]))
+    end
+    x/M
+end
 
 mutable struct SimpleATsit5Integrator{IIP, T, S, P, F, N} <: DiffEqBase.DEIntegrator
     f::F                  # eom
@@ -78,7 +86,7 @@ function simpleatsit5_init(f::F,
                          internalnorm::N) where {F, P, T, S, N}
 
     cs, as, btildes, rs = _build_atsit5_caches(T)
-    ks = [zero(u0) for i in 1:7]
+    ks = _initialize_ks(u0)
 
     !IIP && @assert S <: SArray
 
@@ -88,6 +96,10 @@ function simpleatsit5_init(f::F,
         qoldinit,abstol,reltol, internalnorm
     )
 end
+
+_initialize_ks(u0::AbstractArray{T}) where {T<:Number} = [zero(u0) for i in 1:7]
+_initialize_ks(u0::Vector{<:Vector}) =
+[[zero(u0[j]) for j in 1:length(u0)] for i in 1:7]
 
 function _build_atsit5_caches(::Type{T}) where {T}
 
