@@ -13,7 +13,7 @@ function defaultnorm(tmp::Vector{<:AbstractVector{T}}) where {T<:Number}
     x = zero(T)
     M = length(tmp)
     @inbounds for j in 1:M
-        x += @fastmath sqrt(sum(abs2,tmp[j])/length(tmp[j]))
+        @fastmath x += sqrt(sum(abs2,tmp[j])/length(tmp[j]))
     end
     x/M
 end
@@ -463,6 +463,100 @@ function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S<:Vector{<:Vector
     end
     return  nothing
 end
+
+# Vector{SVector}
+function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S<:Vector{<:SVector}}
+
+    M = length(integ.u)
+    L = length(integ.u[1])
+
+    c1, c2, c3, c4, c5, c6 = integ.cs;
+    dt = integ.dt; t = integ.t; p = integ.p; tf = integ.tf
+    a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
+    a61, a62, a63, a64, a65, a71, a72, a73, a74, a75, a76 = integ.as
+    btilde1, btilde2, btilde3, btilde4, btilde5, btilde6, btilde7 = integ.btildes
+
+    k1, k2, k3, k4, k5, k6, k7 = integ.ks
+    tmp = integ.tmp; f! = integ.f
+
+    integ.uprev .= integ.u; uprev = integ.uprev; u = integ.u
+
+    qold = integ.qold
+    abstol = integ.abstol
+    reltol = integ.reltol
+
+    @inbounds if integ.u_modified
+        f!(k1, uprev, p, t)
+        integ.u_modified=false
+    else
+        for j in 1:M
+            k1[j] = k7[j]
+        end
+    end
+
+
+    EEst = Inf
+
+    @inbounds while EEst>1
+      dt < 1e-14 && error("dt<dtmin")
+
+      for j in 1:M
+          tmp[j] = uprev[j]+dt*a21*k1[j]
+
+          f!(k2, tmp, p, t+c1*dt)
+          tmp[j] = uprev[j]+dt*(a31*k1[j]+a32*k2[j])
+
+          f!(k3, tmp, p, t+c2*dt)
+          tmp[j] = uprev[j]+dt*(a41*k1[j]+a42*k2[j]+a43*k3[j])
+
+          f!(k4, tmp, p, t+c3*dt)
+          tmp[j] = uprev[j]+dt*(a51*k1[j]+a52*k2[j]+a53*k3[j]+a54*k4[j])
+
+          f!(k5, tmp, p, t+c4*dt)
+          tmp[j] = uprev[j]+dt*(a61*k1[j]+a62*k2[j]+a63*k3[j]+a64*k4[j]+a65*k5[j])
+
+          f!(k6, tmp, p, t+dt)
+          u[j] = uprev[j]+dt*(a71*k1[j]+a72*k2[j]+a73*k3[j]+a74*k4[j]+a75*k5[j]+a76*k6[j])
+
+          f!(k7, u, p, t+dt)
+
+        tmp[j] = dt*(btilde1*k1[j]+btilde2*k2[j]+btilde3*k3[j]+btilde4*k4[j]+
+                         btilde5*k5[j]+btilde6*k6[j]+btilde7*k7[j])
+        tmp[j] = tmp[j]./(abstol+max.(abs.(uprev[j]),abs.(u[j]))*reltol)
+      end
+
+      EEst = integ.internalnorm(tmp)
+
+      if iszero(EEst)
+        q = inv(qmax)
+      else
+        @fastmath q11 = EEst^beta1
+        @fastmath q = q11/(qold^beta2)
+      end
+
+      if EEst > 1
+        dt = dt/min(inv(qmin),q11/gamma)
+      else # EEst <= 1
+        @fastmath q = max(inv(qmax),min(inv(qmin),q/gamma))
+        qold = max(EEst,qoldinit)
+        dtold = dt
+        dt = dt/q #dtnew
+        dt = min(abs(dt),abs(tf-t-dtold))
+
+        integ.dt = dt
+        integ.qold = qold
+        integ.tprev = t
+
+        if (tf - t - dtold) < 1e-14
+          integ.t = tf
+        else
+          integ.t += dtold
+        end
+      end
+    end
+    return  nothing
+end
+
 
 #######################################################################################
 # Interpolation

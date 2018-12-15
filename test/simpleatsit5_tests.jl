@@ -82,13 +82,13 @@ step!(iip); step!(iip)
 
 ###################################################################################
 # VectorVector test:
-function vvoop(du, u, p, t)
+function vvoop(du, u, p, t) # takes Vector{SVector}
     @inbounds for j in 1:2
         du[j] = loop(u[j], p, t)
     end
     return nothing
 end
-function vviip(du, u, p, t)
+function vviip(du, u, p, t) # takes Vector{Vector}
     @inbounds for j in 1:2
         liip(du[j], u[j], p, t)
     end
@@ -106,3 +106,14 @@ iip = init(odeiip,SimpleATsit5(),dt=dt)
 step!(iip); step!(iip)
 
 @test iip.u ≈ viip.u[1] atol=1e-14
+
+voop = init(odevoop,SimpleATsit5(),dt=dt,internalnorm = u -> SimpleDiffEq.defaultnorm(u[1]))
+step!(voop); step!(voop)
+
+oop = init(odeoop,SimpleATsit5(),dt=dt)
+step!(oop); step!(oop)
+
+@test oop.u ≈ voop.u[1] atol=1e-14
+
+# Final test that the states of both methods should be the same:
+@test voop.u[2] ≈ viip.u[2] atol=1e-14
