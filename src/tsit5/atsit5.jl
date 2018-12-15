@@ -397,38 +397,57 @@ function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S<:Vector{<:Vector
     EEst = Inf
 
     @inbounds while EEst>1
-      dt < 1e-14 && error("dt<dtmin")
+        dt < 1e-14 && error("dt<dtmin")
 
-      for j in 1:M
-          for i in 1:L
-              tmp[j][i] = uprev[j][i]+dt*a21*k1[j][i]
+          for j in 1:M
+              for i in 1:L
+                  tmp[j][i] = uprev[j][i]+dt*a21*k1[j][i]
+              end
           end
+          
           f!(k2, tmp, p, t+c1*dt)
-          for i in 1:L
+          for j in 1:M
+            for i in 1:L
               tmp[j][i] = uprev[j][i]+dt*(a31*k1[j][i]+a32*k2[j][i])
+              end
           end
+
           f!(k3, tmp, p, t+c2*dt)
-          for i in 1:L
+          for j in 1:M
+            for i in 1:L
               tmp[j][i] = uprev[j][i]+dt*(a41*k1[j][i]+a42*k2[j][i]+a43*k3[j][i])
+              end
           end
+
           f!(k4, tmp, p, t+c3*dt)
-          for i in 1:L
-              tmp[j][i] = uprev[j][i]+dt*(a51*k1[j][i]+a52*k2[j][i]+a53*k3[j][i]+a54*k4[j][i])
+          for j in 1:M
+              for i in 1:L
+                  tmp[j][i] = uprev[j][i]+dt*(a51*k1[j][i]+a52*k2[j][i]+a53*k3[j][i]+a54*k4[j][i])
+              end
           end
+
           f!(k5, tmp, p, t+c4*dt)
-          for i in 1:L
-              tmp[j][i] = uprev[j][i]+dt*(a61*k1[j][i]+a62*k2[j][i]+a63*k3[j][i]+a64*k4[j][i]+a65*k5[j][i])
+          for j in 1:M
+              for i in 1:L
+                  tmp[j][i] = uprev[j][i]+dt*(a61*k1[j][i]+a62*k2[j][i]+a63*k3[j][i]+a64*k4[j][i]+a65*k5[j][i])
+              end
           end
+
           f!(k6, tmp, p, t+dt)
-          for i in 1:L
-              u[j][i] = uprev[j][i]+dt*(a71*k1[j][i]+a72*k2[j][i]+a73*k3[j][i]+a74*k4[j][i]+a75*k5[j][i]+a76*k6[j][i])
+          for j in 1:M
+              for i in 1:L
+                  u[j][i] = uprev[j][i]+dt*(a71*k1[j][i]+a72*k2[j][i]+a73*k3[j][i]+a74*k4[j][i]+a75*k5[j][i]+a76*k6[j][i])
+              end
           end
+
           f!(k7, u, p, t+dt)
 
-          for i in 1:L
-            tmp[j][i] = dt*(btilde1*k1[j][i]+btilde2*k2[j][i]+btilde3*k3[j][i]+btilde4*k4[j][i]+
-                         btilde5*k5[j][i]+btilde6*k6[j][i]+btilde7*k7[j][i])
-            tmp[j][i] = tmp[j][i]/(abstol+max(abs(uprev[j][i]),abs(u[j][i]))*reltol)
+          for j in 1:M
+              for i in 1:L
+                tmp[j][i] = dt*(btilde1*k1[j][i]+btilde2*k2[j][i]+btilde3*k3[j][i]+btilde4*k4[j][i]+
+                             btilde5*k5[j][i]+btilde6*k6[j][i]+btilde7*k7[j][i])
+                tmp[j][i] = tmp[j][i]/(abstol+max(abs(uprev[j][i]),abs(u[j][i]))*reltol)
+              end
           end
       end
 
@@ -498,32 +517,45 @@ function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S<:Vector{<:SVecto
     EEst = Inf
 
     @inbounds while EEst>1
-      dt < 1e-14 && error("dt<dtmin")
+        dt < 1e-14 && error("dt<dtmin")
 
-      for j in 1:M
-          tmp[j] = uprev[j]+dt*a21*k1[j]
+        for j in 1:M
+            tmp[j] = uprev[j]+dt*a21*k1[j]
+        end
 
-          f!(k2, tmp, p, t+c1*dt)
-          tmp[j] = uprev[j]+dt*(a31*k1[j]+a32*k2[j])
+        f!(k2, tmp, p, t+c1*dt)
+        for j in 1:M
+            tmp[j] = uprev[j]+dt*(a31*k1[j]+a32*k2[j])
+        end
 
-          f!(k3, tmp, p, t+c2*dt)
-          tmp[j] = uprev[j]+dt*(a41*k1[j]+a42*k2[j]+a43*k3[j])
+        f!(k3, tmp, p, t+c2*dt)
+        for j in 1:M
+            tmp[j] = uprev[j]+dt*(a41*k1[j]+a42*k2[j]+a43*k3[j])
+        end
 
-          f!(k4, tmp, p, t+c3*dt)
-          tmp[j] = uprev[j]+dt*(a51*k1[j]+a52*k2[j]+a53*k3[j]+a54*k4[j])
+        f!(k4, tmp, p, t+c3*dt)
+        for j in 1:M
+            tmp[j] = uprev[j]+dt*(a51*k1[j]+a52*k2[j]+a53*k3[j]+a54*k4[j])
+        end
 
-          f!(k5, tmp, p, t+c4*dt)
-          tmp[j] = uprev[j]+dt*(a61*k1[j]+a62*k2[j]+a63*k3[j]+a64*k4[j]+a65*k5[j])
+        f!(k5, tmp, p, t+c4*dt)
+        for j in 1:M
+            tmp[j] = uprev[j]+dt*(a61*k1[j]+a62*k2[j]+a63*k3[j]+a64*k4[j]+a65*k5[j])
+        end
 
-          f!(k6, tmp, p, t+dt)
-          u[j] = uprev[j]+dt*(a71*k1[j]+a72*k2[j]+a73*k3[j]+a74*k4[j]+a75*k5[j]+a76*k6[j])
+        f!(k6, tmp, p, t+dt)
+        for j in 1:M
+            u[j] = uprev[j]+dt*(a71*k1[j]+a72*k2[j]+a73*k3[j]+a74*k4[j]+a75*k5[j]+a76*k6[j])
+        end
 
-          f!(k7, u, p, t+dt)
+        f!(k7, u, p, t+dt)
 
-        tmp[j] = dt*(btilde1*k1[j]+btilde2*k2[j]+btilde3*k3[j]+btilde4*k4[j]+
-                         btilde5*k5[j]+btilde6*k6[j]+btilde7*k7[j])
-        tmp[j] = tmp[j]./(abstol+max.(abs.(uprev[j]),abs.(u[j]))*reltol)
-      end
+        for j in 1:M
+            tmp[j] = dt*(btilde1*k1[j]+btilde2*k2[j]+btilde3*k3[j]+btilde4*k4[j]+
+                             btilde5*k5[j]+btilde6*k6[j]+btilde7*k7[j])
+            tmp[j] = tmp[j]./(abstol+max.(abs.(uprev[j]),abs.(u[j]))*reltol)
+        end
+    end
 
       EEst = integ.internalnorm(tmp)
 
