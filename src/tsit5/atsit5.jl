@@ -364,9 +364,9 @@ end
 # Vector of Vector (always in-place) stepping
 #######################################################################################
 # Vector{Vector}
-function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S<:Vector{<:Vector}}
+function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S<:Vector{<:Array}}
 
-    M = length(integ.u)
+    M = length(integ.u) # number of states
     L = length(integ.u[1])
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
@@ -378,21 +378,20 @@ function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S<:Vector{<:Vector
     k1, k2, k3, k4, k5, k6, k7 = integ.ks
     tmp = integ.tmp; f! = integ.f
 
-    integ.uprev .= integ.u; uprev = integ.uprev; u = integ.u
+    @inbounds for j in 1:M
+        integ.uprev[j] .= integ.u[j]
+    end
+    uprev = integ.uprev; u = integ.u
 
-    qold = integ.qold
-    abstol = integ.abstol
-    reltol = integ.reltol
+    qold = integ.qold; abstol = integ.abstol; reltol = integ.reltol
 
-    @inbounds if integ.u_modified
+    # FSAL
+    if integ.u_modified
         f!(k1, uprev, p, t)
         integ.u_modified=false
     else
-        for j in 1:M
-            k1[j] .= k7[j]
-        end
+        @inbounds for j in 1:M; k1[j] .= k7[j]; end
     end
-
 
     EEst = Inf
 
@@ -441,11 +440,10 @@ function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S<:Vector{<:Vector
         end
 
         f!(k7, u, p, t+dt)
-
         for j in 1:M
             for i in 1:L
                 tmp[j][i] = dt*(btilde1*k1[j][i]+btilde2*k2[j][i]+btilde3*k3[j][i]+btilde4*k4[j][i]+
-                btilde5*k5[j][i]+btilde6*k6[j][i]+btilde7*k7[j][i])
+                            btilde5*k5[j][i]+btilde6*k6[j][i]+btilde7*k7[j][i])
                 tmp[j][i] = tmp[j][i]/(abstol+max(abs(uprev[j][i]),abs(u[j][i]))*reltol)
             end
         end

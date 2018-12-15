@@ -117,3 +117,16 @@ step!(oop); step!(oop)
 
 # Final test that the states of both methods should be the same:
 @test voop.u[2] ≈ viip.u[2] atol=1e-14
+
+
+
+# viip = init(odeviip,SimpleATsit5(),dt=dt; internalnorm = u -> SimpleDiffEq.defaultnorm(u[1]))
+# step!(viip); step!(viip)
+# x = Float64[]; y = Float64[]
+# for i in 1:1000
+#     step!(viip)
+#     push!(x, viip.u[1][1])
+#     push!(y, viip.u[1][2])
+# end
+# using PyPlot
+# plot(x,y)
