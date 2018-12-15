@@ -77,12 +77,5 @@ step!(oop); step!(oop)
 iip = init(odemiip,SimpleATsit5(),dt=dt, internalnorm = u -> norm(u[:, 1]))
 step!(iip); step!(iip)
 
-deoop = DiffEqBase.init(odeoop, Tsit5(); dt = dt, internalnorm = u -> norm(u[:, 1]))
-step!(deoop); step!(deoop)
-@test oop.u ≈ deoop.u atol=1e-14
-@test oop.t ≈ deoop.t atol=1e-14
-
-deiip = DiffEqBase.init(odeiip, Tsit5(); dt = dt, internalnorm = u -> norm(u[:, 1]))
-step!(deiip); step!(deiip)
-@test iip.u ≈ deiip.u atol=1e-9
-@test iip.t ≈ deiip.t atol=1e-12
+@test oop.u ≈ iip.u atol=1e-14
+@test oop.t ≈ iip.t atol=1e-14
