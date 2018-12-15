@@ -59,15 +59,15 @@ function moop(u, p, t)
 end
 function miip(du, u, p, t)
     @views begin
-        luup(du[:, 1], u[:, 1], p, t)
-        luup(du[:, 2], u[:, 2], p, t)
+        liip(du[:, 1], u[:, 1], p, t)
+        liip(du[:, 2], u[:, 2], p, t)
     end
     return nothing
 end
 
 ran = rand(SVector{3})
-odemoop = ODEProblem{false}(loop, SMatrix{3,2}(hcat(u0, ran)), (0.0, 100.0),  [10, 28, 8/3])
-odemiip = ODEProblem{true}(liip, hcat(u0, ran), (0.0, 100.0),  [10, 28, 8/3])
+odemoop = ODEProblem{false}(moop, SMatrix{3,2}(hcat(u0, ran)), (0.0, 100.0),  [10, 28, 8/3])
+odemiip = ODEProblem{true}(miip, hcat(u0, ran), (0.0, 100.0),  [10, 28, 8/3])
 
 using LinearAlgebra
 
