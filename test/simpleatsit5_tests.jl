@@ -79,3 +79,30 @@ step!(iip); step!(iip)
 
 @test oop.u ≈ iip.u atol=1e-14
 @test oop.t ≈ iip.t atol=1e-14
+
+###################################################################################
+# VectorVector test:
+function vvoop(du, u, p, t)
+    @inbounds for j in 1:2
+        du[j] = loop(u[j], p, t)
+    end
+    return nothing
+end
+function vviip(du, u, p, t)
+    @inbounds for j in 1:2
+        liip(du[j], u[j], p, t)
+    end
+    return nothing
+end
+
+ran = rand(3)
+odevoop = ODEProblem{true}(vvoop, [SVector{3}(u0),  SVector{3}(ran)], (0.0, 100.0),  [10, 28, 8/3])
+odeviip = ODEProblem{true}(vviip, [u0, ran], (0.0, 100.0),  [10, 28, 8/3])
+
+viip = init(odeviip,SimpleATsit5(),dt=dt; internalnorm = u -> SimpleDiffEq.defaultnorm(u[1]))
+step!(viip); step!(viip)
+
+iip = init(odeiip,SimpleATsit5(),dt=dt)
+step!(iip); step!(iip)
+
+@test iip.u ≈ viip.u[1] atol=1e-14
