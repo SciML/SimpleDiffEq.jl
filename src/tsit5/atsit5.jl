@@ -168,9 +168,8 @@ function _build_atsit5_caches(::Type{T}) where {T}
 end
 
 #######################################################################################
-# Stepping
-#######################################################################################
 # IIP version for vectors and matrices
+#######################################################################################
 function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S}
 
     L = length(integ.u)
@@ -267,7 +266,9 @@ function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S}
     return  nothing
 end
 
+#######################################################################################
 # OOP version for vectors and matrices
+#######################################################################################
 function DiffEqBase.step!(integ::SAT5I{false, T, S}) where {T, S}
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
@@ -348,6 +349,112 @@ function DiffEqBase.step!(integ::SAT5I{false, T, S}) where {T, S}
       end
     end
 
+    return  nothing
+end
+
+#######################################################################################
+# Vector of Vector (always in-place) stepping
+#######################################################################################
+# Vector{Vector}
+function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S<:Vector{<:Vector}}
+
+    M = length(integ.u)
+    L = length(integ.u[1])
+
+    c1, c2, c3, c4, c5, c6 = integ.cs;
+    dt = integ.dt; t = integ.t; p = integ.p; tf = integ.tf
+    a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
+    a61, a62, a63, a64, a65, a71, a72, a73, a74, a75, a76 = integ.as
+    btilde1, btilde2, btilde3, btilde4, btilde5, btilde6, btilde7 = integ.btildes
+
+    k1, k2, k3, k4, k5, k6, k7 = integ.ks
+    tmp = integ.tmp; f! = integ.f
+
+    integ.uprev .= integ.u; uprev = integ.uprev; u = integ.u
+
+    qold = integ.qold
+    abstol = integ.abstol
+    reltol = integ.reltol
+
+    @inbounds if integ.u_modified
+        for j in 1:M
+            f!(k1[j], uprev, p, t)
+            integ.u_modified=false
+        end
+    else
+        for j in 1:M
+            k1[j] .= k7[j]
+        end
+    end
+
+
+    EEst = Inf
+
+    @inbounds while EEst>1
+      dt < 1e-14 && error("dt<dtmin")
+
+      for j in 1:M
+          for i in 1:L
+              tmp[j][i] = uprev[j][i]+dt*a21*k1[j][i]
+          end
+          f!(k2[j], tmp[j], p, t+c1*dt)
+          for i in 1:L
+              tmp[j][i] = uprev[j][i]+dt*(a31*k1[j][i]+a32*k2[j][i])
+          end
+          f!(k3[j], tmp[j], p, t+c2*dt)
+          for i in 1:L
+              tmp[j][i] = uprev[j][i]+dt*(a41*k1[j][i]+a42*k2[j][i]+a43*k3[j][i])
+          end
+          f!(k4[j], tmp[j], p, t+c3*dt)
+          for i in 1:L
+              tmp[j][i] = uprev[j][i]+dt*(a51*k1[j][i]+a52*k2[j][i]+a53*k3[j][i]+a54*k4[j][i])
+          end
+          f!(k5[j], tmp[j], p, t+c4*dt)
+          for i in 1:L
+              tmp[j][i] = uprev[j][i]+dt*(a61*k1[j][i]+a62*k2[j][i]+a63*k3[j][i]+a64*k4[j][i]+a65*k5[j][i])
+          end
+          f!(k6[j], tmp[j], p, t+dt)
+          for i in 1:L
+              u[j][i] = uprev[j][i]+dt*(a71*k1[j][i]+a72*k2[j][i]+a73*k3[j][i]+a74*k4[j][i]+a75*k5[j][i]+a76*k6[j][i])
+          end
+          f!(k7[j], u[j], p, t+dt)
+
+          for i in 1:L
+            tmp[j][i] = dt*(btilde1*k1[j][i]+btilde2*k2[j][i]+btilde3*k3[j][i]+btilde4*k4[j][i]+
+                         btilde5*k5[j][i]+btilde6*k6[j][i]+btilde7*k7[j][i])
+            tmp[j][i] = tmp[j][i]/(abstol+max(abs(uprev[j][i]),abs(u[j][i]))*reltol)
+          end
+      end
+
+      EEst = integ.internalnorm(tmp)
+
+      if iszero(EEst)
+        q = inv(qmax)
+      else
+        @fastmath q11 = EEst^beta1
+        @fastmath q = q11/(qold^beta2)
+      end
+
+      if EEst > 1
+        dt = dt/min(inv(qmin),q11/gamma)
+      else # EEst <= 1
+        @fastmath q = max(inv(qmax),min(inv(qmin),q/gamma))
+        qold = max(EEst,qoldinit)
+        dtold = dt
+        dt = dt/q #dtnew
+        dt = min(abs(dt),abs(tf-t-dtold))
+
+        integ.dt = dt
+        integ.qold = qold
+        integ.tprev = t
+
+        if (tf - t - dtold) < 1e-14
+          integ.t = tf
+        else
+          integ.t += dtold
+        end
+      end
+    end
     return  nothing
 end
 
