@@ -1,5 +1,6 @@
 struct SimpleATsit5 end
 
+# PI-adaptive stepping parameters:
 const beta1 = 7/50
 const beta2 = 2/25
 const qmax = 10.0
@@ -7,7 +8,9 @@ const qmin = 1/5
 const gamma = 9/10
 const qoldinit = 1e-4
 
-mutable struct SimpleATsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F} <: DiffEqBase.DEIntegrator
+defaultnorm(tmp) = @fastmath sqrt(sum(abs2,tmp)/length(tmp))
+
+mutable struct SimpleATsit5Integrator{IIP, T, S, P, F, N} <: DiffEqBase.DEIntegrator
     f::F                  # eom
     uprev::S              # previous state
     u::S                  # current state
@@ -27,6 +30,7 @@ mutable struct SimpleATsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F} <: D
     qold::Float64
     abstol::Float64
     reltol::Float64
+    internalnorm::N       # function that computes the error EEst based on state
 end
 const SAT5I = SimpleATsit5Integrator
 
@@ -37,14 +41,17 @@ DiffEqBase.isinplace(::SAT5I{IIP}) where {IIP} = IIP
 #######################################################################################
 function DiffEqBase.__init(prob::ODEProblem,alg::SimpleATsit5;
                          dt = error("dt is required for this algorithm"),
-                         abstol = 1e-6, reltol = 1e-3)
+                         abstol = 1e-6, reltol = 1e-3,
+                         internalnorm = defaultnorm)
   simpleatsit5_init(prob.f,DiffEqBase.isinplace(prob),prob.u0,
-                   prob.tspan[1], prob.tspan[2], dt, prob.p, abstol, reltol)
+                   prob.tspan[1], prob.tspan[2], dt, prob.p, abstol, reltol,
+                   internalnorm)
 end
 
 function DiffEqBase.__solve(prob::ODEProblem,alg::SimpleATsit5;
                           dt = error("dt is required for this algorithm"),
-                          abstol = 1e-6, reltol = 1e-3)
+                          abstol = 1e-6, reltol = 1e-3,
+                          internalnorm = defaultnorm)
   u0 = prob.u0
   tspan = prob.tspan
   ts = Vector{eltype(dt)}(undef,1)
@@ -52,7 +59,7 @@ function DiffEqBase.__solve(prob::ODEProblem,alg::SimpleATsit5;
   us = Vector{typeof(u0)}(undef,0)
   push!(us,copy(u0))
   integ = simpleatsit5_init(prob.f,DiffEqBase.isinplace(prob),prob.u0,
-                            tspan[1], tspan[2], dt, prob.p, abstol, reltol)
+                            tspan[1], tspan[2], dt, prob.p, abstol, reltol, internalnorm)
   # FSAL
   while integ.t < tspan[2]
     step!(integ)
@@ -67,17 +74,18 @@ end
 
 function simpleatsit5_init(f::F,
                          IIP::Bool, u0::S, t0::T, tf::T, dt::T, p::P,
-                         abstol, reltol) where {F, P, T, S<:AbstractArray{T}}
+                         abstol, reltol,
+                         internalnorm::N) where {F, P, T, S, N}
 
     cs, as, btildes, rs = _build_atsit5_caches(T)
     ks = [zero(u0) for i in 1:7]
 
     !IIP && @assert S <: SArray
 
-    integ = SAT5I{IIP, T, S, P, F}(
+    integ = SAT5I{IIP, T, S, P, F, N}(
         f, copy(u0), copy(u0), copy(u0), t0, t0, t0, tf, dt,
         p, true, ks, cs, as, btildes, rs,
-        qoldinit,abstol,reltol
+        qoldinit,abstol,reltol, internalnorm
     )
 end
 
@@ -214,7 +222,7 @@ function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S}
         tmp[i] = tmp[i]/(abstol+max(abs(uprev[i]),abs(u[i]))*reltol)
       end
 
-      EEst = @fastmath sqrt(sum(abs2,tmp)/L)
+      EEst = integ.internalnorm(tmp)
 
       if iszero(EEst)
         q = inv(qmax)
@@ -291,7 +299,7 @@ function DiffEqBase.step!(integ::SAT5I{false, T, S}) where {T, S}
       tmp = dt*(btilde1*k1+btilde2*k2+btilde3*k3+btilde4*k4+
                    btilde5*k5+btilde6*k6+btilde7*k7)
       tmp = tmp./(abstol+max.(abs.(uprev),abs.(u))*reltol)
-      EEst = @fastmath sqrt(sum(abs2,tmp)/length(tmp))
+      EEst = integ.internalnorm(tmp)
 
       if iszero(EEst)
         q = inv(qmax)
@@ -334,7 +342,7 @@ end
 #######################################################################################
 # Interpolation
 #######################################################################################
-# Interpolation function, OOP
+# Interpolation function, both OOP and IIP
 function (integ::SAT5I)(t::T) where {T}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
     @assert tprev ≤ t ≤ tnext

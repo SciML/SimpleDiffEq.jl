@@ -49,3 +49,40 @@ step!(deoop); step!(deoop)
 
 @test oop.u ≈ deoop.u atol=1e-14
 @test oop.t ≈ deoop.t atol=1e-14
+
+###################################################################################
+# Internal norm test:
+function moop(u, p, t)
+    x = loop(u[:, 1], p, t)
+    y = loop(u[:, 2], p, t)
+    return hcat(x,y)
+end
+function miip(du, u, p, t)
+    @views begin
+        luup(du[:, 1], u[:, 1], p, t)
+        luup(du[:, 2], u[:, 2], p, t)
+    end
+    return nothing
+end
+
+ran = rand(SVector{3})
+odemoop = ODEProblem{false}(loop, SMatrix{3,2}(hcat(u0, ran)), (0.0, 100.0),  [10, 28, 8/3])
+odemiip = ODEProblem{true}(liip, hcat(u0, ran), (0.0, 100.0),  [10, 28, 8/3])
+
+using LinearAlgebra
+
+oop = init(odemoop,SimpleATsit5(),dt=dt, internalnorm = u -> norm(u[:, 1]))
+step!(oop); step!(oop)
+
+iip = init(odemiip,SimpleATsit5(),dt=dt, internalnorm = u -> norm(u[:, 1]))
+step!(iip); step!(iip)
+
+deoop = DiffEqBase.init(odeoop, Tsit5(); dt = dt, internalnorm = u -> norm(u[:, 1]))
+step!(deoop); step!(deoop)
+@test oop.u ≈ deoop.u atol=1e-14
+@test oop.t ≈ deoop.t atol=1e-14
+
+deiip = DiffEqBase.init(odeiip, Tsit5(); dt = dt, internalnorm = u -> norm(u[:, 1]))
+step!(deiip); step!(deiip)
+@test iip.u ≈ deiip.u atol=1e-9
+@test iip.t ≈ deiip.t atol=1e-12
