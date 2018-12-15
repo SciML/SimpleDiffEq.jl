@@ -36,13 +36,15 @@ DiffEqBase.isinplace(::SAT5I{IIP}) where {IIP} = IIP
 # Initialization
 #######################################################################################
 function DiffEqBase.__init(prob::ODEProblem,alg::SimpleATsit5;
-                         dt = error("dt is required for this algorithm"))
+                         dt = error("dt is required for this algorithm"),
+                         abstol = 1e-6, reltol = 1e-3)
   simpleatsit5_init(prob.f,DiffEqBase.isinplace(prob),prob.u0,
-                   prob.tspan[1], prob.tspan[2], dt, prob.p)
+                   prob.tspan[1], prob.tspan[2], dt, prob.p, abstol, reltol)
 end
 
 function DiffEqBase.__solve(prob::ODEProblem,alg::SimpleATsit5;
-                          dt = error("dt is required for this algorithm"))
+                          dt = error("dt is required for this algorithm"),
+                          abstol = 1e-6, reltol = 1e-3)
   u0 = prob.u0
   tspan = prob.tspan
   ts = Vector{eltype(dt)}(undef,1)
@@ -50,7 +52,7 @@ function DiffEqBase.__solve(prob::ODEProblem,alg::SimpleATsit5;
   us = Vector{typeof(u0)}(undef,0)
   push!(us,copy(u0))
   integ = simpleatsit5_init(prob.f,DiffEqBase.isinplace(prob),prob.u0,
-                            tspan[1], tspan[2], dt, prob.p)
+                            tspan[1], tspan[2], dt, prob.p, abstol, reltol)
   # FSAL
   while integ.t < tspan[2]
     step!(integ)
@@ -64,21 +66,18 @@ function DiffEqBase.__solve(prob::ODEProblem,alg::SimpleATsit5;
 end
 
 function simpleatsit5_init(f::F,
-                         IIP::Bool, u0::S, t0::T, tf::T, dt::T, p::P
-                         ) where {F, P, T, S<:AbstractArray{T}}
+                         IIP::Bool, u0::S, t0::T, tf::T, dt::T, p::P,
+                         abstol, reltol) where {F, P, T, S<:AbstractArray{T}}
 
     cs, as, btildes, rs = _build_atsit5_caches(T)
     ks = [zero(u0) for i in 1:7]
 
     !IIP && @assert S <: SArray
 
-    abstol = 1e-6
-    reltol = 1e-3
-
     integ = SAT5I{IIP, T, S, P, F}(
         f, copy(u0), copy(u0), copy(u0), t0, t0, t0, tf, dt,
         p, true, ks, cs, as, btildes, rs,
-        qoldinit,qoldinit,abstol,reltol
+        qoldinit,abstol,reltol
     )
 end
 

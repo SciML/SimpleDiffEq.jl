@@ -40,3 +40,12 @@ step!(deiip); step!(deiip)
 @test iip.t ≈ deiip.t atol=1e-12
 
 sol = solve(odeoop,SimpleATsit5(),dt=dt)
+
+# Test keywords:
+oop = init(odeoop,SimpleATsit5(),dt=dt, reltol = 1e-9, abstol = 1e-9)
+step!(oop); step!(oop)
+deoop = DiffEqBase.init(odeoop, Tsit5(); dt = dt, reltol=1e-9, abstol=1e-9)
+step!(deoop); step!(deoop)
+
+@test oop.u ≈ deoop.u atol=1e-14
+@test oop.t ≈ deoop.t atol=1e-14
