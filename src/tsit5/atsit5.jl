@@ -2,6 +2,9 @@ struct SimpleATsit5 end
 
 const beta1 = 7/50
 const beta2 = 2/25
+const qmax = 10.0
+const qmin = 1/5
+const gamma = 9/10
 
 mutable struct SimpleATsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F} <: DiffEqBase.DEIntegrator
     f::F                  # eom
@@ -20,11 +23,8 @@ mutable struct SimpleATsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F} <: D
     as::SVector{21, T}    # aij factors cache: solution coefficients
     btildes::SVector{7,T}
     rs::SVector{22, T}    # rij factors cache: interpolation coefficients
-    gamma::Float64
     qold::Float64
     qoldinit::Float64
-    qmax::Float64
-    qmin::Float64
     abstol::Float64
     reltol::Float64
 end
@@ -72,17 +72,14 @@ function simpleatsit5_init(f::F,
 
     !IIP && @assert S <: SArray
 
-    gamma = 9/10
     qold = 1e-4
-    qmax = 10.0
-    qmin = 1/5
     abstol = 1e-6
     reltol = 1e-3
 
     integ = SAT5I{IIP, T, S, P, F}(
         f, copy(u0), copy(u0), copy(u0), t0, t0, t0, tf, dt,
         p, true, ks, cs, as, btildes, rs,
-        gamma,qold,qold,qmax,qmin,abstol,reltol
+        qold,qold,abstol,reltol
     )
 end
 
@@ -171,11 +168,8 @@ function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S}
 
     integ.uprev .= integ.u; uprev = integ.uprev; u = integ.u
 
-    gamma = integ.gamma
     qold = integ.qold
     qoldinit = integ.qoldinit
-    qmax = integ.qmax
-    qmin = integ.qmin
     abstol = integ.abstol
     reltol = integ.reltol
 
@@ -268,11 +262,8 @@ function DiffEqBase.step!(integ::SAT5I{false, T, S}) where {T, S}
     tmp = integ.tmp; f = integ.f
     integ.uprev = integ.u; uprev = integ.u
 
-    gamma = integ.gamma
     qold = integ.qold
     qoldinit = integ.qoldinit
-    qmax = integ.qmax
-    qmin = integ.qmin
     abstol = integ.abstol
     reltol = integ.reltol
 
