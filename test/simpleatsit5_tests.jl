@@ -31,13 +31,13 @@ step!(iip); step!(iip)
 
 deoop = DiffEqBase.init(odeoop, Tsit5(); dt = dt)
 step!(deoop); step!(deoop)
-@test oop.u ≈ deoop.u atol=1e-14
-@test oop.t ≈ deoop.t atol=1e-14
+@test oop.u ≈ deoop.u atol=1e-9
+@test oop.t ≈ deoop.t atol=1e-9
 
 deiip = DiffEqBase.init(odeiip, Tsit5(); dt = dt)
 step!(deiip); step!(deiip)
 @test iip.u ≈ deiip.u atol=1e-9
-@test iip.t ≈ deiip.t atol=1e-12
+@test iip.t ≈ deiip.t atol=1e-9
 
 sol = solve(odeoop,SimpleATsit5(),dt=dt)
 
@@ -47,8 +47,8 @@ step!(oop); step!(oop)
 deoop = DiffEqBase.init(odeoop, Tsit5(); dt = dt, reltol=1e-9, abstol=1e-9)
 step!(deoop); step!(deoop)
 
-@test oop.u ≈ deoop.u atol=1e-14
-@test oop.t ≈ deoop.t atol=1e-14
+@test oop.u ≈ deoop.u atol=1e-9
+@test oop.t ≈ deoop.t atol=1e-9
 
 ###################################################################################
 # Internal norm test:
@@ -77,5 +77,5 @@ step!(oop); step!(oop)
 iip = init(odemiip,SimpleATsit5(),dt=dt, internalnorm = u -> norm(u[:, 1]))
 step!(iip); step!(iip)
 
-@test oop.u ≈ iip.u atol=1e-14
-@test oop.t ≈ iip.t atol=1e-14
+@test oop.u ≈ iip.u atol=1e-9
+@test oop.t ≈ iip.t atol=1e-9
