@@ -20,7 +20,7 @@ function defaultnorm(tmp::Vector{<:AbstractVector{T}}) where {T<:Number}
     x/M
 end
 
-mutable struct SimpleATsit5Integrator{IIP, T, S, P, F, N} <: DiffEqBase.DEIntegrator
+mutable struct SimpleATsit5Integrator{IIP, S, T, P, F, N} <: DiffEqBase.DEIntegrator
     f::F                  # eom
     uprev::S              # previous state
     u::S                  # current state
@@ -85,14 +85,14 @@ end
 function simpleatsit5_init(f::F,
                          IIP::Bool, u0::S, t0::T, tf::T, dt::T, p::P,
                          abstol, reltol,
-                         internalnorm::N) where {F, P, T, S, N}
+                         internalnorm::N) where {F, P, S, T, N}
 
     cs, as, btildes, rs = _build_atsit5_caches(T)
     ks = _initialize_ks(u0)
 
     !IIP && @assert S <: SArray
 
-    integ = SAT5I{IIP, T, S, P, F, N}(
+    integ = SAT5I{IIP, S, T, P, F, N}(
         f, recursivecopy(u0), recursivecopy(u0), recursivecopy(u0), t0, t0, t0, tf, dt,
         p, true, ks, cs, as, btildes, rs,
         qoldinit,abstol,reltol, internalnorm
@@ -180,7 +180,7 @@ end
 #######################################################################################
 # IIP version for vectors and matrices
 #######################################################################################
-function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S}
+function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S, T}
 
     L = length(integ.u)
 
@@ -279,7 +279,7 @@ end
 #######################################################################################
 # OOP version for vectors and matrices
 #######################################################################################
-function DiffEqBase.step!(integ::SAT5I{false, T, S}) where {T, S}
+function DiffEqBase.step!(integ::SAT5I{false, S, T}) where {S, T}
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
     dt = integ.dt; t = integ.t; p = integ.p; tf = integ.tf
@@ -366,7 +366,7 @@ end
 # Vector of Vector (always in-place) stepping
 #######################################################################################
 # Vector{Vector}
-function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S<:Vector{<:Array}}
+function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S, T<:Vector{<:Array}}
 
     M = length(integ.u) # number of states
     L = length(integ.u[1])
@@ -483,7 +483,7 @@ function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S<:Vector{<:Array}
 end
 
 # Vector{SVector}
-function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S<:Vector{<:SVector}}
+function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S, T<:Vector{<:SVector}}
 
     M = length(integ.u)
     L = length(integ.u[1])
@@ -593,7 +593,7 @@ end
 # Interpolation
 #######################################################################################
 # Interpolation function, both OOP and IIP
-function (integ::SAT5I{IIP, T, S})(t::Real) where {IIP, T, S<:AbstractArray{<:Number}}
+function (integ::SAT5I{IIP, S, T})(t::Real) where {IIP, S, T<:AbstractArray{<:Number}}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
     @assert tprev ≤ t ≤ tnext
     θ = (t - tprev)/dt
