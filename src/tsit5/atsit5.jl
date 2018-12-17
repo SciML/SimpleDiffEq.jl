@@ -1,3 +1,5 @@
+using RecursiveArrayTools: recursivecopy
+
 struct SimpleATsit5 end
 
 # PI-adaptive stepping parameters:
@@ -65,13 +67,13 @@ function DiffEqBase.__solve(prob::ODEProblem,alg::SimpleATsit5;
   ts = Vector{eltype(dt)}(undef,1)
   ts[1] = prob.tspan[1]
   us = Vector{typeof(u0)}(undef,0)
-  push!(us,copy(u0))
+  push!(us,recursivecopy(u0))
   integ = simpleatsit5_init(prob.f,DiffEqBase.isinplace(prob),prob.u0,
                             tspan[1], tspan[2], dt, prob.p, abstol, reltol, internalnorm)
   # FSAL
   while integ.t < tspan[2]
     step!(integ)
-    push!(us,copy(integ.u))
+    push!(us,recursivecopy(integ.u))
     push!(ts,integ.t)
   end
   sol = DiffEqBase.build_solution(prob,alg,ts,us,
@@ -91,7 +93,7 @@ function simpleatsit5_init(f::F,
     !IIP && @assert S <: SArray
 
     integ = SAT5I{IIP, T, S, P, F, N}(
-        f, copy(u0), copy(u0), copy(u0), t0, t0, t0, tf, dt,
+        f, recursivecopy(u0), recursivecopy(u0), recursivecopy(u0), t0, t0, t0, tf, dt,
         p, true, ks, cs, as, btildes, rs,
         qoldinit,abstol,reltol, internalnorm
     )

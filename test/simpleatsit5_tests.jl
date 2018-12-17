@@ -105,7 +105,7 @@ step!(viip); step!(viip)
 iip = init(odeiip,SimpleATsit5(),dt=dt)
 step!(iip); step!(iip)
 
-@test iip.u ≈ viip.u[1] atol=1e-14
+@test iip.u ≈ viip.u[1] atol=1e-9
 
 voop = init(odevoop,SimpleATsit5(),dt=dt,internalnorm = u -> SimpleDiffEq.defaultnorm(u[1]))
 step!(voop); step!(voop)
@@ -113,10 +113,10 @@ step!(voop); step!(voop)
 oop = init(odeoop,SimpleATsit5(),dt=dt)
 step!(oop); step!(oop)
 
-@test oop.u ≈ voop.u[1] atol=1e-14
+@test oop.u ≈ voop.u[1] atol=1e-9
 
 # Final test that the states of both methods should be the same:
-@test voop.u[2] ≈ viip.u[2] atol=1e-14
+@test voop.u[2] ≈ viip.u[2] atol=1e-9
 
 
 
