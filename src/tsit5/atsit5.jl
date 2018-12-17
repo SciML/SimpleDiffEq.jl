@@ -366,7 +366,7 @@ end
 # Vector of Vector (always in-place) stepping
 #######################################################################################
 # Vector{Vector}
-function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S, T<:Vector{<:Array}}
+function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:Array}, T}
 
     M = length(integ.u) # number of states
     L = length(integ.u[1])
@@ -483,7 +483,7 @@ function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S, T<:Vector{<:Array}
 end
 
 # Vector{SVector}
-function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S, T<:Vector{<:SVector}}
+function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:SVector}, T}
 
     M = length(integ.u)
     L = length(integ.u[1])
