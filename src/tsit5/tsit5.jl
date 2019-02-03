@@ -1,4 +1,5 @@
 struct SimpleTsit5 end
+export SimpleTsit5
 
 mutable struct SimpleTsit5Integrator{IIP, S, T, P, F} <: DiffEqBase.AbstractODEIntegrator{SimpleTsit5, IIP, S, T}
     f::F                  # eom
@@ -262,5 +263,3 @@ function bθs(rs::SVector{22, T}, θ::T) where {T}
 
     return b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ
 end
-
-export SimpleTsit5
