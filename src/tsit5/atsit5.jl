@@ -95,7 +95,7 @@ function simpleatsit5_init(f::F,
     integ = SAT5I{IIP, S, T, P, F, N}(
         f, recursivecopy(u0), recursivecopy(u0), recursivecopy(u0), t0, t0, t0, tf, dt,
         p, true, ks, cs, as, btildes, rs,
-        qoldinit,abstol,reltol, internalnorm, +1
+        qoldinit,abstol,reltol, internalnorm
     )
 end
 
