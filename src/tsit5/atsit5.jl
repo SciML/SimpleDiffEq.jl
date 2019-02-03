@@ -20,7 +20,7 @@ function defaultnorm(tmp::Vector{<:AbstractVector{T}}) where {T<:Number}
     x/M
 end
 
-mutable struct SimpleATsit5Integrator{IIP, S, T, P, F, N} <: DiffEqBase.DEIntegrator
+mutable struct SimpleATsit5Integrator{IIP, S, T, P, F, N} <: DiffEqBase.AbstractODEIntegrator{SimpleATsit5, IIP, S, T}
     f::F                  # eom
     uprev::S              # previous state
     u::S                  # current state
