@@ -52,7 +52,7 @@ DiffEqBase.isinplace(::SAT5I{IIP}) where {IIP} = IIP
 function DiffEqBase.__init(prob::ODEProblem,alg::SimpleATsit5;
                          dt = error("dt is required for this algorithm"),
                          abstol = 1e-6, reltol = 1e-3,
-                         internalnorm = defaultnorm)
+                         internalnorm = defaultnorm, kwargs...)
   simpleatsit5_init(prob.f,DiffEqBase.isinplace(prob),prob.u0,
                    prob.tspan[1], prob.tspan[2], dt, prob.p, abstol, reltol,
                    internalnorm)
