@@ -1,6 +1,6 @@
 struct SimpleTsit5 end
 
-mutable struct SimpleTsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F} <: DiffEqBase.DEIntegrator
+mutable struct SimpleTsit5Integrator{IIP, S, T, P, F} <: DiffEqBase.AbstractODEIntegrator{SimpleTsit5, IIP, S, T}
     f::F                  # eom
     uprev::S              # previous state
     u::S                  # current state
@@ -59,7 +59,7 @@ function simpletsit5_init(f::F,
 
     !IIP && @assert S <: SArray
 
-    integ = ST5I{IIP, T, S, P, F}(
+    integ = ST5I{IIP, S, T, P, F}(
         f, copy(u0), copy(u0), copy(u0), t0, t0, t0, dt, p, true, ks, cs, as, rs
     )
 end
@@ -124,7 +124,7 @@ end
 # Stepping
 #######################################################################################
 # IIP version for vectors and matrices
-function DiffEqBase.step!(integ::ST5I{true, T, S}) where {T, S}
+function DiffEqBase.step!(integ::ST5I{true, S, T}) where {T, S}
 
     L = length(integ.u)
 
@@ -179,7 +179,7 @@ function DiffEqBase.step!(integ::ST5I{true, T, S}) where {T, S}
 end
 
 # OOP version for vectors and matrices
-function DiffEqBase.step!(integ::ST5I{false, T, S}) where {T, S}
+function DiffEqBase.step!(integ::ST5I{false, S, T}) where {T, S}
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
     dt = integ.dt; t = integ.t; p = integ.p
@@ -213,7 +213,7 @@ function DiffEqBase.step!(integ::ST5I{false, T, S}) where {T, S}
     @inbounds begin # Necessary for interpolation
         integ.ks[1] = k7; integ.ks[2] = k2; integ.ks[3] = k3
         integ.ks[4] = k4; integ.ks[5] = k5; integ.ks[6] = k6
-        integ.ks[7]
+        integ.ks[7] = k7
     end
 
     integ.tprev = t

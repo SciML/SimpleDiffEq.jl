@@ -1,6 +1,26 @@
+using RecursiveArrayTools: recursivecopy
+
 struct SimpleATsit5 end
 
-mutable struct SimpleATsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F} <: DiffEqBase.DEIntegrator
+# PI-adaptive stepping parameters:
+const beta1 = 7/50
+const beta2 = 2/25
+const qmax = 10.0
+const qmin = 1/5
+const gamma = 9/10
+const qoldinit = 1e-4
+
+defaultnorm(tmp) = @fastmath sqrt(sum(abs2,tmp)/length(tmp))
+function defaultnorm(tmp::Vector{<:AbstractVector{T}}) where {T<:Number}
+    x = zero(T)
+    M = length(tmp)
+    @inbounds for j in 1:M
+        @fastmath x += sqrt(sum(abs2,tmp[j])/length(tmp[j]))
+    end
+    x/M
+end
+
+mutable struct SimpleATsit5Integrator{IIP, S, T, P, F, N} <: DiffEqBase.AbstractODEIntegrator{SimpleATsit5, IIP, S, T}
     f::F                  # eom
     uprev::S              # previous state
     u::S                  # current state
@@ -17,15 +37,10 @@ mutable struct SimpleATsit5Integrator{IIP, T, S <: AbstractVector{T}, P, F} <: D
     as::SVector{21, T}    # aij factors cache: solution coefficients
     btildes::SVector{7,T}
     rs::SVector{22, T}    # rij factors cache: interpolation coefficients
-    gamma::Float64
     qold::Float64
-    qoldinit::Float64
-    qmax::Float64
-    qmin::Float64
-    beta1::Float64
-    beta2::Float64
     abstol::Float64
     reltol::Float64
+    internalnorm::N       # function that computes the error EEst based on state
 end
 const SAT5I = SimpleATsit5Integrator
 
@@ -35,25 +50,30 @@ DiffEqBase.isinplace(::SAT5I{IIP}) where {IIP} = IIP
 # Initialization
 #######################################################################################
 function DiffEqBase.__init(prob::ODEProblem,alg::SimpleATsit5;
-                         dt = error("dt is required for this algorithm"))
+                         dt = 0.1,
+                         abstol = 1e-6, reltol = 1e-3,
+                         internalnorm = defaultnorm, kwargs...)
   simpleatsit5_init(prob.f,DiffEqBase.isinplace(prob),prob.u0,
-                   prob.tspan[1], prob.tspan[2], dt, prob.p)
+                   prob.tspan[1], prob.tspan[2], dt, prob.p, abstol, reltol,
+                   internalnorm)
 end
 
 function DiffEqBase.__solve(prob::ODEProblem,alg::SimpleATsit5;
-                          dt = error("dt is required for this algorithm"))
+                          dt = 0.1,
+                          abstol = 1e-6, reltol = 1e-3,
+                          internalnorm = defaultnorm)
   u0 = prob.u0
   tspan = prob.tspan
   ts = Vector{eltype(dt)}(undef,1)
   ts[1] = prob.tspan[1]
   us = Vector{typeof(u0)}(undef,0)
-  push!(us,copy(u0))
+  push!(us,recursivecopy(u0))
   integ = simpleatsit5_init(prob.f,DiffEqBase.isinplace(prob),prob.u0,
-                            tspan[1], tspan[2], dt, prob.p)
+                            tspan[1], tspan[2], dt, prob.p, abstol, reltol, internalnorm)
   # FSAL
   while integ.t < tspan[2]
     step!(integ)
-    push!(us,copy(integ.u))
+    push!(us,recursivecopy(integ.u))
     push!(ts,integ.t)
   end
   sol = DiffEqBase.build_solution(prob,alg,ts,us,
@@ -63,28 +83,25 @@ function DiffEqBase.__solve(prob::ODEProblem,alg::SimpleATsit5;
 end
 
 function simpleatsit5_init(f::F,
-                         IIP::Bool, u0::S, t0::T, tf::T, dt::T, p::P
-                         ) where {F, P, T, S<:AbstractArray{T}}
+                         IIP::Bool, u0::S, t0::T, tf::T, dt::T, p::P,
+                         abstol, reltol,
+                         internalnorm::N) where {F, P, S, T, N}
 
     cs, as, btildes, rs = _build_atsit5_caches(T)
-    ks = [zero(u0) for i in 1:7]
+    ks = _initialize_ks(u0)
 
     !IIP && @assert S <: SArray
 
-    gamma = 9/10
-    qold = 1e-4
-    qmax = 10.0
-    qmin = 1/5
-    beta1 = 7/50
-    beta2 = 2/25
-    abstol = 1e-6
-    reltol = 1e-3
-
-    integ = SAT5I{IIP, T, S, P, F}(
-        f, copy(u0), copy(u0), copy(u0), t0, t0, t0, tf, dt,
+    integ = SAT5I{IIP, S, T, P, F, N}(
+        f, recursivecopy(u0), recursivecopy(u0), recursivecopy(u0), t0, t0, t0, tf, dt,
         p, true, ks, cs, as, btildes, rs,
-        gamma,qold,qold,qmax,qmin,beta1,beta2,abstol,reltol
+        qoldinit,abstol,reltol, internalnorm, +1
     )
+end
+
+_initialize_ks(u0::AbstractArray{T}) where {T<:Number} = [zero(u0) for i in 1:7]
+function _initialize_ks(u0::Vector{<:AbstractVector})
+    return [[zero(u0[j]) for j in 1:length(u0)] for i in 1:7]
 end
 
 function _build_atsit5_caches(::Type{T}) where {T}
@@ -154,10 +171,9 @@ function _build_atsit5_caches(::Type{T}) where {T}
 end
 
 #######################################################################################
-# Stepping
-#######################################################################################
 # IIP version for vectors and matrices
-function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S}
+#######################################################################################
+function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S, T}
 
     L = length(integ.u)
 
@@ -172,13 +188,7 @@ function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S}
 
     integ.uprev .= integ.u; uprev = integ.uprev; u = integ.u
 
-    gamma = integ.gamma
     qold = integ.qold
-    qoldinit = integ.qoldinit
-    qmax = integ.qmax
-    qmin = integ.qmin
-    beta1 = integ.beta1
-    beta2 = integ.beta2
     abstol = integ.abstol
     reltol = integ.reltol
 
@@ -226,7 +236,7 @@ function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S}
         tmp[i] = tmp[i]/(abstol+max(abs(uprev[i]),abs(u[i]))*reltol)
       end
 
-      EEst = @fastmath sqrt(sum(abs2,tmp)/L)
+      EEst = integ.internalnorm(tmp)
 
       if iszero(EEst)
         q = inv(qmax)
@@ -259,8 +269,10 @@ function DiffEqBase.step!(integ::SAT5I{true, T, S}) where {T, S}
     return  nothing
 end
 
+#######################################################################################
 # OOP version for vectors and matrices
-function DiffEqBase.step!(integ::SAT5I{false, T, S}) where {T, S}
+#######################################################################################
+function DiffEqBase.step!(integ::SAT5I{false, S, T}) where {S, T}
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
     dt = integ.dt; t = integ.t; p = integ.p; tf = integ.tf
@@ -271,13 +283,7 @@ function DiffEqBase.step!(integ::SAT5I{false, T, S}) where {T, S}
     tmp = integ.tmp; f = integ.f
     integ.uprev = integ.u; uprev = integ.u
 
-    gamma = integ.gamma
     qold = integ.qold
-    qoldinit = integ.qoldinit
-    qmax = integ.qmax
-    qmin = integ.qmin
-    beta1 = integ.beta1
-    beta2 = integ.beta2
     abstol = integ.abstol
     reltol = integ.reltol
 
@@ -309,7 +315,7 @@ function DiffEqBase.step!(integ::SAT5I{false, T, S}) where {T, S}
       tmp = dt*(btilde1*k1+btilde2*k2+btilde3*k3+btilde4*k4+
                    btilde5*k5+btilde6*k6+btilde7*k7)
       tmp = tmp./(abstol+max.(abs.(uprev),abs.(u))*reltol)
-      EEst = @fastmath sqrt(sum(abs2,tmp)/length(tmp))
+      EEst = integ.internalnorm(tmp)
 
       if iszero(EEst)
         q = inv(qmax)
@@ -350,17 +356,244 @@ function DiffEqBase.step!(integ::SAT5I{false, T, S}) where {T, S}
 end
 
 #######################################################################################
+# Vector of Vector (always in-place) stepping
+#######################################################################################
+# Vector{Vector}
+function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:Array}, T}
+
+    M = length(integ.u) # number of states
+    L = length(integ.u[1])
+
+    c1, c2, c3, c4, c5, c6 = integ.cs;
+    dt = integ.dt; t = integ.t; p = integ.p; tf = integ.tf
+    a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
+    a61, a62, a63, a64, a65, a71, a72, a73, a74, a75, a76 = integ.as
+    btilde1, btilde2, btilde3, btilde4, btilde5, btilde6, btilde7 = integ.btildes
+
+    k1, k2, k3, k4, k5, k6, k7 = integ.ks
+    tmp = integ.tmp; f! = integ.f
+
+    @inbounds for j in 1:M
+        integ.uprev[j] .= integ.u[j]
+    end
+    uprev = integ.uprev; u = integ.u
+
+    qold = integ.qold; abstol = integ.abstol; reltol = integ.reltol
+
+    # FSAL
+    if integ.u_modified
+        f!(k1, uprev, p, t)
+        integ.u_modified=false
+    else
+        @inbounds for j in 1:M; k1[j] .= k7[j]; end
+    end
+
+    EEst = Inf
+
+    @inbounds while EEst>1
+        dt < 1e-14 && error("dt<dtmin")
+
+        for j in 1:M
+            for i in 1:length(integ.u[j])
+                tmp[j][i] = uprev[j][i]+dt*a21*k1[j][i]
+            end
+        end
+
+        f!(k2, tmp, p, t+c1*dt)
+        for j in 1:M
+            for i in 1:length(integ.u[j])
+                tmp[j][i] = uprev[j][i]+dt*(a31*k1[j][i]+a32*k2[j][i])
+            end
+        end
+
+        f!(k3, tmp, p, t+c2*dt)
+        for j in 1:M
+            for i in 1:length(integ.u[j])
+                tmp[j][i] = uprev[j][i]+dt*(a41*k1[j][i]+a42*k2[j][i]+a43*k3[j][i])
+            end
+        end
+
+        f!(k4, tmp, p, t+c3*dt)
+        for j in 1:M
+            for i in 1:length(integ.u[j])
+                tmp[j][i] = uprev[j][i]+dt*(a51*k1[j][i]+a52*k2[j][i]+a53*k3[j][i]+a54*k4[j][i])
+            end
+        end
+
+        f!(k5, tmp, p, t+c4*dt)
+        for j in 1:M
+            for i in 1:length(integ.u[j])
+                tmp[j][i] = uprev[j][i]+dt*(a61*k1[j][i]+a62*k2[j][i]+a63*k3[j][i]+a64*k4[j][i]+a65*k5[j][i])
+            end
+        end
+
+        f!(k6, tmp, p, t+dt)
+        for j in 1:M
+            for i in 1:length(integ.u[j])
+                u[j][i] = uprev[j][i]+dt*(a71*k1[j][i]+a72*k2[j][i]+a73*k3[j][i]+a74*k4[j][i]+a75*k5[j][i]+a76*k6[j][i])
+            end
+        end
+
+        f!(k7, u, p, t+dt)
+        for j in 1:M
+            for i in 1:length(integ.u[j])
+                tmp[j][i] = dt*(btilde1*k1[j][i]+btilde2*k2[j][i]+btilde3*k3[j][i]+btilde4*k4[j][i]+
+                            btilde5*k5[j][i]+btilde6*k6[j][i]+btilde7*k7[j][i])
+                tmp[j][i] = tmp[j][i]/(abstol+max(abs(uprev[j][i]),abs(u[j][i]))*reltol)
+            end
+        end
+
+        EEst = integ.internalnorm(tmp)
+
+        if iszero(EEst)
+            q = inv(qmax)
+        else
+            @fastmath q11 = EEst^beta1
+            @fastmath q = q11/(qold^beta2)
+        end
+
+        if EEst > 1
+            dt = dt/min(inv(qmin),q11/gamma)
+        else # EEst <= 1
+            @fastmath q = max(inv(qmax),min(inv(qmin),q/gamma))
+            qold = max(EEst,qoldinit)
+            dtold = dt
+            dt = dt/q #dtnew
+            dt = min(abs(dt),abs(tf-t-dtold))
+
+            integ.dt = dt
+            integ.qold = qold
+            integ.tprev = t
+
+            if (tf - t - dtold) < 1e-14
+                integ.t = tf
+            else
+                integ.t += dtold
+            end
+        end
+    end
+    return  nothing
+end
+
+# Vector{SVector}
+function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:SVector}, T}
+
+    M = length(integ.u)
+    L = length(integ.u[1])
+
+    c1, c2, c3, c4, c5, c6 = integ.cs;
+    dt = integ.dt; t = integ.t; p = integ.p; tf = integ.tf
+    a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
+    a61, a62, a63, a64, a65, a71, a72, a73, a74, a75, a76 = integ.as
+    btilde1, btilde2, btilde3, btilde4, btilde5, btilde6, btilde7 = integ.btildes
+
+    k1, k2, k3, k4, k5, k6, k7 = integ.ks
+    tmp = integ.tmp; f! = integ.f
+
+    integ.uprev .= integ.u; uprev = integ.uprev; u = integ.u
+
+    qold = integ.qold
+    abstol = integ.abstol
+    reltol = integ.reltol
+
+    @inbounds if integ.u_modified
+        f!(k1, uprev, p, t)
+        integ.u_modified=false
+    else
+        for j in 1:M
+            k1[j] = k7[j]
+        end
+    end
+
+
+    EEst = Inf
+
+    @inbounds while EEst>1
+        dt < 1e-14 && error("dt<dtmin")
+
+        for j in 1:M
+            tmp[j] = uprev[j]+dt*a21*k1[j]
+        end
+
+        f!(k2, tmp, p, t+c1*dt)
+        for j in 1:M
+            tmp[j] = uprev[j]+dt*(a31*k1[j]+a32*k2[j])
+        end
+
+        f!(k3, tmp, p, t+c2*dt)
+        for j in 1:M
+            tmp[j] = uprev[j]+dt*(a41*k1[j]+a42*k2[j]+a43*k3[j])
+        end
+
+        f!(k4, tmp, p, t+c3*dt)
+        for j in 1:M
+            tmp[j] = uprev[j]+dt*(a51*k1[j]+a52*k2[j]+a53*k3[j]+a54*k4[j])
+        end
+
+        f!(k5, tmp, p, t+c4*dt)
+        for j in 1:M
+            tmp[j] = uprev[j]+dt*(a61*k1[j]+a62*k2[j]+a63*k3[j]+a64*k4[j]+a65*k5[j])
+        end
+
+        f!(k6, tmp, p, t+dt)
+        for j in 1:M
+            u[j] = uprev[j]+dt*(a71*k1[j]+a72*k2[j]+a73*k3[j]+a74*k4[j]+a75*k5[j]+a76*k6[j])
+        end
+
+        f!(k7, u, p, t+dt)
+
+        for j in 1:M
+            tmp[j] = dt*(btilde1*k1[j]+btilde2*k2[j]+btilde3*k3[j]+btilde4*k4[j]+
+                             btilde5*k5[j]+btilde6*k6[j]+btilde7*k7[j])
+            tmp[j] = tmp[j]./(abstol+max.(abs.(uprev[j]),abs.(u[j]))*reltol)
+        end
+
+
+        EEst = integ.internalnorm(tmp)
+
+        if iszero(EEst)
+            q = inv(qmax)
+        else
+            @fastmath q11 = EEst^beta1
+            @fastmath q = q11/(qold^beta2)
+        end
+
+        if EEst > 1
+            dt = dt/min(inv(qmin),q11/gamma)
+        else # EEst <= 1
+            @fastmath q = max(inv(qmax),min(inv(qmin),q/gamma))
+            qold = max(EEst,qoldinit)
+            dtold = dt
+            dt = dt/q #dtnew
+            dt = min(abs(dt),abs(tf-t-dtold))
+
+            integ.dt = dt
+            integ.qold = qold
+            integ.tprev = t
+
+            if (tf - t - dtold) < 1e-14
+                integ.t = tf
+            else
+                integ.t += dtold
+            end
+        end
+    end
+    return  nothing
+end
+
+
+#######################################################################################
 # Interpolation
 #######################################################################################
-# Interpolation function, OOP
-function (integ::SAT5I)(t::T) where {T}
+# Interpolation function, both OOP and IIP
+function (integ::SAT5I{IIP, S, T})(t::Real) where {IIP, S, T<:AbstractArray{<:Number}}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
     @assert tprev ≤ t ≤ tnext
     θ = (t - tprev)/dt
     b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ = bθs(integ.rs, θ)
 
     ks = integ.ks
-    if !isinplace(integ)
+    if !IIP
         u = @inbounds integ.uprev + dt*(b1θ*ks[1] + b2θ*ks[2] + b3θ*ks[3] + b4θ*ks[4] +
                       b5θ*ks[5] + b6θ*ks[6] + b7θ*ks[7])
         return u
@@ -375,3 +608,14 @@ function (integ::SAT5I)(t::T) where {T}
 end
 
 export SimpleATsit5
+
+#######################################################################################
+# Multiple steps at once
+#######################################################################################
+function DiffEqBase.step!(integ::SimpleATsit5Integrator, dt::Real)
+    t = integ.t
+    next_t = t+dt
+    while integ.t < next_t
+        step!(integ)
+    end
+end

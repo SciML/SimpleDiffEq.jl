@@ -53,8 +53,7 @@ end
 ##################################################
 
 # Integrator version
-
-mutable struct DiscreteIntegrator{F,uType,tType,P,S} <: DiffEqBase.DEIntegrator
+mutable struct DiscreteIntegrator{F, IIP, uType,tType,P,S} <: DiffEqBase.DEIntegrator{SimpleFunctionMap, IIP, uType, tType}
     f::F
     u::uType
     t::tType
@@ -67,7 +66,13 @@ end
 function DiffEqBase.__init(prob::DiscreteProblem,
                          alg::SimpleFunctionMap)
     sol = solve(prob,alg;calculate_values=false)
-    DiscreteIntegrator(prob.f,prob.u0,prob.tspan[1],copy(prob.u0),prob.p,sol,1)
+    F = typeof(prob.f)
+    IIP = isinplace(prob)
+    uType = typeof(prob.u0)
+    tType = typeof(prob.tspan[1])
+    P = typeof(prob.p)
+    S = typeof(sol)
+    DiscreteIntegrator{F, IIP, uType, tType, P, S}(prob.f,prob.u0,prob.tspan[1],copy(prob.u0),prob.p,sol,1)
 end
 
 function DiffEqBase.step!(integrator::DiscreteIntegrator)
