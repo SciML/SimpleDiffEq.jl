@@ -213,7 +213,7 @@ function DiffEqBase.step!(integ::ST5I{false, S, T}) where {T, S}
     @inbounds begin # Necessary for interpolation
         integ.ks[1] = k7; integ.ks[2] = k2; integ.ks[3] = k3
         integ.ks[4] = k4; integ.ks[5] = k5; integ.ks[6] = k6
-        integ.ks[7]
+        integ.ks[7] = k7
     end
 
     integ.tprev = t
