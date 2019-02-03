@@ -95,7 +95,7 @@ function simpleatsit5_init(f::F,
     integ = SAT5I{IIP, S, T, P, F, N}(
         f, recursivecopy(u0), recursivecopy(u0), recursivecopy(u0), t0, t0, t0, tf, dt,
         p, true, ks, cs, as, btildes, rs,
-        qoldinit,abstol,reltol, internalnorm
+        qoldinit,abstol,reltol, internalnorm, +1
     )
 end
 
@@ -608,3 +608,14 @@ function (integ::SAT5I{IIP, S, T})(t::Real) where {IIP, S, T<:AbstractArray{<:Nu
 end
 
 export SimpleATsit5
+
+#######################################################################################
+# Multiple steps at once
+#######################################################################################
+function DiffEqBase.step!(integ::SimpleATsit5Integrator, dt::Real)
+    t = integ.t
+    next_t = t+dt
+    while integ.t < next_t
+        step!(integ)
+    end
+end
