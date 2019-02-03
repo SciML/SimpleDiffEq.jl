@@ -521,7 +521,7 @@ end
 # Interpolation
 #######################################################################################
 # Interpolation function, both OOP and IIP
-function (integ::SAT5I{IIP, S, T})(t::Real) where {IIP, S, T<:AbstractArray{<:Number}}
+function (integ::SAT5I{IIP, S, T})(t::Real) where {IIP, S<:AbstractArray{<:Number}, T}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
     @assert tprev ≤ t ≤ tnext
     θ = (t - tprev)/dt
