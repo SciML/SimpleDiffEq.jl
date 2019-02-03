@@ -46,6 +46,7 @@ end
 const SAT5I = SimpleATsit5Integrator
 
 DiffEqBase.isinplace(::SAT5I{IIP}) where {IIP} = IIP
+DiffEqBase.u_modified!(i::SAT5I, bool) = (i.u_modified = bool)
 
 #######################################################################################
 # Initialization
