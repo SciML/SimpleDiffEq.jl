@@ -574,6 +574,7 @@ function DiffEqBase.reinit!(integrator::SimpleATsit5Integrator, u0 = integrator.
     integrator.t = t0
     integrator.tprev = t0
     integrator.dt = dt
+    integrator.qold = qoldinit
 end
 
 
