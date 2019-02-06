@@ -50,6 +50,17 @@ step!(deoop); step!(deoop)
 @test oop.u ≈ deoop.u atol=1e-9
 @test oop.t ≈ deoop.t atol=1e-9
 
+# Test reinit!
+reinit!(oop, odeoop.u0; dt = dt)
+reinit!(iip, odeiip.u0; dt = dt)
+step!(oop); step!(oop)
+step!(iip); step!(iip)
+
+@test oop.u ≈ deoop.u atol=1e-9
+@test oop.t ≈ deoop.t atol=1e-9
+@test iip.u ≈ deiip.u atol=1e-9
+@test iip.t ≈ deiip.t atol=1e-9
+
 ###################################################################################
 # Internal norm test:
 function moop(u, p, t)
