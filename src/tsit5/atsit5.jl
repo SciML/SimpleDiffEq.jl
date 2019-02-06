@@ -553,3 +553,29 @@ function DiffEqBase.step!(integ::SimpleATsit5Integrator, dt::Real)
         step!(integ)
     end
 end
+
+#######################################################################################
+# reinit!
+#######################################################################################
+function DiffEqBase.reinit!(integrator::SimpleATsit5Integrator, u0 = integrator.u;
+  t0 = integrator.t0, dt = integrator.dt)
+
+    # Is modifying the `uprev` necessary? We do `u_modified(i, true)`
+    if isinplace(integrator)
+        recursivecopy!(integrator.u,u0)
+        recursivecopy!(integrator.uprev,integrator.u)
+    else
+        integrator.u = u0
+        integrator.uprev = integrator.u
+    end
+    u_modified!(integrator, true)
+
+    integrator.t = t0
+    integrator.tprev = t0
+    integrator.dt = dt
+end
+
+
+function DiffEqBase.set_t!(integrator::SimpleATsit5Integrator, t::Real)
+    reinit!(integrator; t0 = t)
+end
