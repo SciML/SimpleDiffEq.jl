@@ -557,6 +557,7 @@ end
 #######################################################################################
 # reinit!
 #######################################################################################
+using RecursiveArrayTools
 function DiffEqBase.reinit!(integrator::SimpleATsit5Integrator, u0 = integrator.u;
   t0 = integrator.t0, dt = integrator.dt)
 
