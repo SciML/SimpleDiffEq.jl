@@ -31,6 +31,7 @@ mutable struct SimpleATsit5Integrator{IIP, S, T, P, F, N} <: DiffEqBase.Abstract
     t0::T                 # initial time, only for reinit
     tf::T
     dt::T                 # step size
+    dtnew::T
     p::P                  # parameter container
     u_modified::Bool
     ks::Vector{S}         # interpolants of the algorithm
@@ -95,7 +96,7 @@ function simpleatsit5_init(f::F,
     !IIP && @assert S <: SArray
 
     integ = SAT5I{IIP, S, T, P, F, N}(
-        f, recursivecopy(u0), recursivecopy(u0), recursivecopy(u0), t0, t0, t0, tf, dt,
+        f, recursivecopy(u0), recursivecopy(u0), recursivecopy(u0), t0, t0, t0, tf, dt, dt,
         p, true, ks, cs, as, btildes, rs,
         qoldinit,abstol,reltol, internalnorm
     )
@@ -114,7 +115,7 @@ function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S, T}
     L = length(integ.u)
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
-    dt = integ.dt; t = integ.t; p = integ.p; tf = integ.tf
+    dt = integ.dtnew; t = integ.t; p = integ.p; tf = integ.tf
     a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
     a61, a62, a63, a64, a65, a71, a72, a73, a74, a75, a76 = integ.as
     btilde1, btilde2, btilde3, btilde4, btilde5, btilde6, btilde7 = integ.btildes
@@ -186,18 +187,18 @@ function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S, T}
       else # EEst <= 1
         @fastmath q = max(inv(qmax),min(inv(qmin),q/gamma))
         qold = max(EEst,qoldinit)
-        dtold = dt
-        dt = dt/q #dtnew
-        dt = min(abs(dt),abs(tf-t-dtold))
+        dtnew = dt/q #dtnew
+        dtnew = min(abs(dtnew),abs(tf-t-dt))
 
         integ.dt = dt
+        integ.dtnew = dtnew
         integ.qold = qold
         integ.tprev = t
 
-        if (tf - t - dtold) < 1e-14
+        if (tf - t - dt) < 1e-14
           integ.t = tf
         else
-          integ.t += dtold
+          integ.t += dt
         end
       end
     end
@@ -211,7 +212,7 @@ end
 function DiffEqBase.step!(integ::SAT5I{false, S, T}) where {S, T}
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
-    dt = integ.dt; t = integ.t; p = integ.p; tf = integ.tf
+    dt = integ.dtnew; t = integ.t; p = integ.p; tf = integ.tf
     a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
     a61, a62, a63, a64, a65, a71, a72, a73, a74, a75, a76 = integ.as
     btilde1, btilde2, btilde3, btilde4, btilde5, btilde6, btilde7 = integ.btildes
@@ -265,9 +266,8 @@ function DiffEqBase.step!(integ::SAT5I{false, S, T}) where {S, T}
       else # EEst <= 1
         @fastmath q = max(inv(qmax),min(inv(qmin),q/gamma))
         qold = max(EEst,qoldinit)
-        dtold = dt
-        dt = dt/q #dtnew
-        dt = min(abs(dt),abs(tf-t-dtold))
+        dtnew = dt/q #dtnew
+        dtnew = min(abs(dtnew),abs(tf-t-dt))
 
         @inbounds begin # Necessary for interpolation
             integ.ks[1] = k1; integ.ks[2] = k2; integ.ks[3] = k3
@@ -276,14 +276,15 @@ function DiffEqBase.step!(integ::SAT5I{false, S, T}) where {S, T}
         end
 
         integ.dt = dt
+        integ.dtnew = dtnew
         integ.qold = qold
         integ.tprev = t
         integ.u = u
 
-        if (tf - t - dtold) < 1e-14
+        if (tf - t - dt) < 1e-14
           integ.t = tf
         else
-          integ.t += dtold
+          integ.t += dt
         end
       end
     end
@@ -301,7 +302,7 @@ function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:Array}, T
     L = length(integ.u[1])
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
-    dt = integ.dt; t = integ.t; p = integ.p; tf = integ.tf
+    dt = integ.dtnew; t = integ.t; p = integ.p; tf = integ.tf
     a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
     a61, a62, a63, a64, a65, a71, a72, a73, a74, a75, a76 = integ.as
     btilde1, btilde2, btilde3, btilde4, btilde5, btilde6, btilde7 = integ.btildes
@@ -393,18 +394,18 @@ function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:Array}, T
         else # EEst <= 1
             @fastmath q = max(inv(qmax),min(inv(qmin),q/gamma))
             qold = max(EEst,qoldinit)
-            dtold = dt
-            dt = dt/q #dtnew
-            dt = min(abs(dt),abs(tf-t-dtold))
+            dtnew = dt/q #dtnew
+            dtnew = min(abs(dtnew),abs(tf-t-dt))
 
             integ.dt = dt
+            integ.dtnew = dtnew
             integ.qold = qold
             integ.tprev = t
 
-            if (tf - t - dtold) < 1e-14
+            if (tf - t - dt) < 1e-14
                 integ.t = tf
             else
-                integ.t += dtold
+                integ.t += dt
             end
         end
     end
@@ -418,7 +419,7 @@ function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:SVector},
     L = length(integ.u[1])
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
-    dt = integ.dt; t = integ.t; p = integ.p; tf = integ.tf
+    dt = integ.dtnew; t = integ.t; p = integ.p; tf = integ.tf
     a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
     a61, a62, a63, a64, a65, a71, a72, a73, a74, a75, a76 = integ.as
     btilde1, btilde2, btilde3, btilde4, btilde5, btilde6, btilde7 = integ.btildes
@@ -499,18 +500,18 @@ function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:SVector},
         else # EEst <= 1
             @fastmath q = max(inv(qmax),min(inv(qmin),q/gamma))
             qold = max(EEst,qoldinit)
-            dtold = dt
-            dt = dt/q #dtnew
-            dt = min(abs(dt),abs(tf-t-dtold))
+            dtnew = dt/q #dtnew
+            dtnew = min(abs(dtnew),abs(tf-t-dt))
 
             integ.dt = dt
+            integ.dtnew = dtnew
             integ.qold = qold
             integ.tprev = t
 
-            if (tf - t - dtold) < 1e-14
+            if (tf - t - dt) < 1e-14
                 integ.t = tf
             else
-                integ.t += dtold
+                integ.t += dt
             end
         end
     end
