@@ -61,6 +61,16 @@ step!(iip); step!(iip)
 @test iip.u ≈ deiip.u atol=1e-9
 @test iip.t ≈ deiip.t atol=1e-9
 
+# Interpolation tests
+uprev = copy(oop.u)
+step!(oop)
+@test uprev ≈ oop(oop.tprev) atol = 1e-12
+@test oop(oop.t) ≈ oop.u atol = 1e-12
+
+uprev = copy(iip.u)
+step!(iip)
+@test uprev ≈ iip(iip.tprev) atol = 1e-12
+@test iip(iip.t) ≈ iip.u atol = 1e-12
 ###################################################################################
 # Internal norm test:
 function moop(u, p, t)
