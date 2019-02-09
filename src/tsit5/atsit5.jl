@@ -232,7 +232,7 @@ function DiffEqBase.step!(integ::SAT5I{false, S, T}) where {S, T}
 
     EEst = Inf
 
-    while EEst > 1
+    # while EEst > 1
       dt < 1e-14 && error("dt<dtmin")
 
       tmp = uprev+dt*a21*k1
@@ -248,11 +248,19 @@ function DiffEqBase.step!(integ::SAT5I{false, S, T}) where {S, T}
       u = uprev+dt*(a71*k1+a72*k2+a73*k3+a74*k4+a75*k5+a76*k6)
       k7 = f(u, p, t+dt)
 
-      tmp = dt*(btilde1*k1+btilde2*k2+btilde3*k3+btilde4*k4+
-                   btilde5*k5+btilde6*k6+btilde7*k7)
-      tmp = tmp./(abstol+max.(abs.(uprev),abs.(u))*reltol)
-      EEst = integ.internalnorm(tmp)
-
+      # tmp = dt*(btilde1*k1+btilde2*k2+btilde3*k3+btilde4*k4+
+                   # btilde5*k5+btilde6*k6+btilde7*k7)
+      # tmp = tmp./(abstol+max.(abs.(uprev),abs.(u))*reltol)
+      # EEst = integ.internalnorm(tmp)
+      integ.tprev = t;
+      integ.t += dt;
+      integ.u = u;
+      @inbounds begin # Necessary for interpolation
+          integ.ks[1] = k1; integ.ks[2] = k2; integ.ks[3] = k3
+          integ.ks[4] = k4; integ.ks[5] = k5; integ.ks[6] = k6
+          integ.ks[7] = k7;
+      end
+#=
       if iszero(EEst)
         q = inv(qmax)
       else
@@ -286,8 +294,8 @@ function DiffEqBase.step!(integ::SAT5I{false, S, T}) where {S, T}
           integ.t += dtold
         end
       end
-    end
-
+=#
+    # end
     return  nothing
 end
 
