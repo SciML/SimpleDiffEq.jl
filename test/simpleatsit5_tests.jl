@@ -61,6 +61,41 @@ step!(iip); step!(iip)
 @test iip.u ≈ deiip.u atol=1e-9
 @test iip.t ≈ deiip.t atol=1e-9
 
+# Interpolation tests
+uprev = copy(oop.u)
+step!(oop)
+@test uprev ≈ oop(oop.tprev) atol = 1e-12
+@test oop(oop.t) ≈ oop.u atol = 1e-12
+
+uprev = copy(iip.u)
+step!(iip)
+@test uprev ≈ iip(iip.tprev) atol = 1e-12
+@test iip(iip.t) ≈ iip.u atol = 1e-12
+
+# Interpolation tests comparing Tsit5 and SimpleATsit5
+function f(du,u,p,t)
+    du[1] = 2.0*u[1] + 3.0*u[2]
+    du[2] = 4.0*u[1] + 5.0*u[2]
+end
+tmp = [1.0;1.0]
+tspan = (0.0,1.0)
+prob = ODEProblem(f,tmp,tspan)
+integ1 = init(prob, SimpleATsit5(), abstol = 1e-6, reltol = 1e-6, save_everystep = false, dt = 0.1)
+integ2 = init(prob, Tsit5(), abstol = 1e-6, reltol = 1e-6, save_everystep = false, dt = 0.1)
+step!(integ2)
+step!(integ1)
+for i in 1:9
+    x = i/10
+    y = 1 - x
+    @test integ1(x * integ2.t + y * integ2.tprev) ≈ integ2(x * integ2.t + y * integ2.tprev) atol=1e-12
+end
+step!(integ2)
+step!(integ1)
+for i in 1:9
+    x = i/10
+    y = 1 - x
+    @test integ1(x * integ2.t + y * integ2.tprev) ≈ integ2(x * integ2.t + y * integ2.tprev) atol=1e-12
+end
 ###################################################################################
 # Internal norm test:
 function moop(u, p, t)
