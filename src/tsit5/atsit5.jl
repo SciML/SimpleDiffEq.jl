@@ -525,7 +525,7 @@ end
 # Interpolation function, both OOP and IIP
 function (integ::SAT5I{IIP, S, T})(t::Real) where {IIP, S<:AbstractArray{<:Number}, T}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
-    @assert tprev ≤ t ≤ tnext
+
     θ = (t - tprev)/dt
     b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ = bθs(integ.rs, θ)
 
