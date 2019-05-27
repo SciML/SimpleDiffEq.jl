@@ -64,19 +64,33 @@ export GPUSimpleATsit5
 
 function DiffEqBase.solve(prob::ODEProblem,
                           alg::GPUSimpleATsit5;
-                          dt = 0.1,
+                          dt = 0.1,saveat = nothing,
+                          save_everystep = true,
                           abstol = 1e-6, reltol = 1e-3)
   @assert !isinplace(prob)
   u0 = prob.u0
   tspan = prob.tspan
   f = prob.f
   p = prob.p
-  ts = Vector{eltype(dt)}(undef,1)
-  ts[1] = prob.tspan[1]
+
   t = tspan[1]
   tf = prob.tspan[2]
-  us = Vector{typeof(u0)}(undef,0)
-  push!(us,recursivecopy(u0))
+
+  if saveat === nothing
+    ts = Vector{eltype(dt)}(undef,1)
+    ts[1] = prob.tspan[1]
+    us = Vector{typeof(u0)}(undef,0)
+    push!(us,recursivecopy(u0))
+  else
+    ts = saveat
+    cur_t = 1
+    us = MVector{length(ts),typeof(u0)}(undef)
+    if prob.tspan[1] == ts[1]
+      cur_t += 1
+      us[1] = u0
+    end
+  end
+
   u = u0
   qold = qoldinit
   k7 = f(u, p, t)
@@ -127,20 +141,34 @@ function DiffEqBase.solve(prob::ODEProblem,
           @fastmath q = max(inv(qmax),min(inv(qmin),q/gamma))
           qold = max(EEst,qoldinit)
           dtold = dt
+
           dt = dt/q #dtnew
           dt = min(abs(dt),abs(tf-t-dtold))
-
+          told = t
           if (tf - t - dtold) < 1e-14
             t = tf
           else
             t += dtold
           end
+
+          if saveat === nothing && save_everystep
+            push!(us,recursivecopy(u))
+            push!(ts,t)
+          else saveat !== nothing
+            while cur_t < length(ts) && ts[cur_t] <= t
+              savet = ts[cur_t]
+              θ = (savet - told)/dtold
+              b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ = bθs(rs, θ)
+              us[cur_t] = uprev + dtold*(
+                   b1θ*k1 + b2θ*k2 + b3θ*k3 + b4θ*k4 + b5θ*k5 + b6θ*k6 + b7θ*k7)
+              cur_t += 1
+            end
+          end
+
         end
       end
-
-      push!(us,recursivecopy(u))
-      push!(ts,t)
   end
+
   sol = DiffEqBase.build_solution(prob,alg,ts,us,
                                   calculate_error = false)
   DiffEqBase.has_analytic(prob.f) && DiffEqBase.calculate_solution_errors!(sol;timeseries_errors=true,dense_errors=false)
