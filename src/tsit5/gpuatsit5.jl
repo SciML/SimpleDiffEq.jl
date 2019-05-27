@@ -155,7 +155,7 @@ function DiffEqBase.solve(prob::ODEProblem,
             push!(us,recursivecopy(u))
             push!(ts,t)
           else saveat !== nothing
-            while cur_t < length(ts) && ts[cur_t] <= t
+            while cur_t <= length(ts) && ts[cur_t] <= t
               savet = ts[cur_t]
               θ = (savet - told)/dtold
               b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ = bθs(rs, θ)
@@ -169,6 +169,10 @@ function DiffEqBase.solve(prob::ODEProblem,
       end
   end
 
+  if saveat === nothing && !save_everystep
+      push!(us,u)
+      push!(ts,t)
+  end
   sol = DiffEqBase.build_solution(prob,alg,ts,us,
                                   calculate_error = false)
   DiffEqBase.has_analytic(prob.f) && DiffEqBase.calculate_solution_errors!(sol;timeseries_errors=true,dense_errors=false)

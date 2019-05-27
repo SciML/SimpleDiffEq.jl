@@ -62,23 +62,53 @@ function DiffEqBase.__init(prob::ODEProblem,alg::SimpleATsit5;
 end
 
 function DiffEqBase.__solve(prob::ODEProblem,alg::SimpleATsit5;
-                          dt = 0.1,
+                          dt = 0.1, saveat = nothing, save_everystep = true,
                           abstol = 1e-6, reltol = 1e-3,
                           internalnorm = defaultnorm)
   u0 = prob.u0
   tspan = prob.tspan
   ts = Vector{eltype(dt)}(undef,1)
-  ts[1] = prob.tspan[1]
-  us = Vector{typeof(u0)}(undef,0)
-  push!(us,recursivecopy(u0))
+
+  if saveat === nothing
+    ts = Vector{eltype(dt)}(undef,1)
+    ts[1] = prob.tspan[1]
+    us = Vector{typeof(u0)}(undef,0)
+    push!(us,recursivecopy(u0))
+  else
+    ts = saveat
+    cur_t = 1
+    us = MVector{length(ts),typeof(u0)}(undef)
+    if prob.tspan[1] == ts[1]
+      cur_t += 1
+      us[1] = u0
+    end
+  end
+
   integ = simpleatsit5_init(prob.f,DiffEqBase.isinplace(prob),prob.u0,
                             tspan[1], tspan[2], dt, prob.p, abstol, reltol, internalnorm)
   # FSAL
   while integ.t < tspan[2]
     step!(integ)
-    push!(us,recursivecopy(integ.u))
-    push!(ts,integ.t)
+    if saveat === nothing && save_everystep
+        push!(us,recursivecopy(integ.u))
+        push!(ts,integ.t)
+    else saveat !== nothing
+      while cur_t <= length(ts) && ts[cur_t] <= integ.t
+        if !isinplace(prob)
+            us[cur_t] = integ(ts[cur_t])
+        else
+            integ(us[cur_t],ts[cur_t])
+        end
+        cur_t += 1
+      end
+    end
   end
+
+  if saveat === nothing && !save_everystep
+      push!(us,recursivecopy(u))
+      push!(ts,t)
+  end
+
   sol = DiffEqBase.build_solution(prob,alg,ts,us,
                                   calculate_error = false)
   DiffEqBase.has_analytic(prob.f) && DiffEqBase.calculate_solution_errors!(sol;timeseries_errors=true,dense_errors=false)
@@ -541,6 +571,20 @@ function (integ::SAT5I{IIP, S, T})(t::Real) where {IIP, S<:AbstractArray{<:Numbe
                    b4θ*ks[4][i] + b5θ*ks[5][i] + b6θ*ks[6][i] + b7θ*ks[7][i])
         end
         return u
+    end
+end
+
+# Interpolation function, IIP only
+function (integ::SAT5I{true, S, T})(u,t::Real) where {S<:AbstractArray, T}
+    tnext, tprev, dt = integ.t, integ.tprev, integ.dt
+
+    θ = (t - tprev)/dt
+    b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ = bθs(integ.rs, θ)
+
+    ks = integ.ks
+    @inbounds for i in 1:length(u)
+        u[i] = integ.uprev[i] + dt*(b1θ*ks[1][i] + b2θ*ks[2][i] + b3θ*ks[3][i] +
+               b4θ*ks[4][i] + b5θ*ks[5][i] + b6θ*ks[6][i] + b7θ*ks[7][i])
     end
 end
 
