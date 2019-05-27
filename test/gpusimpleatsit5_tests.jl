@@ -26,3 +26,9 @@ sol2 = solve(odeoop,GPUSimpleATsit5(),dt=dt)
 
 @test sol.u == sol2.u
 @test sol.t == sol2.t
+
+sol = solve(odeoop,SimpleTsit5(),dt=dt)
+sol2 = solve(odeoop,GPUSimpleTsit5(),dt=dt)
+
+@test sol.u == sol2.u
+@test sol.t == sol2.t
