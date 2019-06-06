@@ -11,16 +11,6 @@ const qmin = 1/5
 const gamma = 9/10
 const qoldinit = 1e-4
 
-defaultnorm(tmp) = @fastmath sqrt(sum(abs2,tmp)/length(tmp))
-function defaultnorm(tmp::Vector{<:AbstractVector{T}}) where {T<:Number}
-    x = zero(T)
-    M = length(tmp)
-    @inbounds for j in 1:M
-        @fastmath x += sqrt(sum(abs2,tmp[j])/length(tmp[j]))
-    end
-    x/M
-end
-
 mutable struct SimpleATsit5Integrator{IIP, S, T, P, F, N} <: DiffEqBase.AbstractODEIntegrator{SimpleATsit5, IIP, S, T}
     f::F                  # eom
     uprev::S              # previous state
@@ -55,7 +45,7 @@ DiffEqBase.u_modified!(i::SAT5I, bool) = (i.u_modified = bool)
 function DiffEqBase.__init(prob::ODEProblem,alg::SimpleATsit5;
                          dt = 0.1,
                          abstol = 1e-6, reltol = 1e-3,
-                         internalnorm = defaultnorm, kwargs...)
+                         internalnorm = DiffEqBase.ODE_DEFAULT_NORM, kwargs...)
   simpleatsit5_init(prob.f,DiffEqBase.isinplace(prob),prob.u0,
                    prob.tspan[1], prob.tspan[2], dt, prob.p, abstol, reltol,
                    internalnorm)
@@ -64,7 +54,7 @@ end
 function DiffEqBase.__solve(prob::ODEProblem,alg::SimpleATsit5;
                           dt = 0.1, saveat = nothing, save_everystep = true,
                           abstol = 1e-6, reltol = 1e-3,
-                          internalnorm = defaultnorm)
+                          internalnorm = DiffEqBase.ODE_DEFAULT_NORM)
   u0 = prob.u0
   tspan = prob.tspan
   ts = Vector{eltype(dt)}(undef,1)
@@ -203,7 +193,7 @@ function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S, T}
         tmp[i] = tmp[i]/(abstol+max(abs(uprev[i]),abs(u[i]))*reltol)
       end
 
-      EEst = integ.internalnorm(tmp)
+      EEst = integ.internalnorm(tmp, integ.t)
 
       if iszero(EEst)
         q = inv(qmax)
@@ -282,7 +272,7 @@ function DiffEqBase.step!(integ::SAT5I{false, S, T}) where {S, T}
       tmp = dt*(btilde1*k1+btilde2*k2+btilde3*k3+btilde4*k4+
                    btilde5*k5+btilde6*k6+btilde7*k7)
       tmp = tmp./(abstol+max.(abs.(uprev),abs.(u))*reltol)
-      EEst = integ.internalnorm(tmp)
+      EEst = integ.internalnorm(tmp, integ.t)
 
       if iszero(EEst)
         q = inv(qmax)
@@ -410,7 +400,7 @@ function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:Array}, T
             end
         end
 
-        EEst = integ.internalnorm(tmp)
+        EEst = integ.internalnorm(tmp, integ.t)
 
         if iszero(EEst)
             q = inv(qmax)
@@ -516,7 +506,7 @@ function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:SVector},
         end
 
 
-        EEst = integ.internalnorm(tmp)
+        EEst = integ.internalnorm(tmp, integ.t)
 
         if iszero(EEst)
             q = inv(qmax)
