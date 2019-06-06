@@ -8,8 +8,8 @@ export GPUSimpleTsit5
 
 function DiffEqBase.solve(prob::ODEProblem,
                           alg::GPUSimpleTsit5;
-                          dt = 0.1,
-                          abstol = 1e-6, reltol = 1e-3)
+                          dt = 0.1f0,
+                          abstol = 1f-6, reltol = 1f-3)
   @assert !isinplace(prob)
   u0 = prob.u0
   tspan = prob.tspan
@@ -48,7 +48,7 @@ function DiffEqBase.solve(prob::ODEProblem,
       us[i] = u
   end
 
-  sol = DiffEqBase.build_solution(prob,alg,ts,us,
+  sol = DiffEqBase.build_solution(prob,alg,ts,SArray(us),
                                   calculate_error = false)
   DiffEqBase.has_analytic(prob.f) && DiffEqBase.calculate_solution_errors!(sol;timeseries_errors=true,dense_errors=false)
   sol
@@ -64,9 +64,9 @@ export GPUSimpleATsit5
 
 function DiffEqBase.solve(prob::ODEProblem,
                           alg::GPUSimpleATsit5;
-                          dt = 0.1,saveat = nothing,
+                          dt = 0.1f0,saveat = nothing,
                           save_everystep = true,
-                          abstol = 1e-6, reltol = 1e-3)
+                          abstol = 1f-6, reltol = 1f-3)
   @assert !isinplace(prob)
   u0 = prob.u0
   tspan = prob.tspan
