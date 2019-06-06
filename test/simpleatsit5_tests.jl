@@ -117,10 +117,10 @@ odemiip = ODEProblem{true}(miip, hcat(u0, ran), (0.0, 100.0),  [10, 28, 8/3])
 
 using LinearAlgebra
 
-oop = init(odemoop,SimpleATsit5(),dt=dt, internalnorm = u -> norm(u[:, 1]))
+oop = init(odemoop,SimpleATsit5(),dt=dt, internalnorm = (u, t) -> norm(u[:, 1]))
 step!(oop); step!(oop)
 
-iip = init(odemiip,SimpleATsit5(),dt=dt, internalnorm = u -> norm(u[:, 1]))
+iip = init(odemiip,SimpleATsit5(),dt=dt, internalnorm = (u, t) -> norm(u[:, 1]))
 step!(iip); step!(iip)
 
 @test oop.u ≈ iip.u atol=1e-9
@@ -145,7 +145,7 @@ ran = rand(3)
 odevoop = ODEProblem{true}(vvoop, [SVector{3}(u0),  SVector{3}(ran)], (0.0, 100.0),  [10, 28, 8/3])
 odeviip = ODEProblem{true}(vviip, [u0, ran], (0.0, 100.0),  [10, 28, 8/3])
 
-viip = init(odeviip,SimpleATsit5(),dt=dt; internalnorm = u -> SimpleDiffEq.defaultnorm(u[1]))
+viip = init(odeviip,SimpleATsit5(),dt=dt; internalnorm = (u, t) -> DiffEqBase.ODE_DEFAULT_NORM(u[1], t))
 step!(viip); step!(viip)
 
 iip = init(odeiip,SimpleATsit5(),dt=dt)
@@ -153,7 +153,7 @@ step!(iip); step!(iip)
 
 @test iip.u ≈ viip.u[1] atol=1e-9
 
-voop = init(odevoop,SimpleATsit5(),dt=dt,internalnorm = u -> SimpleDiffEq.defaultnorm(u[1]))
+voop = init(odevoop,SimpleATsit5(),dt=dt,internalnorm = (u, t) -> DiffEqBase.ODE_DEFAULT_NORM(u[1], t))
 step!(voop); step!(voop)
 
 oop = init(odeoop,SimpleATsit5(),dt=dt)
