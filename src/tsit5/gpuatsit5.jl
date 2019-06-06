@@ -49,6 +49,7 @@ function DiffEqBase.solve(prob::ODEProblem,
   end
 
   sol = DiffEqBase.build_solution(prob,alg,ts,SArray(us),
+                                  k = nothing, destats = nothing,
                                   calculate_error = false)
   DiffEqBase.has_analytic(prob.f) && DiffEqBase.calculate_solution_errors!(sol;timeseries_errors=true,dense_errors=false)
   sol
