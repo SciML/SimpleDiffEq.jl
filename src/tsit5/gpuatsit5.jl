@@ -7,9 +7,9 @@ struct GPUSimpleTsit5 end
 export GPUSimpleTsit5
 
 function DiffEqBase.solve(prob::ODEProblem,
-                          alg::GPUSimpleTsit5;
+                          alg::GPUSimpleTsit5,
                           dt = 0.1f0)
-  @assert !isinplace(prob)
+  #@assert !isinplace(prob)
   u0 = prob.u0
   tspan = prob.tspan
   f = prob.f
@@ -17,7 +17,7 @@ function DiffEqBase.solve(prob::ODEProblem,
   t = tspan[1]
   tf = prob.tspan[2]
   ts = tspan[1]:dt:tspan[2]
-  us = MVector{length(ts),typeof(u0)}(undef)
+  us = MVector{101,typeof(u0)}(undef)
   us[1] = u0
   u = u0
   k7 = f(u, p, t)
@@ -29,7 +29,7 @@ function DiffEqBase.solve(prob::ODEProblem,
   btilde1, btilde2, btilde3, btilde4, btilde5, btilde6, btilde7 = btildes
 
   # FSAL
-  for i in 2:length(ts)
+  @inbounds for i in 2:length(ts)
       uprev = u; k1 = k7; t = ts[i]
       tmp = uprev+dt*a21*k1
       k2 = f(tmp, p, t+c1*dt)
@@ -46,11 +46,14 @@ function DiffEqBase.solve(prob::ODEProblem,
       us[i] = u
   end
 
+  #=
   sol = DiffEqBase.build_solution(prob,alg,ts,SArray(us),
                                   k = nothing, destats = nothing,
                                   calculate_error = false)
   DiffEqBase.has_analytic(prob.f) && DiffEqBase.calculate_solution_errors!(sol;timeseries_errors=true,dense_errors=false)
   sol
+  =#
+  SArray(us)
 end
 
 #######################################################################################
