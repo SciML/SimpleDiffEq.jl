@@ -8,8 +8,7 @@ export GPUSimpleTsit5
 
 function DiffEqBase.solve(prob::ODEProblem,
                           alg::GPUSimpleTsit5;
-                          dt = 0.1f0,
-                          abstol = 1f-6, reltol = 1f-3)
+                          dt = 0.1f0)
   @assert !isinplace(prob)
   u0 = prob.u0
   tspan = prob.tspan
@@ -21,7 +20,6 @@ function DiffEqBase.solve(prob::ODEProblem,
   us = MVector{length(ts),typeof(u0)}(undef)
   us[1] = u0
   u = u0
-  qold = qoldinit
   k7 = f(u, p, t)
 
   cs, as, btildes, rs = _build_atsit5_caches(eltype(u0))
