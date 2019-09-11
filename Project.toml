@@ -1,7 +1,7 @@
 name = "SimpleDiffEq"
 uuid = "05bca326-078c-5bf0-a5bf-ce7c7982d7fd"
 repo = "https://github.com/JuliaDiffEq/SimpleDiffEq.jl.git"
-version = "0.4.0"
+version = "0.5.0"
 
 [deps]
 DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
@@ -10,9 +10,9 @@ Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
-DiffEqBase = "5.0.0"
-StaticArrays = "≥ 0.8.0"
-julia = "≥ 1.0.0"
+DiffEqBase = "6"
+StaticArrays = "0.11.0"
+julia = "1
 
 [extras]
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
