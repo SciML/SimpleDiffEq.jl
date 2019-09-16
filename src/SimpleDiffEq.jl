@@ -2,7 +2,7 @@ __precompile__()
 
 module SimpleDiffEq
 
-using Reexport
+using Reexport, MuladdMacro
 @reexport using DiffEqBase
 using StaticArrays
 
