@@ -271,7 +271,7 @@ function DiffEqBase.step!(integ::SAT5I{false, S, T}) where {S, T}
 
       tmp = dt*(btilde1*k1+btilde2*k2+btilde3*k3+btilde4*k4+
                    btilde5*k5+btilde6*k6+btilde7*k7)
-      tmp = tmp./(abstol+max.(abs.(uprev),abs.(u))*reltol)
+      tmp = tmp./(abstol.+max.(abs.(uprev),abs.(u))*reltol)
       EEst = integ.internalnorm(tmp, integ.t)
 
       if iszero(EEst)
@@ -502,7 +502,7 @@ function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:SVector},
         for j in 1:M
             tmp[j] = dt*(btilde1*k1[j]+btilde2*k2[j]+btilde3*k3[j]+btilde4*k4[j]+
                              btilde5*k5[j]+btilde6*k6[j]+btilde7*k7[j])
-            tmp[j] = tmp[j]./(abstol+max.(abs.(uprev[j]),abs.(u[j]))*reltol)
+            tmp[j] = tmp[j]./(abstol.+max.(abs.(uprev[j]),abs.(u[j]))*reltol)
         end
 
 

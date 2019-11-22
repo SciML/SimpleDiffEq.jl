@@ -31,7 +31,7 @@ sol  = solve(odeoop,Tsit5()          ,dt=dt,saveat=0.0:0.1:100.0)
 sol2 = solve(odeoop,GPUSimpleATsit5(),dt=dt,saveat=0.0:0.1:100.0,abstol=1e-6,reltol=1e-3)
 sol3 = solve(odeoop,SimpleATsit5()   ,dt=dt,saveat=0.0:0.1:100.0)
 
-@test sol[20] ≈ sol2[20]
+@test sol[20] ≈ sol2[20] atol=1e-5
 @test sol2.u == sol3.u
 @test sol.t  == sol2.t
 

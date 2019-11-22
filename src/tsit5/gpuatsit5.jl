@@ -124,7 +124,7 @@ function DiffEqBase.solve(prob::ODEProblem,
 
         tmp = dt*(btilde1*k1+btilde2*k2+btilde3*k3+btilde4*k4+
                      btilde5*k5+btilde6*k6+btilde7*k7)
-        tmp = tmp./(abstol+max.(abs.(uprev),abs.(u))*reltol)
+        tmp = tmp./(abstol.+max.(abs.(uprev),abs.(u))*reltol)
         EEst = DiffEqBase.ODE_DEFAULT_NORM(tmp, t)
 
         if iszero(EEst)
