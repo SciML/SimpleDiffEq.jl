@@ -61,6 +61,7 @@ mutable struct DiscreteIntegrator{F, IIP, uType,tType,P,S} <: DiffEqBase.DEInteg
     p::P
     sol::S
     i::Int
+    tdir::tType
 end
 
 function DiffEqBase.__init(prob::DiscreteProblem,
@@ -72,7 +73,7 @@ function DiffEqBase.__init(prob::DiscreteProblem,
     tType = typeof(prob.tspan[1])
     P = typeof(prob.p)
     S = typeof(sol)
-    DiscreteIntegrator{F, IIP, uType, tType, P, S}(prob.f,prob.u0,prob.tspan[1],copy(prob.u0),prob.p,sol,1)
+    DiscreteIntegrator{F, IIP, uType, tType, P, S}(prob.f,prob.u0,prob.tspan[1],copy(prob.u0),prob.p,sol,1,one(tType))
 end
 
 function DiffEqBase.step!(integrator::DiscreteIntegrator)

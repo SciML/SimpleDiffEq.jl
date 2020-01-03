@@ -10,6 +10,7 @@ mutable struct SimpleTsit5Integrator{IIP, S, T, P, F} <: DiffEqBase.AbstractODEI
     t::T                  # current time
     t0::T                 # initial time, only for reinit
     dt::T                 # step size
+    tdir::T
     p::P                  # parameter container
     u_modified::Bool
     ks::Vector{S}         # interpolants of the algorithm
@@ -61,7 +62,7 @@ function simpletsit5_init(f::F,
     !IIP && @assert S <: SArray
 
     integ = ST5I{IIP, S, T, P, F}(
-        f, copy(u0), copy(u0), copy(u0), t0, t0, t0, dt, p, true, ks, cs, as, rs
+        f, copy(u0), copy(u0), copy(u0), t0, t0, t0, dt, sign(dt), p, true, ks, cs, as, rs
     )
 end
 

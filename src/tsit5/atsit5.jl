@@ -22,6 +22,7 @@ mutable struct SimpleATsit5Integrator{IIP, S, T, P, F, N} <: DiffEqBase.Abstract
     tf::T
     dt::T                 # step size
     dtnew::T
+    tdir::T
     p::P                  # parameter container
     u_modified::Bool
     ks::Vector{S}         # interpolants of the algorithm
@@ -117,7 +118,7 @@ function simpleatsit5_init(f::F,
 
     integ = SAT5I{IIP, S, T, P, F, N}(
         f, recursivecopy(u0), recursivecopy(u0), recursivecopy(u0), t0, t0, t0, tf, dt, dt,
-        p, true, ks, cs, as, btildes, rs,
+        sign(tf-t0), p, true, ks, cs, as, btildes, rs,
         qoldinit,abstol,reltol, internalnorm
     )
 end
