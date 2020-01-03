@@ -593,14 +593,6 @@ function DiffEqBase.step!(integ::SimpleATsit5Integrator, dt::Real, stop_at_tdt::
     end
 end
 
-function DiffEqBase.step!(integ::SimpleATsit5Integrator, dt::Real)
-    t = integ.t
-    next_t = t+dt
-    while integ.t < next_t
-        step!(integ)
-    end
-end
-
 #######################################################################################
 # reinit!
 #######################################################################################
