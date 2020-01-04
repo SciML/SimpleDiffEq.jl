@@ -582,10 +582,13 @@ end
 #######################################################################################
 # Multiple steps at once
 #######################################################################################
-function DiffEqBase.step!(integ::SimpleATsit5Integrator, dt::Real)
+function DiffEqBase.step!(integ::SimpleATsit5Integrator, dt::Real, stop_at_tdt::Bool = false)
     t = integ.t
     next_t = t+dt
     while integ.t < next_t
+        if stop_at_tdt && integ.t+integ.dt >= next_t
+            integ.dt = next_t-integ.t
+        end
         step!(integ)
     end
 end
