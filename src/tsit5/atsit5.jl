@@ -106,7 +106,7 @@ function DiffEqBase.__solve(prob::ODEProblem,alg::SimpleATsit5;
   sol
 end
 
-function simpleatsit5_init(f::F,
+@inline function simpleatsit5_init(f::F,
                          IIP::Bool, u0::S, t0::T, tf::T, dt::T, p::P,
                          abstol, reltol,
                          internalnorm::N) where {F, P, S, T, N}
@@ -123,15 +123,15 @@ function simpleatsit5_init(f::F,
     )
 end
 
-_initialize_ks(u0::AbstractArray{T}) where {T<:Number} = [zero(u0) for i in 1:7]
-function _initialize_ks(u0::Vector{<:AbstractVector})
+@inline _initialize_ks(u0::AbstractArray{T}) where {T<:Number} = [zero(u0) for i in 1:7]
+@inline function _initialize_ks(u0::Vector{<:AbstractVector})
     return [[zero(u0[j]) for j in 1:length(u0)] for i in 1:7]
 end
 
 #######################################################################################
 # IIP version for vectors and matrices
 #######################################################################################
-function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S, T}
+@inline function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S, T}
 
     L = length(integ.u)
 
@@ -230,7 +230,7 @@ end
 #######################################################################################
 # OOP version for vectors and matrices
 #######################################################################################
-function DiffEqBase.step!(integ::SAT5I{false, S, T}) where {S, T}
+@inline function DiffEqBase.step!(integ::SAT5I{false, S, T}) where {S, T}
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
     dt = integ.dtnew; t = integ.t; p = integ.p; tf = integ.tf
@@ -317,7 +317,7 @@ end
 # Vector of Vector (always in-place) stepping
 #######################################################################################
 # Vector{Vector}
-function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:Array}, T}
+@inline function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:Array}, T}
 
     M = length(integ.u) # number of states
     L = length(integ.u[1])
@@ -434,7 +434,7 @@ function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:Array}, T
 end
 
 # Vector{SVector}
-function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:SVector}, T}
+@inline function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:SVector}, T}
 
     M = length(integ.u)
     L = length(integ.u[1])
@@ -544,7 +544,7 @@ end
 # Interpolation
 #######################################################################################
 # Interpolation function, both OOP and IIP
-function (integ::SAT5I{IIP, S, T})(t::Real) where {IIP, S<:AbstractArray{<:Number}, T}
+@inline function (integ::SAT5I{IIP, S, T})(t::Real) where {IIP, S<:AbstractArray{<:Number}, T}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
 
     θ = (t - tprev)/dt
@@ -566,7 +566,7 @@ function (integ::SAT5I{IIP, S, T})(t::Real) where {IIP, S<:AbstractArray{<:Numbe
 end
 
 # Interpolation function, IIP only
-function (integ::SAT5I{true, S, T})(u,t::Real) where {S<:AbstractArray, T}
+@inline function (integ::SAT5I{true, S, T})(u,t::Real) where {S<:AbstractArray, T}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
 
     θ = (t - tprev)/dt
@@ -582,7 +582,7 @@ end
 #######################################################################################
 # Multiple steps at once
 #######################################################################################
-function DiffEqBase.step!(integ::SimpleATsit5Integrator, dt::Real, stop_at_tdt::Bool = false)
+@inline function DiffEqBase.step!(integ::SimpleATsit5Integrator, dt::Real, stop_at_tdt::Bool = false)
     t = integ.t
     next_t = t+dt
     while integ.t < next_t
@@ -596,8 +596,7 @@ end
 #######################################################################################
 # reinit!
 #######################################################################################
-using RecursiveArrayTools
-function DiffEqBase.reinit!(integrator::SimpleATsit5Integrator, u0 = integrator.u;
+@inline function DiffEqBase.reinit!(integrator::SimpleATsit5Integrator, u0 = integrator.u;
   t0 = integrator.t0, dt = integrator.dt)
 
     # Is modifying the `uprev` necessary? We do `u_modified(i, true)`
@@ -618,6 +617,6 @@ function DiffEqBase.reinit!(integrator::SimpleATsit5Integrator, u0 = integrator.
 end
 
 
-function DiffEqBase.set_t!(integrator::SimpleATsit5Integrator, t::Real)
+@inline function DiffEqBase.set_t!(integrator::SimpleATsit5Integrator, t::Real)
     reinit!(integrator; t0 = t)
 end

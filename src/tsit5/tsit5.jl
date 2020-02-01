@@ -38,13 +38,13 @@ function DiffEqBase.__solve(prob::ODEProblem,alg::SimpleTsit5;
   ts = Array(tspan[1]:dt:tspan[2])
   n = length(ts)
   us = Vector{typeof(u0)}(undef,n)
-  us[1] = copy(u0)
+  @inbounds us[1] = _copy(u0)
   integ = simpletsit5_init(prob.f,DiffEqBase.isinplace(prob),prob.u0,
                            prob.tspan[1], dt, prob.p)
   # FSAL
   for i in 1:n-1
     step!(integ)
-    us[i+1] = copy(integ.u)
+    us[i+1] = _copy(integ.u)
   end
   sol = DiffEqBase.build_solution(prob,alg,ts,us,
                                   calculate_error = false)
@@ -52,7 +52,7 @@ function DiffEqBase.__solve(prob::ODEProblem,alg::SimpleTsit5;
   sol
 end
 
-function simpletsit5_init(f::F,
+@inline function simpletsit5_init(f::F,
                          IIP::Bool, u0::S, t0::T, dt::T, p::P
                          ) where {F, P, T, S<:AbstractArray{T}}
 
@@ -62,11 +62,11 @@ function simpletsit5_init(f::F,
     !IIP && @assert S <: SArray
 
     integ = ST5I{IIP, S, T, P, F}(
-        f, copy(u0), copy(u0), copy(u0), t0, t0, t0, dt, sign(dt), p, true, ks, cs, as, rs
+        f, _copy(u0), _copy(u0), _copy(u0), t0, t0, t0, dt, sign(dt), p, true, ks, cs, as, rs
     )
 end
 
-function _build_tsit5_caches(::Type{T}) where {T}
+@inline function _build_tsit5_caches(::Type{T}) where {T}
 
     cs = SVector{6, T}(0.161, 0.327, 0.9, 0.9800255409045097, 1.0, 1.0)
 
@@ -126,7 +126,7 @@ end
 # Stepping
 #######################################################################################
 # IIP version for vectors and matrices
-function DiffEqBase.step!(integ::ST5I{true, S, T}) where {T, S}
+@inline function DiffEqBase.step!(integ::ST5I{true, S, T}) where {T, S}
 
     L = length(integ.u)
 
@@ -181,7 +181,7 @@ function DiffEqBase.step!(integ::ST5I{true, S, T}) where {T, S}
 end
 
 # OOP version for vectors and matrices
-function DiffEqBase.step!(integ::ST5I{false, S, T}) where {T, S}
+@inline function DiffEqBase.step!(integ::ST5I{false, S, T}) where {T, S}
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
     dt = integ.dt; t = integ.t; p = integ.p
@@ -209,7 +209,7 @@ function DiffEqBase.step!(integ::ST5I{false, S, T}) where {T, S}
     tmp = uprev+dt*(a61*k1+a62*k2+a63*k3+a64*k4+a65*k5)
     k6 = f(tmp, p, t+dt)
 
-    integ.u = uprev+dt*(a71*k1+a72*k2+a73*k3+a74*k4+a75*k5+a76*k6)
+    integ.u = uprev+dt*((a71*k1+a72*k2+a73*k3+a74*k4)+a75*k5+a76*k6)
     k7 = f(integ.u, p, t+dt)
 
     @inbounds begin # Necessary for interpolation
@@ -230,7 +230,7 @@ end
 # Interpolation function, OOP
 function (integ::ST5I)(t::T) where {T}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
-    @assert tprev ≤ t ≤ tnext
+    #@assert tprev ≤ t ≤ tnext
     θ = (t - tprev)/dt
     b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ = bθs(integ.rs, θ)
 
@@ -249,18 +249,18 @@ function (integ::ST5I)(t::T) where {T}
     end
 end
 # Interpolation coefficients
-function bθs(rs::SVector{22, T}, θ::T) where {T}
+@inline function bθs(rs::SVector{22, T}, θ::T) where {T}
     # θ in (0, 1) !
     r11,r12,r13,r14,r22,r23,r24,r32,r33,r34,r42,r43,r44,r52,r53,
     r54,r62,r63,r64,r72,r73,r74 = rs
 
-    b1θ::T = @evalpoly(θ, 0.0, r11, r12, r13, r14)
-    b2θ::T = @evalpoly(θ, 0.0, 0.0, r22, r23, r24)
-    b3θ::T = @evalpoly(θ, 0.0, 0.0, r32, r33, r34)
-    b4θ::T = @evalpoly(θ, 0.0, 0.0, r42, r43, r44)
-    b5θ::T = @evalpoly(θ, 0.0, 0.0, r52, r53, r54)
-    b6θ::T = @evalpoly(θ, 0.0, 0.0, r62, r63, r64)
-    b7θ::T = @evalpoly(θ, 0.0, 0.0, r72, r73, r74)
+    b1θ::T = @evalpoly(θ, zero(T), r11    , r12, r13, r14)
+    b2θ::T = @evalpoly(θ, zero(T), zero(T), r22, r23, r24)
+    b3θ::T = @evalpoly(θ, zero(T), zero(T), r32, r33, r34)
+    b4θ::T = @evalpoly(θ, zero(T), zero(T), r42, r43, r44)
+    b5θ::T = @evalpoly(θ, zero(T), zero(T), r52, r53, r54)
+    b6θ::T = @evalpoly(θ, zero(T), zero(T), r62, r63, r64)
+    b7θ::T = @evalpoly(θ, zero(T), zero(T), r72, r73, r74)
 
     return b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ
 end

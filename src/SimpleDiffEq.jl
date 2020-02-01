@@ -5,6 +5,10 @@ module SimpleDiffEq
 using Reexport, MuladdMacro
 @reexport using DiffEqBase
 using StaticArrays
+using RecursiveArrayTools
+
+@inline _copy(a::SArray) = a
+@inline _copy(a) = copy(a)
 
 include("functionmap.jl")
 include("euler_maruyama.jl")
