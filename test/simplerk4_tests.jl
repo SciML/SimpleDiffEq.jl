@@ -111,6 +111,10 @@ sol = solve(odeoop, SimpleRK4(), dt = dt)
 
 @test oop.u == sol.u[3]
 
+sol = solve(odeoop, LoopRK4(), dt = dt)
+
+@test oop.u == sol.u[3]
+
 # In-place version of the algorithm
 # ---------------------------------
 
@@ -134,5 +138,9 @@ step!(deiip)
 @test iip.u == deiip.u
 
 sol = solve(odeiip, SimpleRK4(), dt = dt)
+
+@test iip.u == sol.u[3]
+
+sol = solve(odeiip, LoopRK4(), dt = dt)
 
 @test iip.u == sol.u[3]
