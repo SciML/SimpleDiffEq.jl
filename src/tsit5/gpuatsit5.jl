@@ -6,7 +6,7 @@
 struct GPUSimpleTsit5 <: DiffEqBase.AbstractODEAlgorithm end
 export GPUSimpleTsit5
 
-function DiffEqBase.solve(prob::ODEProblem,
+@muladd function DiffEqBase.solve(prob::ODEProblem,
                           alg::GPUSimpleTsit5;
                           dt = 0.1f0)
   @assert !isinplace(prob)
@@ -61,7 +61,7 @@ end
 struct GPUSimpleATsit5 end
 export GPUSimpleATsit5
 
-function DiffEqBase.solve(prob::ODEProblem,
+@muladd function DiffEqBase.solve(prob::ODEProblem,
                           alg::GPUSimpleATsit5;
                           dt = 0.1f0,saveat = nothing,
                           save_everystep = true,
@@ -140,7 +140,6 @@ function DiffEqBase.solve(prob::ODEProblem,
           @fastmath q = max(inv(qmax),min(inv(qmin),q/gamma))
           qold = max(EEst,qoldinit)
           dtold = dt
-
           dt = dt/q #dtnew
           dt = min(abs(dt),abs(tf-t-dtold))
           told = t

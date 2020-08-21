@@ -97,7 +97,7 @@ end
 #                                   Stepping
 ################################################################################
 
-@inline function DiffEqBase.step!(integ::SRK4{true, S, T}) where {T, S}
+@inline @muladd function DiffEqBase.step!(integ::SRK4{true, S, T}) where {T, S}
     integ.uprev       .= integ.u
     tmp                = integ.tmp
     f!                 = integ.f
@@ -149,7 +149,7 @@ end
     return nothing
 end
 
-@inline function DiffEqBase.step!(integ::SRK4{false, S, T}) where {T, S}
+@inline @muladd function DiffEqBase.step!(integ::SRK4{false, S, T}) where {T, S}
     integ.uprev = integ.u
     f           = integ.f
     p           = integ.p
@@ -198,7 +198,7 @@ end
 #                                Interpolation
 ################################################################################
 
-function (integ::SRK4)(t::T) where T
+@inline @muladd function (integ::SRK4)(t::T) where T
     t₁, t₀, dt = integ.t, integ.tprev, integ.dt
 
     y₀ = integ.uprev

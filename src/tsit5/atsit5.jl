@@ -131,7 +131,7 @@ end
 #######################################################################################
 # IIP version for vectors and matrices
 #######################################################################################
-@inline function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S, T}
+@inline @muladd function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S, T}
 
     L = length(integ.u)
 
@@ -230,7 +230,7 @@ end
 #######################################################################################
 # OOP version for vectors and matrices
 #######################################################################################
-@inline function DiffEqBase.step!(integ::SAT5I{false, S, T}) where {S, T}
+@inline @muladd function DiffEqBase.step!(integ::SAT5I{false, S, T}) where {S, T}
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
     dt = integ.dtnew; t = integ.t; p = integ.p; tf = integ.tf
@@ -317,7 +317,7 @@ end
 # Vector of Vector (always in-place) stepping
 #######################################################################################
 # Vector{Vector}
-@inline function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:Array}, T}
+@inline @muladd function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:Array}, T}
 
     M = length(integ.u) # number of states
     L = length(integ.u[1])
@@ -434,7 +434,7 @@ end
 end
 
 # Vector{SVector}
-@inline function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:SVector}, T}
+@inline @muladd function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {S<:Vector{<:SVector}, T}
 
     M = length(integ.u)
     L = length(integ.u[1])
@@ -544,7 +544,7 @@ end
 # Interpolation
 #######################################################################################
 # Interpolation function, both OOP and IIP
-@inline function (integ::SAT5I{IIP, S, T})(t::Real) where {IIP, S<:AbstractArray{<:Number}, T}
+@inline @muladd function (integ::SAT5I{IIP, S, T})(t::Real) where {IIP, S<:AbstractArray{<:Number}, T}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
 
     θ = (t - tprev)/dt
@@ -566,7 +566,7 @@ end
 end
 
 # Interpolation function, IIP only
-@inline function (integ::SAT5I{true, S, T})(u,t::Real) where {S<:AbstractArray, T}
+@inline @muladd function (integ::SAT5I{true, S, T})(u,t::Real) where {S<:AbstractArray, T}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
 
     θ = (t - tprev)/dt

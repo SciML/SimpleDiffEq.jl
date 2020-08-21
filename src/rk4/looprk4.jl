@@ -7,7 +7,7 @@ export LoopRK4
 
 # Out-of-place
 # No caching, good for static arrays, bad for arrays
-function DiffEqBase.__solve(prob::ODEProblem{uType,tType,false},
+@muladd function DiffEqBase.__solve(prob::ODEProblem{uType,tType,false},
                           alg::LoopRK4;
                           dt = error("dt is required for this algorithm"),
                           save_everystep = true,
@@ -67,7 +67,7 @@ end
 # In-place
 # Good for mutable objects like arrays
 # Use DiffEqBase.@.. for simd ivdep
-function DiffEqBase.solve(prob::ODEProblem{uType,tType,true},
+@muladd function DiffEqBase.solve(prob::ODEProblem{uType,tType,true},
                           alg::LoopRK4;
                           dt = error("dt is required for this algorithm"),
                           save_everystep = true,
