@@ -15,7 +15,7 @@ function DiffEqBase.__solve(prob::ODEProblem{uType,tType,false},
                           adaptive = false,
                           dense = false,
                           save_end = true,
-                          unstable_check = nothing) where {uType,tType}
+                          kwargs...) where {uType,tType}
   @assert !adaptive
   @assert !dense
   u0 = prob.u0
@@ -75,7 +75,7 @@ function DiffEqBase.solve(prob::ODEProblem{uType,tType,true},
                           adaptive = false,
                           dense = false,
                           save_end = true,
-                          unstable_check = nothing) where {uType,tType}
+                          kwargs...) where {uType,tType}
   @assert !adaptive
   @assert !dense
   u0 = prob.u0
