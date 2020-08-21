@@ -2,16 +2,22 @@
 # Simplest Loop method
 # Makes the simplest possible method for teaching and performance testing
 #######################################################################################
-struct LoopRK4 end
+struct LoopRK4 <: DiffEqBase.AbstractODEAlgorithm end
 export LoopRK4
 
 # Out-of-place
 # No caching, good for static arrays, bad for arrays
-function DiffEqBase.solve(prob::ODEProblem{uType,tType,false},
+function DiffEqBase.__solve(prob::ODEProblem{uType,tType,false},
                           alg::LoopRK4;
                           dt = error("dt is required for this algorithm"),
                           save_everystep = true,
-                          save_start = true) where {uType,tType}
+                          save_start = true,
+                          adaptive = false,
+                          dense = false,
+                          save_end = true,
+                          unstable_check = nothing) where {uType,tType}
+  @assert !adaptive
+  @assert !dense
   u0 = prob.u0
   tspan = prob.tspan
   f = prob.f
@@ -49,7 +55,7 @@ function DiffEqBase.solve(prob::ODEProblem{uType,tType,false},
       save_everystep && (us[i] = u)
   end
 
-  !save_everystep && (us[end] = u)
+  !save_everystep && save_end && (us[end] = u)
 
   sol = DiffEqBase.build_solution(prob,alg,ts,us,
                                   k = nothing, destats = nothing,
@@ -65,7 +71,13 @@ function DiffEqBase.solve(prob::ODEProblem{uType,tType,true},
                           alg::LoopRK4;
                           dt = error("dt is required for this algorithm"),
                           save_everystep = true,
-                          save_start = true) where {uType,tType}
+                          save_start = true,
+                          adaptive = false,
+                          dense = false,
+                          save_end = true,
+                          unstable_check = nothing) where {uType,tType}
+  @assert !adaptive
+  @assert !dense
   u0 = prob.u0
   tspan = prob.tspan
   f = prob.f
@@ -104,7 +116,7 @@ function DiffEqBase.solve(prob::ODEProblem{uType,tType,true},
       save_everystep && (us[i] = copy(u))
   end
 
-  !save_everystep && (us[end] = u)
+  !save_everystep && save_end && (us[end] = u)
 
   sol = DiffEqBase.build_solution(prob,alg,ts,us,
                                   k = nothing, destats = nothing,

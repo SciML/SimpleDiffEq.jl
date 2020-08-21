@@ -1,6 +1,6 @@
 using RecursiveArrayTools: recursivecopy
 
-struct SimpleATsit5 end
+struct SimpleATsit5 <: DiffEqBase.AbstractODEAlgorithm end
 export SimpleATsit5
 
 # PI-adaptive stepping parameters:

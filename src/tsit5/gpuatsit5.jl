@@ -3,7 +3,7 @@
 # Makes the simplest possible method for GPU-compatibility
 # Out of place only
 #######################################################################################
-struct GPUSimpleTsit5 end
+struct GPUSimpleTsit5 <: DiffEqBase.AbstractODEAlgorithm end
 export GPUSimpleTsit5
 
 function DiffEqBase.solve(prob::ODEProblem,
