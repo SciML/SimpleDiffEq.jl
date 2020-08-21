@@ -6,7 +6,7 @@
 struct GPUSimpleRK4 <: DiffEqBase.AbstractODEAlgorithm end
 export GPUSimpleRK4
 
-function DiffEqBase.solve(prob::ODEProblem,
+@muladd function DiffEqBase.solve(prob::ODEProblem,
                           alg::GPUSimpleRK4;
                           dt = error("dt is required for this algorithm"))
   @assert !isinplace(prob)

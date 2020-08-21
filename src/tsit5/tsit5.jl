@@ -126,7 +126,7 @@ end
 # Stepping
 #######################################################################################
 # IIP version for vectors and matrices
-@inline function DiffEqBase.step!(integ::ST5I{true, S, T}) where {T, S}
+@inline @muladd function DiffEqBase.step!(integ::ST5I{true, S, T}) where {T, S}
 
     L = length(integ.u)
 
@@ -181,7 +181,7 @@ end
 end
 
 # OOP version for vectors and matrices
-@inline function DiffEqBase.step!(integ::ST5I{false, S, T}) where {T, S}
+@inline @muladd function DiffEqBase.step!(integ::ST5I{false, S, T}) where {T, S}
 
     c1, c2, c3, c4, c5, c6 = integ.cs;
     dt = integ.dt; t = integ.t; p = integ.p
@@ -228,7 +228,7 @@ end
 # Interpolation
 #######################################################################################
 # Interpolation function, OOP
-function (integ::ST5I)(t::T) where {T}
+@muladd function (integ::ST5I)(t::T) where {T}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
     #@assert tprev ≤ t ≤ tnext
     θ = (t - tprev)/dt
