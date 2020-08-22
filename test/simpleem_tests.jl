@@ -18,3 +18,10 @@ prob = SDEProblem(f,g,u0,tspan)
 sol = solve(prob,SimpleEM(),dt=0.25)
 
 @test typeof(sol.u) <: Vector{SVector{2,Float64}}
+
+f(du,u,p,t) = du .= 2.0 * u
+g(du,u,p,t) = du .= 1
+u0 = 0.5ones(4)
+tspan = (0.0,1.0)
+prob = SDEProblem(f,g,u0,tspan)
+sol = solve(prob,SimpleEM(),dt=0.25)
