@@ -1,6 +1,6 @@
 # SimpleDiffEq.jl
 
-[![Build Status](https://travis-ci.org/JuliaDiffEq/SimpleDiffEq.jl.svg?branch=master)](https://travis-ci.org/JuliaDiffEq/SimpleDiffEq.jl)
+[![Build Status](https://github.com/SciML/SimpleDiffEq.jl/workflows/CI/badge.svg)](https://github.com/SciML/SimpleDiffEq.jl/actions?query=workflow%3ACI)
 [![Coverage Status](https://coveralls.io/repos/ChrisRackauckas/SimpleDiffEq.jl/badge.svg?branch=master&service=github)](https://coveralls.io/github/ChrisRackauckas/SimpleDiffEq.jl?branch=master)
 [![codecov.io](http://codecov.io/github/ChrisRackauckas/SimpleDiffEq.jl/coverage.svg?branch=master)](http://codecov.io/github/ChrisRackauckas/SimpleDiffEq.jl?branch=master)
 
