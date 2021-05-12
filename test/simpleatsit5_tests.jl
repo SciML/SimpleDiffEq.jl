@@ -175,3 +175,28 @@ step!(oop); step!(oop)
 # end
 # using PyPlot
 # plot(x,y)
+
+###################################################################################
+# Issue #46 check (step!(integ, dt, true))
+# see https://github.com/SciML/SimpleDiffEq.jl/issues/46
+using SimpleDiffEq, OrdinaryDiffEq, StaticArrays
+
+@inbounds function duffing_rule(x, p, t)
+    ω, f, d, β = p
+    dx1 = x[2]
+    dx2 = f*cos(ω*t) - β*x[1] - x[1]^3 - d * x[2]
+    return SVector(dx1, dx2)
+end
+prob = ODEProblem(duffing_rule, SVector(0.1, 0.2), (0.0, 1e12), [0.3, 0.1, 0.2, -1])
+
+T = 2π/0.3 # this is the period of the oscillator
+
+integ2 = init(prob, SimpleATsit5(), reltol=1e-9)
+step!(integ2, T*20, true)
+v=zeros(200,2)
+for k in 1:200
+   step!(integ2, T, true)
+   v[k,:] = integ2.u
+end
+
+@test length(unique(round.(v; digits = 3))) == 2
