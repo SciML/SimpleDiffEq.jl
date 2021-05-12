@@ -180,7 +180,6 @@ step!(oop); step!(oop)
 # Issue #46 check (step!(integ, dt, true))
 # see https://github.com/SciML/SimpleDiffEq.jl/issues/46
 using SimpleDiffEq, OrdinaryDiffEq, StaticArrays
-using PyPlot
 
 @inbounds function duffing_rule(x, p, t)
     ω, f, d, β = p
