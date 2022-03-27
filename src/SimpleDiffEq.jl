@@ -6,6 +6,7 @@ using Reexport, MuladdMacro
 @reexport using DiffEqBase
 using StaticArrays
 using RecursiveArrayTools
+const ^ = DiffEqBase.fastpow
 
 @inline _copy(a::SArray) = a
 @inline _copy(a) = copy(a)
