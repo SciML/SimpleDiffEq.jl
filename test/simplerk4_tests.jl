@@ -12,9 +12,9 @@ function loop(u, p, t)
         ρ = p[2]
         β = p[3]
 
-        du1 = σ*(u[2]-u[1])
-        du2 = u[1]*(ρ-u[3]) - u[2]
-        du3 = u[1]*u[2] - β*u[3]
+        du1 = σ * (u[2] - u[1])
+        du2 = u[1] * (ρ - u[3]) - u[2]
+        du3 = u[1] * u[2] - β * u[3]
 
         return SVector{3}(du1, du2, du3)
     end
@@ -25,9 +25,9 @@ function liip(du, u, p, t)
     ρ = p[2]
     β = p[3]
 
-    du[1] = σ*(u[2]-u[1])
-    du[2] = u[1]*(ρ-u[3]) - u[2]
-    du[3] = u[1]*u[2] - β*u[3]
+    du[1] = σ * (u[2] - u[1])
+    du[2] = u[1] * (ρ - u[3]) - u[2]
+    du[3] = u[1] * u[2] - β * u[3]
 
     return nothing
 end
@@ -41,14 +41,14 @@ end
 # Out-of-place version of the algorithm
 # -------------------------------------
 
-u0  = 10ones(3)
-dt  = 0.01
+u0 = 10ones(3)
+dt = 0.01
 oop = SimpleDiffEq.simplerk4_init(loop,
                                   false,
                                   SVector{3}(u0),
                                   0.0,
                                   dt,
-                                  [10, 28, 8/3])
+                                  [10, 28, 8 / 3])
 step!(oop)
 
 for i in 1:10000
@@ -67,11 +67,11 @@ iip = SimpleDiffEq.simplerk4_init(liip,
                                   copy(u0),
                                   0.0,
                                   dt,
-                                  [10, 28, 8/3])
+                                  [10, 28, 8 / 3])
 
 step!(iip)
 
-for i in 1:10000;
+for i in 1:10000
     step!(iip)
 
     if isnan(iip.u[1]) || isnan(iip.u[2]) || isnan(iip.u[3])
@@ -91,7 +91,7 @@ dt = 0.01
 odeoop = ODEProblem{false}(loop,
                            SVector{3}(u0),
                            (0.0, 100.0),
-                           [10, 28, 8/3])
+                           [10, 28, 8 / 3])
 
 oop = init(odeoop, SimpleRK4(), dt = dt)
 step!(oop)
@@ -121,7 +121,7 @@ sol = solve(odeoop, LoopRK4(), dt = dt)
 odeiip = ODEProblem{true}(liip,
                           u0,
                           (0.0, 100.0),
-                          [10, 28, 8/3])
+                          [10, 28, 8 / 3])
 
 iip = init(odeiip, SimpleRK4(), dt = dt)
 step!(iip)
