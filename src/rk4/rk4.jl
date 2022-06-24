@@ -4,10 +4,11 @@
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-struct SimpleRK4 <: DiffEqBase.AbstractODEAlgorithm end
+struct SimpleRK4 <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleRK4
 
-mutable struct SimpleRK4Integrator{IIP, S, T, P, F} <: DiffEqBase.AbstractODEIntegrator{SimpleRK4, IIP, S, T}
+mutable struct SimpleRK4Integrator{IIP, S, T, P, F} <:
+               DiffEqBase.AbstractODEIntegrator{SimpleRK4, IIP, S, T}
     f::F             # ..................................... Equations of motion
     uprev::S         # .......................................... Previous state
     u::S             # ........................................... Current state
@@ -44,11 +45,11 @@ end
 
 function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleRK4;
                             dt = error("dt is required for this algorithm"))
-    u0    = prob.u0
+    u0 = prob.u0
     tspan = prob.tspan
-    ts    = Array(tspan[1]:dt:tspan[2])
-    n     = length(ts)
-    us    = Vector{typeof(u0)}(undef, n)
+    ts = Array(tspan[1]:dt:tspan[2])
+    n = length(ts)
+    us = Vector{typeof(u0)}(undef, n)
 
     @inbounds us[1] = _copy(u0)
 
@@ -56,9 +57,9 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleRK4;
                            prob.tspan[1], dt, prob.p)
 
     # FSAL
-    for i = 1:n-1
+    for i in 1:(n - 1)
         step!(integ)
-        us[i+1] = _copy(integ.u)
+        us[i + 1] = _copy(integ.u)
     end
 
     sol = DiffEqBase.build_solution(prob, alg, ts, us, calculate_error = false)
@@ -71,11 +72,12 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleRK4;
     return sol
 end
 
-@inline function simplerk4_init(f::F, IIP::Bool, u0::S, t0::T, dt::T, p::P) where
-    {F, P, T, S<:AbstractArray{T}}
+@inline function simplerk4_init(f::F, IIP::Bool, u0::S, t0::T, dt::T,
+                                p::P) where
+    {F, P, T, S <: AbstractArray{T}}
 
     # Allocate the vector with the interpolants. For RK4, we need 5.
-    ks = [zero(u0) for _ = 1:5]
+    ks = [zero(u0) for _ in 1:5]
 
     integ = SRK4{IIP, S, T, P, F}(f,
                                   _copy(u0),
@@ -98,14 +100,14 @@ end
 ################################################################################
 
 @inline @muladd function DiffEqBase.step!(integ::SRK4{true, S, T}) where {T, S}
-    integ.uprev       .= integ.u
-    tmp                = integ.tmp
-    f!                 = integ.f
-    p                  = integ.p
-    t                  = integ.t
-    dt                 = integ.dt
-    uprev              = integ.uprev
-    u                  = integ.u
+    integ.uprev .= integ.u
+    tmp = integ.tmp
+    f! = integ.f
+    p = integ.p
+    t = integ.t
+    dt = integ.dt
+    uprev = integ.uprev
+    u = integ.u
     k₁, k₂, k₃, k₄, k₅ = integ.ks
 
     # If the input was modified, then we need to recompute the initial pass of
@@ -122,22 +124,22 @@ end
         L = length(u)
 
         for i in 1:L
-            tmp[i] = uprev[i] + dt*k₁[i]/2
+            tmp[i] = uprev[i] + dt * k₁[i] / 2
         end
-        f!(k₂, tmp, p, t + dt/2)
+        f!(k₂, tmp, p, t + dt / 2)
 
         for i in 1:L
-            tmp[i] = uprev[i] + dt*k₂[i]/2
+            tmp[i] = uprev[i] + dt * k₂[i] / 2
         end
-        f!(k₃, tmp, p, t + dt/2)
+        f!(k₃, tmp, p, t + dt / 2)
 
         for i in 1:L
-            tmp[i] = uprev[i] + dt*k₃[i]
+            tmp[i] = uprev[i] + dt * k₃[i]
         end
         f!(k₄, tmp, p, t + dt)
 
-        for i = 1:L
-            u[i] = uprev[i] + (dt/6)*( 2*(k₂[i] + k₃[i]) + (k₁[i] + k₄[i]) )
+        for i in 1:L
+            u[i] = uprev[i] + (dt / 6) * (2 * (k₂[i] + k₃[i]) + (k₁[i] + k₄[i]))
         end
 
         f!(k₅, u, p, t + dt)
@@ -151,11 +153,11 @@ end
 
 @inline @muladd function DiffEqBase.step!(integ::SRK4{false, S, T}) where {T, S}
     integ.uprev = integ.u
-    f           = integ.f
-    p           = integ.p
-    t           = integ.t
-    dt          = integ.dt
-    uprev       = integ.uprev
+    f = integ.f
+    p = integ.p
+    t = integ.t
+    dt = integ.dt
+    uprev = integ.uprev
 
     # If the input was modified, then we need to recompute the initial pass of
     # this step.
@@ -166,16 +168,16 @@ end
         @inbounds k₁ = integ.ks[5]
     end
 
-    tmp = uprev + dt*k₁/2
-    k₂ = f(tmp, p, t + dt/2)
+    tmp = uprev + dt * k₁ / 2
+    k₂ = f(tmp, p, t + dt / 2)
 
-    tmp = uprev + dt*k₂/2
-    k₃ = f(tmp, p, t + dt/2)
+    tmp = uprev + dt * k₂ / 2
+    k₃ = f(tmp, p, t + dt / 2)
 
-    tmp = uprev + dt*k₃
+    tmp = uprev + dt * k₃
     k₄ = f(tmp, p, t + dt)
 
-    integ.u = uprev + (dt/6)*( 2*(k₂ + k₃) + (k₁ + k₄) )
+    integ.u = uprev + (dt / 6) * (2 * (k₂ + k₃) + (k₁ + k₄))
     k₅ = f(integ.u, p, t + dt)
 
     # Update the interpolants in the integrator. This is necessary for the
@@ -198,26 +200,29 @@ end
 #                                Interpolation
 ################################################################################
 
-@inline @muladd function (integ::SRK4)(t::T) where T
+@inline @muladd function (integ::SRK4)(t::T) where {T}
     t₁, t₀, dt = integ.t, integ.tprev, integ.dt
 
     y₀ = integ.uprev
     y₁ = integ.u
     ks = integ.ks
-    Θ  = (t - t₀)/dt
+    Θ = (t - t₀) / dt
 
     # Hermite interpolation.
     @inbounds if !isinplace(integ)
-        u = (1-Θ)*y₀ + Θ*y₁ + Θ*(Θ-1)*( (1-2Θ)*(y₁-y₀) +
-                                        (Θ-1)*dt*ks[1] +
-                                        Θ*dt*ks[5])
+        u = (1 - Θ) * y₀ + Θ * y₁ +
+            Θ * (Θ - 1) * ((1 - 2Θ) * (y₁ - y₀) +
+                           (Θ - 1) * dt * ks[1] +
+                           Θ * dt * ks[5])
         return u
     else
         u = similar(y₁)
         for i in 1:length(u)
-            u[i] = (1-Θ)*y₀[i] + Θ*y₁[i] + Θ*(Θ-1)*( (1-2Θ)*(y₁[i]-y₀[i])+
-                                                     (Θ-1)*dt*ks[1][i] +
-                                                     Θ*dt*ks[5][i])
+            u[i] = (1 - Θ) * y₀[i] + Θ * y₁[i] +
+                   Θ * (Θ - 1) *
+                   ((1 - 2Θ) * (y₁[i] - y₀[i]) +
+                    (Θ - 1) * dt * ks[1][i] +
+                    Θ * dt * ks[5][i])
         end
 
         return u
