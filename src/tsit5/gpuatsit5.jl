@@ -3,7 +3,7 @@
 # Makes the simplest possible method for GPU-compatibility
 # Out of place only
 #######################################################################################
-struct GPUSimpleTsit5 <: DiffEqBase.AbstractODEAlgorithm end
+struct GPUSimpleTsit5 <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleTsit5
 
 @muladd function DiffEqBase.solve(prob::ODEProblem,
@@ -64,6 +64,8 @@ end
 #######################################################################################
 struct GPUSimpleATsit5 end
 export GPUSimpleATsit5
+
+SciMLBase.isadaptive(alg::GPUSimpleATsit5) = true
 
 @muladd function DiffEqBase.solve(prob::ODEProblem,
                                   alg::GPUSimpleATsit5;

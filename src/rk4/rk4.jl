@@ -4,7 +4,7 @@
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-struct SimpleRK4 <: DiffEqBase.AbstractODEAlgorithm end
+struct SimpleRK4 <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleRK4
 
 mutable struct SimpleRK4Integrator{IIP, S, T, P, F} <:

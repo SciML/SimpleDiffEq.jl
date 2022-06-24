@@ -2,7 +2,7 @@
 # Simplest Loop method
 # Makes the simplest possible method for teaching and performance testing
 #######################################################################################
-struct LoopRK4 <: DiffEqBase.AbstractODEAlgorithm end
+struct LoopRK4 <: AbstractSimpleDiffEqODEAlgorithm end
 export LoopRK4
 
 # Out-of-place

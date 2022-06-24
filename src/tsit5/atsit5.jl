@@ -1,7 +1,9 @@
 using RecursiveArrayTools: recursivecopy
 
-struct SimpleATsit5 <: DiffEqBase.AbstractODEAlgorithm end
+struct SimpleATsit5 <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleATsit5
+
+SciMLBase.isadaptive(alg::SimpleATsit5) = true
 
 # PI-adaptive stepping parameters:
 const beta1 = 7 / 50

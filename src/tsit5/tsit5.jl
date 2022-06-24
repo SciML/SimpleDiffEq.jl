@@ -1,4 +1,4 @@
-struct SimpleTsit5 <: DiffEqBase.AbstractODEAlgorithm end
+struct SimpleTsit5 <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleTsit5
 
 mutable struct SimpleTsit5Integrator{IIP, S, T, P, F} <:

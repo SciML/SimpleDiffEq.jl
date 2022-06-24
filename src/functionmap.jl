@@ -1,5 +1,6 @@
 struct SimpleFunctionMap end
 export SimpleFunctionMap
+SciMLBase.isdiscrete(alg::SimpleFunctionMap) = true
 
 # ConstantCache version
 function DiffEqBase.__solve(prob::DiffEqBase.DiscreteProblem{uType, tupType, false},

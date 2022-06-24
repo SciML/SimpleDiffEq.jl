@@ -3,7 +3,7 @@
 # Makes the simplest possible method for GPU-compatibility
 # Out of place only
 #######################################################################################
-struct GPUSimpleRK4 <: DiffEqBase.AbstractODEAlgorithm end
+struct GPUSimpleRK4 <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleRK4
 
 @muladd function DiffEqBase.solve(prob::ODEProblem,
