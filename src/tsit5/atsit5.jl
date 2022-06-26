@@ -681,3 +681,23 @@ end
 @inline function DiffEqBase.set_t!(integrator::SimpleATsit5Integrator, t::Real)
     reinit!(integrator; t0 = t)
 end
+
+#######################################################################################
+# chech_error
+#######################################################################################
+
+function check_error(integrator::SimpleATsit5Integrator)
+	# This implementation is intended to be used for SimpleDiffEq.SimpleATsit5Integrator
+	   if isnan(integrator.dt)
+	       @warn("NaN dt detected. Likely a NaN value in the state, parameters, or derivative value caused this outcome.")
+	       return :DtNaN
+	   end
+
+	   if DiffEqBase.ODE_DEFAULT_UNSTABLE_CHECK(integrator.dt, integrator.u, integrator.p, integrator.t)
+	       @warn("Instability detected. Aborting")
+	       return :Unstable
+	   end
+
+	   return :Success
+end
+
