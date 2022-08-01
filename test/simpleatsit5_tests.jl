@@ -221,3 +221,23 @@ for k in 1:200
 end
 
 @test length(unique(round.(v; digits = 3))) == 2
+
+#=
+Solution seems to be sensitive at 100s,
+hence changing the final tspan to test with save_everystep = false
+=#
+
+odeiip = remake(odeiip; tspan = (0.0, 10.0))
+odeoop = remake(odeoop; tspan = (0.0, 10.0))
+
+sol = solve(odeiip, Tsit5(), reltol = 1e-9, abstol = 1e-9, save_everystep = false)
+sol1 = solve(odeiip, SimpleATsit5(), reltol = 1e-9, abstol = 1e-9, save_everystep = false)
+
+@test sol.u≈sol1.u atol=1e-5
+@test sol.t ≈ sol1.t
+
+sol = solve(odeoop, Tsit5(), reltol = 1e-9, abstol = 1e-9, save_everystep = false)
+sol1 = solve(odeoop, SimpleATsit5(), reltol = 1e-9, abstol = 1e-9, save_everystep = false)
+
+@test sol.u≈sol1.u atol=1e-5
+@test sol.t ≈ sol1.t

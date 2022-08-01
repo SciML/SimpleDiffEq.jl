@@ -99,8 +99,8 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleATsit5;
     end
 
     if saveat === nothing && !save_everystep
-        push!(us, recursivecopy(u))
-        push!(ts, t)
+        push!(us, recursivecopy(integ.u))
+        push!(ts, integ.t)
     end
 
     sol = DiffEqBase.build_solution(prob, alg, ts, us,
