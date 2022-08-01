@@ -159,8 +159,7 @@ SciMLBase.isadaptive(alg::GPUSimpleATsit5) = true
                 if saveat === nothing && save_everystep
                     push!(us, recursivecopy(u))
                     push!(ts, t)
-                else
-                    saveat !== nothing
+                elseif saveat !== nothing
                     while cur_t <= length(ts) && ts[cur_t] <= t
                         savet = ts[cur_t]
                         θ = (savet - told) / dtold
