@@ -49,9 +49,19 @@ dt = 1e-1
 
 sol = solve(odeoop, SimpleTsit5(), dt = dt)
 sol2 = solve(odeoop, GPUSimpleTsit5(), dt = dt)
+sol3 = solve(odeoop, GPUSimpleTsit5(), dt = dt, save_everystep = false)
+sol4 = solve(odeoop, GPUSimpleTsit5(), dt = dt, saveat = [5.0, 100.0])
 
 @test sol.u ≈ sol2.u
 @test sol.t ≈ sol2.t
+
+@test sol.u[end] ≈ sol3.u[end]
+@test sol2.u[end] ≈ sol3.u[end]
+
+@test sol.u[end] ≈ sol4.u[end]
+@test sol2.u[end] ≈ sol4.u[end]
+@test sol(5.0) ≈ sol4.u[1]
+
 
 #=
 Solution seems to be sensitive at 100s,
