@@ -61,7 +61,7 @@ export GPUSimpleTsit5
         k7 = f(u, p, t + dt)
         if saveat === nothing && save_everystep
             push!(us, u)
-            push!(ts,t)
+            push!(ts, t)
         elseif saveat !== nothing
             while cur_t <= length(ts) && ts[cur_t] <= t
                 savet = ts[cur_t]
@@ -70,13 +70,13 @@ export GPUSimpleTsit5
                 us[cur_t] = uprev +
                             dt *
                             (b1θ * k1 + b2θ * k2 + b3θ * k3 + b4θ * k4 + b5θ * k5 +
-                                b6θ * k6 + b7θ * k7)
+                             b6θ * k6 + b7θ * k7)
                 cur_t += 1
             end
         end
     end
 
-     if saveat === nothing && !save_everystep
+    if saveat === nothing && !save_everystep
         push!(us, u)
         push!(ts, t)
     end
