@@ -7,7 +7,8 @@ struct GPUSimpleTsit5 <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleTsit5
 
 @muladd function DiffEqBase.solve(prob::ODEProblem,
-                                  alg::GPUSimpleTsit5;
+                                  alg::GPUSimpleTsit5; saveat = nothing,
+                                  save_everystep = true,
                                   dt = 0.1f0)
     @assert !isinplace(prob)
     u0 = prob.u0
@@ -15,10 +16,23 @@ export GPUSimpleTsit5
     f = prob.f
     p = prob.p
     t = tspan[1]
-    tf = prob.tspan[2]
-    ts = tspan[1]:dt:tspan[2]
-    us = MVector{length(ts), typeof(u0)}(undef)
-    us[1] = u0
+    tf = tspan[2]
+
+    if saveat === nothing
+        ts = Vector{eltype(dt)}(undef, 1)
+        ts[1] = prob.tspan[1]
+        us = Vector{typeof(u0)}(undef, 0)
+        push!(us, recursivecopy(u0))
+    else
+        ts = saveat
+        cur_t = 1
+        us = MVector{length(ts), typeof(u0)}(undef)
+        if prob.tspan[1] == ts[1]
+            cur_t += 1
+            us[1] = u0
+        end
+    end
+
     u = u0
     k7 = f(u, p, t)
 
@@ -26,13 +40,13 @@ export GPUSimpleTsit5
     c1, c2, c3, c4, c5, c6 = cs
     a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
     a61, a62, a63, a64, a65, a71, a72, a73, a74, a75, a76 = as
-    btilde1, btilde2, btilde3, btilde4, btilde5, btilde6, btilde7 = btildes
+    _ts = tspan[1]:dt:tspan[2]
 
     # FSAL
-    for i in 2:length(ts)
+    for i in 2:length(_ts)
         uprev = u
         k1 = k7
-        t = ts[i]
+        t = _ts[i]
         tmp = uprev + dt * a21 * k1
         k2 = f(tmp, p, t + c1 * dt)
         tmp = uprev + dt * (a31 * k1 + a32 * k2)
@@ -45,10 +59,29 @@ export GPUSimpleTsit5
         k6 = f(tmp, p, t + dt)
         u = uprev + dt * (a71 * k1 + a72 * k2 + a73 * k3 + a74 * k4 + a75 * k5 + a76 * k6)
         k7 = f(u, p, t + dt)
-        us[i] = u
+        if saveat === nothing && save_everystep
+            push!(us, u)
+            push!(ts, t)
+        elseif saveat !== nothing
+            while cur_t <= length(ts) && ts[cur_t] <= t
+                savet = ts[cur_t]
+                θ = (savet - (t - dt)) / dt
+                b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ = bθs(rs, θ)
+                us[cur_t] = uprev +
+                            dt *
+                            (b1θ * k1 + b2θ * k2 + b3θ * k3 + b4θ * k4 + b5θ * k5 +
+                             b6θ * k6 + b7θ * k7)
+                cur_t += 1
+            end
+        end
     end
 
-    sol = DiffEqBase.build_solution(prob, alg, ts, SArray(us),
+    if saveat === nothing && !save_everystep
+        push!(us, u)
+        push!(ts, t)
+    end
+
+    sol = DiffEqBase.build_solution(prob, alg, ts, us,
                                     k = nothing, destats = nothing,
                                     calculate_error = false)
     DiffEqBase.has_analytic(prob.f) &&
