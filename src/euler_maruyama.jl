@@ -11,6 +11,8 @@ export SimpleEM
     tspan = prob.tspan
     p = prob.p
 
+    is_diagonal_noise = SciMLBase.is_diagonal_noise(prob)
+
     @inbounds begin
         n = Int((tspan[2] - tspan[1]) / dt) + 1
         u = [u0 for i in 1:n]
@@ -21,12 +23,18 @@ export SimpleEM
     @inbounds for i in 2:n
         uprev = u[i - 1]
         tprev = t[i - 1]
-        if u0 isa Number
-            u[i] = uprev + f(uprev, p, tprev) * dt +
-                   sqdt * g(uprev, p, tprev) * randn(typeof(u0))
+
+        if is_diagonal_noise
+            if u0 isa Number
+                u[i] = uprev + f(uprev, p, tprev) * dt +
+                       sqdt * g(uprev, p, tprev) * randn(typeof(u0))
+            else
+                u[i] = uprev + f(uprev, p, tprev) * dt +
+                       sqdt * g(uprev, p, tprev) .* randn(typeof(u0))
+            end
         else
             u[i] = uprev + f(uprev, p, tprev) * dt +
-                   sqdt * g(uprev, p, tprev) .* randn(typeof(u0))
+                   sqdt * g(uprev, p, tprev) * randn(size(prob.noise_rate_prototype, 2))
         end
     end
 
