@@ -6,6 +6,18 @@
 struct GPUSimpleTsit5 <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleTsit5
 
+function build_adaptive_tsit5_controller_cache(::Type{T}) where {T}
+    beta1 = T(7 / 50)
+    beta2 = T(2 / 25)
+    qmax = T(10.0)
+    qmin = T(1 / 5)
+    gamma = T(9 / 10)
+    qoldinit = T(1e-4)
+    qold = qoldinit
+
+    return beta1, beta2, qmax, qmin, gamma, qoldinit, qold
+end
+
 @muladd function DiffEqBase.solve(prob::ODEProblem,
                                   alg::GPUSimpleTsit5; saveat = nothing,
                                   save_everystep = true,
@@ -110,6 +122,7 @@ SciMLBase.isadaptive(alg::GPUSimpleATsit5) = true
     tspan = prob.tspan
     f = prob.f
     p = prob.p
+    beta1, beta2, qmax, qmin, gamma, qoldinit, _ = build_adaptive_tsit5_controller_cache(eltype(u0))
 
     t = tspan[1]
     tf = prob.tspan[2]
