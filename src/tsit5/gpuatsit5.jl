@@ -46,7 +46,7 @@ export GPUSimpleTsit5
     for i in 2:length(_ts)
         uprev = u
         k1 = k7
-        t = _ts[i-1]
+        t = _ts[i - 1]
         tmp = uprev + dt * a21 * k1
         k2 = f(tmp, p, t + c1 * dt)
         tmp = uprev + dt * (a31 * k1 + a32 * k2)
