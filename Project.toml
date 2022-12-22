@@ -15,6 +15,7 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 [compat]
 DiffEqBase = "6.11"
 MuladdMacro = "0.2"
+Parameters = "0.12"
 RecursiveArrayTools = "2"
 Reexport = "0.2, 1.0"
 StaticArrays = "0.10, 0.11, 0.12, 1.0"
