@@ -264,6 +264,7 @@ end
 end
 # Interpolation coefficients
 @inline function bθs(rs, θ)
+    T = eltype(rs)
     # θ in (0, 1) !
     r11, r12, r13, r14, r22, r23, r24, r32, r33, r34, r42, r43, r44, r52, r53,
     r54, r62, r63, r64, r72, r73, r74 = rs
