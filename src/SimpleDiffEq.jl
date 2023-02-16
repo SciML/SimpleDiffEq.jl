@@ -4,7 +4,7 @@ module SimpleDiffEq
 
 using Reexport, MuladdMacro
 @reexport using DiffEqBase
-using StaticArrays
+using StaticArraysCore
 using RecursiveArrayTools
 using LinearAlgebra
 using Parameters

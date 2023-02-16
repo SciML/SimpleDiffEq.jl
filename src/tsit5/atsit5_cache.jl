@@ -1,7 +1,7 @@
 function _build_atsit5_caches(::Type{T}) where {T}
-    cs = SVector{6, T}(0.161, 0.327, 0.9, 0.9800255409045097, 1.0, 1.0)
+    cs = (0.161, 0.327, 0.9, 0.9800255409045097, 1.0, 1.0)
 
-    as = SVector{21, T}(convert(T, 0.161),        #=a21=#
+    as = (convert(T, 0.161),        #=a21=#
                         convert(T, -0.008480655492356989),        #=a31=#
                         convert(T, 0.335480655492357),        #=a32=#
                         convert(T, 2.8971530571054935),        #=a41=#
@@ -23,7 +23,7 @@ function _build_atsit5_caches(::Type{T}) where {T}
                         convert(T, -3.290069515436081),        #=a75=#
                         convert(T, 2.324710524099774))
 
-    btildes = SVector{7, T}(convert(T, -0.00178001105222577714),
+    btildes = (convert(T, -0.00178001105222577714),
                             convert(T, -0.0008164344596567469),
                             convert(T, 0.007880878010261995),
                             convert(T, -0.1447110071732629),
@@ -31,7 +31,7 @@ function _build_atsit5_caches(::Type{T}) where {T}
                             convert(T, -0.45808210592918697),
                             convert(T, 0.015151515151515152))
 
-    rs = SVector{22, T}(convert(T, 1.0),        #=r11=#
+    rs = (convert(T, 1.0),        #=r11=#
                         convert(T, -2.763706197274826),        #=r12=#
                         convert(T, 2.9132554618219126),        #=r13=#
                         convert(T, -1.0530884977290216),        #=r14=#

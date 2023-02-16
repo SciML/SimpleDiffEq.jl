@@ -29,10 +29,10 @@ mutable struct SimpleATsit5Integrator{IIP, S, T, P, F, N} <:
     p::P                  # parameter container
     u_modified::Bool
     ks::Vector{S}         # interpolants of the algorithm
-    cs::SVector{6, T}     # ci factors cache: time coefficients
-    as::SVector{21, T}    # aij factors cache: solution coefficients
-    btildes::SVector{7, T}
-    rs::SVector{22, T}    # rij factors cache: interpolation coefficients
+    cs::NTuple{6, T}     # ci factors cache: time coefficients
+    as::NTuple{21, T}    # aij factors cache: solution coefficients
+    btildes::NTuple{7, T}
+    rs::NTuple{22, T}    # rij factors cache: interpolation coefficients
     qold::Float64
     abstol::Float64
     reltol::Float64
@@ -478,7 +478,7 @@ end
 # Vector{SVector}
 @inline @muladd function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {
                                                                            S <:
-                                                                           Vector{<:SVector
+                                                                           Vector{<:StaticArraysCore.SVector
                                                                                   }, T}
     M = length(integ.u)
     L = length(integ.u[1])
