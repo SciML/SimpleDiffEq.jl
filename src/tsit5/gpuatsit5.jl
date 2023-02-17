@@ -26,10 +26,9 @@ export GPUSimpleTsit5
     else
         ts = saveat
         cur_t = 1
-        us = MVector{length(ts), typeof(u0)}(undef)
+        us = ntuple(n-> u0, length(ts))
         if prob.tspan[1] == ts[1]
             cur_t += 1
-            us[1] = u0
         end
     end
 
@@ -68,10 +67,10 @@ export GPUSimpleTsit5
                 savet = ts[cur_t]
                 θ = (savet - (t - dt)) / dt
                 b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ = bθs(rs, θ)
-                us[cur_t] = uprev +
+                us = Base.setindex(us,uprev +
                             dt *
                             (b1θ * k1 + b2θ * k2 + b3θ * k3 + b4θ * k4 + b5θ * k5 +
-                             b6θ * k6 + b7θ * k7)
+                             b6θ * k6 + b7θ * k7),cur_t)
                 cur_t += 1
             end
         end
@@ -124,10 +123,9 @@ SciMLBase.isadaptive(alg::GPUSimpleATsit5) = true
     else
         ts = saveat
         cur_t = 1
-        us = MVector{length(ts), typeof(u0)}(undef)
+        us = ntuple(x-> u0, length(ts))
         if prob.tspan[1] == ts[1]
             cur_t += 1
-            us[1] = u0
         end
     end
 
@@ -199,10 +197,10 @@ SciMLBase.isadaptive(alg::GPUSimpleATsit5) = true
                         savet = ts[cur_t]
                         θ = (savet - told) / dtold
                         b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ = bθs(rs, θ)
-                        us[cur_t] = uprev +
+                        us = Base.setindex(us,uprev +
                                     dtold *
                                     (b1θ * k1 + b2θ * k2 + b3θ * k3 + b4θ * k4 + b5θ * k5 +
-                                     b6θ * k6 + b7θ * k7)
+                                     b6θ * k6 + b7θ * k7),cur_t)
                         cur_t += 1
                     end
                 end

@@ -26,10 +26,9 @@ export GPUSimpleVern9
     else
         ts = saveat
         cur_t = 1
-        us = MVector{length(ts), typeof(u0)}(undef)
+        us = ntuple(x->u0, length(ts))
         if prob.tspan[1] == ts[1]
             cur_t += 1
-            us[1] = u0
         end
     end
 
@@ -172,7 +171,7 @@ export GPUSimpleVern9
                          a2615 * k9 + a2617 * k11 + a2618 * k12 + a2619 * k13 +
                          a2620 * k14 + a2621 * k15), p, t + c26 * dt)
 
-                us[cur_t] = uprev +
+                us = Base.setindex(us,uprev +
                             dt *
                             (k1 * b1Θ + k2 * b8Θ + k3 * b9Θ + k4 * b10Θ +
                              k5 * b11Θ +
@@ -180,7 +179,7 @@ export GPUSimpleVern9
                              k11 * b17Θ +
                              k12 * b18Θ + k13 * b19Θ + k14 * b20Θ + k15 * b21Θ +
                              k16 * b22Θ +
-                             k17 * b23Θ + k18 * b24Θ + k19 * b25Θ + k20 * b26Θ)
+                             k17 * b23Θ + k18 * b24Θ + k19 * b25Θ + k20 * b26Θ),cur_t)
                 cur_t += 1
             end
         end
@@ -233,10 +232,9 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern9) = true
     else
         ts = saveat
         cur_t = 1
-        us = MVector{length(ts), typeof(u0)}(undef)
+        us = ntuple(x->u0, length(ts))
         if prob.tspan[1] == ts[1]
             cur_t += 1
-            us[1] = u0
         end
     end
 
@@ -438,7 +436,7 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern9) = true
                                  a2615 * k9 + a2617 * k11 + a2618 * k12 + a2619 * k13 +
                                  a2620 * k14 + a2621 * k15), p, told + c26 * dtold)
 
-                        us[cur_t] = uprev +
+                        us = Base.setindex(us, uprev +
                                     dtold *
                                     (k1 * b1Θ + k2 * b8Θ + k3 * b9Θ + k4 * b10Θ +
                                      k5 * b11Θ +
@@ -446,7 +444,7 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern9) = true
                                      k11 * b17Θ +
                                      k12 * b18Θ + k13 * b19Θ + k14 * b20Θ + k15 * b21Θ +
                                      k16 * b22Θ +
-                                     k17 * b23Θ + k18 * b24Θ + k19 * b25Θ + k20 * b26Θ)
+                                     k17 * b23Θ + k18 * b24Θ + k19 * b25Θ + k20 * b26Θ), cur_t)
                         cur_t += 1
                     end
                 end
