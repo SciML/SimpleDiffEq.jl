@@ -118,7 +118,7 @@ end
     cs, as, btildes, rs = _build_atsit5_caches(T)
     ks = _initialize_ks(u0)
 
-    !IIP && @assert S <: SArray
+    !IIP && @assert S <: StaticArraysCore.SArray
 
     integ = SAT5I{IIP, S, T, P, F, N}(f, recursivecopy(u0), recursivecopy(u0),
                                       recursivecopy(u0), t0, t0, t0, tf, dt, dt,

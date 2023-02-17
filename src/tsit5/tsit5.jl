@@ -61,7 +61,7 @@ end
     cs, as, rs = _build_tsit5_caches(T)
     ks = [zero(u0) for i in 1:7]
 
-    !IIP && @assert S <: SArray
+    !IIP && @assert S <: StaticArraysCore.SArray
 
     integ = ST5I{IIP, S, T, P, F}(f, _copy(u0), _copy(u0), _copy(u0), t0, t0, t0, dt,
                                   sign(dt), p, true, ks, cs, as, rs)

@@ -9,7 +9,7 @@ using RecursiveArrayTools
 using LinearAlgebra
 using Parameters
 
-@inline _copy(a::SArray) = a
+@inline _copy(a::StaticArraysCore.SArray) = a
 @inline _copy(a) = copy(a)
 
 abstract type AbstractSimpleDiffEqODEAlgorithm <: SciMLBase.AbstractODEAlgorithm end
