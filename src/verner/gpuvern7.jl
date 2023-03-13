@@ -26,10 +26,9 @@ export GPUSimpleVern7
     else
         ts = saveat
         cur_t = 1
-        us = MVector{length(ts), typeof(u0)}(undef)
+        us = ntuple(x->u0,length(ts))
         if prob.tspan[1] == ts[1]
             cur_t += 1
-            us[1] = u0
         end
     end
 
@@ -116,12 +115,12 @@ export GPUSimpleVern7
                          a1607 * k7 + a1608 * k8 + a1609 * k9 + a1611 * k11 +
                          a1612 * k12 + a1613 * k13), p, t + c16 * dt)
 
-                us[cur_t] = uprev +
+                us = Base.setindex(us,uprev +
                             dt * (k1 * b1Θ
                              + k4 * b4Θ + k5 * b5Θ + k6 * b6Θ + k7 * b7Θ +
                              k8 * b8Θ + k9 * b9Θ
                              + k11 * b11Θ + k12 * b12Θ + k13 * b13Θ +
-                             k14 * b14Θ + k15 * b15Θ + k16 * b16Θ)
+                             k14 * b14Θ + k15 * b15Θ + k16 * b16Θ),cur_t)
 
                 cur_t += 1
             end
@@ -175,10 +174,9 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern7) = true
     else
         ts = saveat
         cur_t = 1
-        us = MVector{length(ts), typeof(u0)}(undef)
+        us = ntuple(x->u0,length(ts))
         if prob.tspan[1] == ts[1]
             cur_t += 1
-            us[1] = u0
         end
     end
 
@@ -306,12 +304,12 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern7) = true
                                  a1607 * k7 + a1608 * k8 + a1609 * k9 + a1611 * k11 +
                                  a1612 * k12 + a1613 * k13), p, t + c16 * dtold)
 
-                        us[cur_t] = uprev +
+                        us = Base.setindex(us,uprev +
                                     dtold * (k1 * b1Θ
                                      + k4 * b4Θ + k5 * b5Θ + k6 * b6Θ + k7 * b7Θ +
                                      k8 * b8Θ + k9 * b9Θ
                                      + k11 * b11Θ + k12 * b12Θ + k13 * b13Θ +
-                                     k14 * b14Θ + k15 * b15Θ + k16 * b16Θ)
+                                     k14 * b14Θ + k15 * b15Θ + k16 * b16Θ),cur_t)
 
                         cur_t += 1
                     end

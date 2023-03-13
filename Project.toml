@@ -10,7 +10,7 @@ MuladdMacro = "46d2c3a1-f734-5fdb-9937-b9b9aeba4221"
 Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
 RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
-StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+StaticArraysCore = "1e83bf80-4336-4d27-bf5d-d5a4f845583c"
 
 [compat]
 DiffEqBase = "6.11"
@@ -18,12 +18,13 @@ MuladdMacro = "0.2"
 Parameters = "0.12"
 RecursiveArrayTools = "2"
 Reexport = "0.2, 1.0"
-StaticArrays = "0.10, 0.11, 0.12, 1.0"
+StaticArraysCore = "1.4"
 julia = "1.6"
 
 [extras]
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["OrdinaryDiffEq", "Test"]
+test = ["OrdinaryDiffEq", "StaticArrays", "Test"]

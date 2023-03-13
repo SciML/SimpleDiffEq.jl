@@ -68,7 +68,7 @@ end
 
 function DiffEqBase.__init(prob::DiscreteProblem,
                            alg::SimpleFunctionMap)
-    sol = solve(prob, alg; calculate_values = false)
+    sol = DiffEqBase.__solve(prob, alg; calculate_values = false)
     F = typeof(prob.f)
     IIP = isinplace(prob)
     uType = typeof(prob.u0)

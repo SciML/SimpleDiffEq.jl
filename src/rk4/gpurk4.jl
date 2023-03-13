@@ -37,7 +37,7 @@ export GPUSimpleRK4
         us[i] = u
     end
 
-    sol = DiffEqBase.build_solution(prob, alg, ts, SArray(us),
+    sol = DiffEqBase.build_solution(prob, alg, ts, StaticArraysCore.SArray(us),
                                     k = nothing, destats = nothing,
                                     calculate_error = false)
     DiffEqBase.has_analytic(prob.f) &&

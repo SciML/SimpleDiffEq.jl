@@ -15,9 +15,9 @@ mutable struct SimpleTsit5Integrator{IIP, S, T, P, F} <:
     p::P                  # parameter container
     u_modified::Bool
     ks::Vector{S}         # interpolants of the algorithm
-    cs::SVector{6, T}     # ci factors cache: time coefficients
-    as::SVector{21, T}    # aij factors cache: solution coefficients
-    rs::SVector{22, T}    # rij factors cache: interpolation coefficients
+    cs::NTuple{6, T}     # ci factors cache: time coefficients
+    as::NTuple{21, T}    # aij factors cache: solution coefficients
+    rs::NTuple{22, T}    # rij factors cache: interpolation coefficients
 end
 const ST5I = SimpleTsit5Integrator
 
@@ -61,16 +61,16 @@ end
     cs, as, rs = _build_tsit5_caches(T)
     ks = [zero(u0) for i in 1:7]
 
-    !IIP && @assert S <: SArray
+    !IIP && @assert S <: StaticArraysCore.SArray
 
     integ = ST5I{IIP, S, T, P, F}(f, _copy(u0), _copy(u0), _copy(u0), t0, t0, t0, dt,
                                   sign(dt), p, true, ks, cs, as, rs)
 end
 
 @inline function _build_tsit5_caches(::Type{T}) where {T}
-    cs = SVector{6, T}(0.161, 0.327, 0.9, 0.9800255409045097, 1.0, 1.0)
+    cs = (0.161, 0.327, 0.9, 0.9800255409045097, 1.0, 1.0)
 
-    as = SVector{21, T}(convert(T, 0.161),        #=a21=#
+    as = (convert(T, 0.161),        #=a21=#
                         convert(T, -0.008480655492356989),        #=a31=#
                         convert(T, 0.335480655492357),        #=a32=#
                         convert(T, 2.8971530571054935),        #=a41=#
@@ -92,7 +92,7 @@ end
                         convert(T, -3.290069515436081),        #=a75=#
                         convert(T, 2.324710524099774))
 
-    rs = SVector{22, T}(convert(T, 1.0),        #=r11=#
+    rs = (convert(T, 1.0),        #=r11=#
                         convert(T, -2.763706197274826),        #=r12=#
                         convert(T, 2.9132554618219126),        #=r13=#
                         convert(T, -1.0530884977290216),        #=r14=#
@@ -263,7 +263,8 @@ end
     end
 end
 # Interpolation coefficients
-@inline function bθs(rs::SVector{22, T}, θ::T) where {T}
+@inline function bθs(rs, θ)
+    T = eltype(rs)
     # θ in (0, 1) !
     r11, r12, r13, r14, r22, r23, r24, r32, r33, r34, r42, r43, r44, r52, r53,
     r54, r62, r63, r64, r72, r73, r74 = rs

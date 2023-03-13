@@ -29,7 +29,7 @@ for (adaptive_alg, non_adaptive_alg) in zip(adaptive_algs, non_adaptive_algs)
                        reltol = 1.0f-7)
 
     @test norm(bench_sol.u[end] - sol.u[end]) < 5e-3
-    @test norm(bench_asol.u - asol.u) < 5e-4
+    @test norm(bench_asol.u .- asol.u) < 5e-4
 
     ### solve parameters
 
@@ -46,8 +46,8 @@ for (adaptive_alg, non_adaptive_alg) in zip(adaptive_algs, non_adaptive_algs)
 
     @test norm(asol.u[end] - sol.u[end]) < 5e-3
 
-    @test norm(bench_sol.u - sol.u) < 2e-4
-    @test norm(bench_asol.u - asol.u) < 2e-4
+    @test norm(bench_sol.u .- sol.u) < 2e-4
+    @test norm(bench_asol.u .- asol.u) < 2e-4
 
     @test length(sol.u) == length(saveat)
     @test length(asol.u) == length(saveat)
@@ -66,8 +66,8 @@ for (adaptive_alg, non_adaptive_alg) in zip(adaptive_algs, non_adaptive_algs)
 
     @test norm(asol.u[end] - sol.u[end]) < 6e-3
 
-    @test norm(bench_sol.u - sol.u) < 2e-3
-    @test norm(bench_asol.u - asol.u) < 3e-3
+    @test norm(bench_sol.u .- sol.u) < 2e-3
+    @test norm(bench_asol.u .- asol.u) < 3e-3
 
     @test length(sol.u) == length(saveat)
     @test length(asol.u) == length(saveat)
@@ -76,7 +76,7 @@ for (adaptive_alg, non_adaptive_alg) in zip(adaptive_algs, non_adaptive_algs)
 
     bench_sol = solve(prob, Vern9(), adaptive = false, dt = 0.01f0, save_everystep = false)
 
-    @test norm(bench_sol.u - sol.u) < 5e-3
+    @test norm(bench_sol.u .- sol.u) < 5e-3
 
     @test length(sol.u) == length(bench_sol.u)
 end
