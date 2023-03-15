@@ -59,7 +59,7 @@ export LoopRK4
     !save_everystep && save_end && (us[end] = u)
 
     sol = DiffEqBase.build_solution(prob, alg, ts, us,
-                                    k = nothing, destats = nothing,
+                                    k = nothing, stats = nothing,
                                     calculate_error = false)
     DiffEqBase.has_analytic(prob.f) &&
         DiffEqBase.calculate_solution_errors!(sol; timeseries_errors = true,
@@ -127,7 +127,7 @@ end
     !save_everystep && save_end && (us[end] = u)
 
     sol = DiffEqBase.build_solution(prob, alg, ts, us,
-                                    k = nothing, destats = nothing,
+                                    k = nothing, stats = nothing,
                                     calculate_error = false)
     DiffEqBase.has_analytic(prob.f) &&
         DiffEqBase.calculate_solution_errors!(sol; timeseries_errors = true,
