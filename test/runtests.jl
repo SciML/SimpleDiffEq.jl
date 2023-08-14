@@ -1,12 +1,12 @@
-using SimpleDiffEq, Test
+using SimpleDiffEq, SafeTestsets, Test
 
 @time begin
-    @time @testset "Discrete Tests" include("discrete_tests.jl")
-    @time @testset "SimpleEM Tests" include("simpleem_tests.jl")
-    @time @testset "SimpleTsit5 Tests" include("simpletsit5_tests.jl")
-    @time @testset "SimpleATsit5 Tests" include("simpleatsit5_tests.jl")
-    @time @testset "GPUSimpleATsit5 Tests" include("gpusimpleatsit5_tests.jl")
-    @time @testset "SimpleRK4 Tests" include("simplerk4_tests.jl")
-    @time @testset "SimpleEuler Tests" include("simpleeuler_tests.jl")
-    @time @testset "GPU Compatible ODE Tests" include("gpu_ode_regression.jl")
+    @time @safetestset "Discrete Tests" include("discrete_tests.jl")
+    @time @safetestset "SimpleEM Tests" include("simpleem_tests.jl")
+    @time @safetestset "SimpleTsit5 Tests" include("simpletsit5_tests.jl")
+    @time @safetestset "SimpleATsit5 Tests" include("simpleatsit5_tests.jl")
+    @time @safetestset "GPUSimpleATsit5 Tests" include("gpusimpleatsit5_tests.jl")
+    @time @safetestset "SimpleRK4 Tests" include("simplerk4_tests.jl")
+    @time @safetestset "SimpleEuler Tests" include("simpleeuler_tests.jl")
+    @time @safetestset "GPU Compatible ODE Tests" include("gpu_ode_regression.jl")
 end
