@@ -33,17 +33,17 @@ DiffEqBase.isinplace(::SEI{IIP}) where {IIP} = IIP
 ################################################################################
 
 function DiffEqBase.__init(prob::ODEProblem, alg::SimpleEuler;
-                           dt = error("dt is required for this algorithm"))
+    dt = error("dt is required for this algorithm"))
     simpleeuler_init(prob.f,
-                   DiffEqBase.isinplace(prob),
-                   prob.u0,
-                   prob.tspan[1],
-                   dt,
-                   prob.p)
+        DiffEqBase.isinplace(prob),
+        prob.u0,
+        prob.tspan[1],
+        dt,
+        prob.p)
 end
 
 function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleEuler;
-                            dt = error("dt is required for this algorithm"))
+    dt = error("dt is required for this algorithm"))
     u0 = prob.u0
     tspan = prob.tspan
     ts = Array(tspan[1]:dt:tspan[2])
@@ -53,7 +53,7 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleEuler;
     @inbounds us[1] = _copy(u0)
 
     integ = simpleeuler_init(prob.f, DiffEqBase.isinplace(prob), prob.u0,
-                           prob.tspan[1], dt, prob.p)
+        prob.tspan[1], dt, prob.p)
 
     for i in 1:(n - 1)
         step!(integ)
@@ -64,26 +64,26 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleEuler;
 
     DiffEqBase.has_analytic(prob.f) &&
         DiffEqBase.calculate_solution_errors!(sol;
-                                              timeseries_errors = true,
-                                              dense_errors = false)
+            timeseries_errors = true,
+            dense_errors = false)
 
     return sol
 end
 
 @inline function simpleeuler_init(f::F, IIP::Bool, u0::S, t0::T, dt::T,
-                                p::P) where
-    {F, P, T, S <: AbstractArray{T}}
+    p::P) where
+    {F, P, T, S}
     integ = SEI{IIP, S, T, P, F}(f,
-                                  _copy(u0),
-                                  _copy(u0),
-                                  _copy(u0),
-                                  t0,
-                                  t0,
-                                  t0,
-                                  dt,
-                                  sign(dt),
-                                  p,
-                                  true)
+        _copy(u0),
+        _copy(u0),
+        _copy(u0),
+        t0,
+        t0,
+        t0,
+        dt,
+        sign(dt),
+        p,
+        true)
 
     return integ
 end

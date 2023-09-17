@@ -27,13 +27,13 @@ DiffEqBase.isinplace(::ST5I{IIP}) where {IIP} = IIP
 # Initialization
 #######################################################################################
 function DiffEqBase.__init(prob::ODEProblem, alg::SimpleTsit5;
-                           dt = error("dt is required for this algorithm"))
+    dt = error("dt is required for this algorithm"))
     simpletsit5_init(prob.f, DiffEqBase.isinplace(prob), prob.u0,
-                     prob.tspan[1], dt, prob.p)
+        prob.tspan[1], dt, prob.p)
 end
 
 function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleTsit5;
-                            dt = error("dt is required for this algorithm"))
+    dt = error("dt is required for this algorithm"))
     u0 = prob.u0
     tspan = prob.tspan
     ts = Array(tspan[1]:dt:tspan[2])
@@ -41,79 +41,77 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleTsit5;
     us = Vector{typeof(u0)}(undef, n)
     @inbounds us[1] = _copy(u0)
     integ = simpletsit5_init(prob.f, DiffEqBase.isinplace(prob), prob.u0,
-                             prob.tspan[1], dt, prob.p)
+        prob.tspan[1], dt, prob.p)
     # FSAL
     for i in 1:(n - 1)
         step!(integ)
         us[i + 1] = _copy(integ.u)
     end
     sol = DiffEqBase.build_solution(prob, alg, ts, us,
-                                    calculate_error = false)
+        calculate_error = false)
     DiffEqBase.has_analytic(prob.f) &&
         DiffEqBase.calculate_solution_errors!(sol; timeseries_errors = true,
-                                              dense_errors = false)
+            dense_errors = false)
     sol
 end
 
 @inline function simpletsit5_init(f::F,
-                                  IIP::Bool, u0::S, t0::T, dt::T,
-                                  p::P) where {F, P, T, S <: AbstractArray{T}}
+    IIP::Bool, u0::S, t0::T, dt::T,
+    p::P) where {F, P, T, S}
     cs, as, rs = _build_tsit5_caches(T)
     ks = [zero(u0) for i in 1:7]
 
-    !IIP && @assert S <: SArray
-
     integ = ST5I{IIP, S, T, P, F}(f, _copy(u0), _copy(u0), _copy(u0), t0, t0, t0, dt,
-                                  sign(dt), p, true, ks, cs, as, rs)
+        sign(dt), p, true, ks, cs, as, rs)
 end
 
 @inline function _build_tsit5_caches(::Type{T}) where {T}
     cs = SVector{6, T}(0.161, 0.327, 0.9, 0.9800255409045097, 1.0, 1.0)
 
     as = SVector{21, T}(convert(T, 0.161),        #=a21=#
-                        convert(T, -0.008480655492356989),        #=a31=#
-                        convert(T, 0.335480655492357),        #=a32=#
-                        convert(T, 2.8971530571054935),        #=a41=#
-                        convert(T, -6.359448489975075),        #=a42=#
-                        convert(T, 4.3622954328695815),        #=a43=#
-                        convert(T, 5.325864828439257),        #=a51=#
-                        convert(T, -11.748883564062828),        #=a52=#
-                        convert(T, 7.4955393428898365),        #=a53=#
-                        convert(T, -0.09249506636175525),        #=a54=#
-                        convert(T, 5.86145544294642),        #=a61=#
-                        convert(T, -12.92096931784711),        #=a62=#
-                        convert(T, 8.159367898576159),        #=a63=#
-                        convert(T, -0.071584973281401),        #=a64=#
-                        convert(T, -0.028269050394068383),        #=a65=#
-                        convert(T, 0.09646076681806523),        #=a71=#
-                        convert(T, 0.01),        #=a72=#
-                        convert(T, 0.4798896504144996),        #=a73=#
-                        convert(T, 1.379008574103742),        #=a74=#
-                        convert(T, -3.290069515436081),        #=a75=#
-                        convert(T, 2.324710524099774))
+        convert(T, -0.008480655492356989),        #=a31=#
+        convert(T, 0.335480655492357),        #=a32=#
+        convert(T, 2.8971530571054935),        #=a41=#
+        convert(T, -6.359448489975075),        #=a42=#
+        convert(T, 4.3622954328695815),        #=a43=#
+        convert(T, 5.325864828439257),        #=a51=#
+        convert(T, -11.748883564062828),        #=a52=#
+        convert(T, 7.4955393428898365),        #=a53=#
+        convert(T, -0.09249506636175525),        #=a54=#
+        convert(T, 5.86145544294642),        #=a61=#
+        convert(T, -12.92096931784711),        #=a62=#
+        convert(T, 8.159367898576159),        #=a63=#
+        convert(T, -0.071584973281401),        #=a64=#
+        convert(T, -0.028269050394068383),        #=a65=#
+        convert(T, 0.09646076681806523),        #=a71=#
+        convert(T, 0.01),        #=a72=#
+        convert(T, 0.4798896504144996),        #=a73=#
+        convert(T, 1.379008574103742),        #=a74=#
+        convert(T, -3.290069515436081),        #=a75=#
+        convert(T, 2.324710524099774))
 
     rs = SVector{22, T}(convert(T, 1.0),        #=r11=#
-                        convert(T, -2.763706197274826),        #=r12=#
-                        convert(T, 2.9132554618219126),        #=r13=#
-                        convert(T, -1.0530884977290216),        #=r14=#
-                        convert(T, 0.13169999999999998),        #=r22=#
-                        convert(T, -0.2234),        #=r23=#
-                        convert(T, 0.1017),        #=r24=#
-                        convert(T, 3.9302962368947516),        #=r32=#
-                        convert(T, -5.941033872131505),        #=r33=#
-                        convert(T, 2.490627285651253),        #=r34=#
-                        convert(T, -12.411077166933676),        #=r42=#
-                        convert(T, 30.33818863028232),        #=r43=#
-                        convert(T, -16.548102889244902),        #=r44=#
-                        convert(T, 37.50931341651104),        #=r52=#
-                        convert(T, -88.1789048947664),        #=r53=#
-                        convert(T, 47.37952196281928),        #=r54=#
-                        convert(T, -27.896526289197286),        #=r62=#
-                        convert(T, 65.09189467479366),        #=r63=#
-                        convert(T, -34.87065786149661),        #=r64=#
-                        convert(T, 1.5),        #=r72=#
-                        convert(T, -4),        #=r73=#
-                        convert(T, 2.5))
+        convert(T, -2.763706197274826),        #=r12=#
+        convert(T, 2.9132554618219126),        #=r13=#
+        convert(T, -1.0530884977290216),        #=r14=#
+        convert(T, 0.13169999999999998),        #=r22=#
+        convert(T, -0.2234),        #=r23=#
+        convert(T, 0.1017),        #=r24=#
+        convert(T, 3.9302962368947516),        #=r32=#
+        convert(T, -5.941033872131505),        #=r33=#
+        convert(T, 2.490627285651253),        #=r34=#
+        convert(T, -12.411077166933676),        #=r42=#
+        convert(T, 30.33818863028232),        #=r43=#
+        convert(T, -16.548102889244902),        #=r44=#
+        convert(T, 37.50931341651104),        #=r52=#
+        convert(T, -88.1789048947664),        #=r53=#
+        convert(T, 47.37952196281928),        #=r54=#
+        convert(T, -27.896526289197286),        #=r62=#
+        convert(T, 65.09189467479366),        #=r63=#
+        convert(T, -34.87065786149661),        #=r64=#
+        convert(T, 1.5),        #=r72=#
+        convert(T, -4),        #=r73=#
+        convert(T, 2.5))
 
     return cs, as, rs
 end

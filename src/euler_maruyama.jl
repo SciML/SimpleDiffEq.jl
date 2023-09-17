@@ -2,9 +2,9 @@ struct SimpleEM <: DiffEqBase.AbstractSDEAlgorithm end
 export SimpleEM
 
 @muladd function DiffEqBase.solve(prob::SDEProblem{uType, tType, false}, alg::SimpleEM,
-                                  args...;
-                                  dt = error("dt required for SimpleEM")) where {uType,
-                                                                                 tType}
+    args...;
+    dt = error("dt required for SimpleEM")) where {uType,
+    tType}
     f = prob.f
     g = prob.g
     u0 = prob.u0
@@ -39,13 +39,13 @@ export SimpleEM
     end
 
     sol = DiffEqBase.build_solution(prob, alg, t, u,
-                                    calculate_error = false)
+        calculate_error = false)
 end
 
 @muladd function DiffEqBase.solve(prob::SDEProblem{uType, tType, true}, alg::SimpleEM,
-                                  args...;
-                                  dt = error("dt required for SimpleEM")) where {uType,
-                                                                                 tType}
+    args...;
+    dt = error("dt required for SimpleEM")) where {uType,
+    tType}
     f = prob.f
     g = prob.g
     u0 = prob.u0
@@ -80,5 +80,5 @@ end
     end
 
     sol = DiffEqBase.build_solution(prob, alg, t, u,
-                                    calculate_error = false)
+        calculate_error = false)
 end

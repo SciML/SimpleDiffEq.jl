@@ -8,14 +8,14 @@ export LoopRK4
 # Out-of-place
 # No caching, good for static arrays, bad for arrays
 @muladd function DiffEqBase.__solve(prob::ODEProblem{uType, tType, false},
-                                    alg::LoopRK4;
-                                    dt = error("dt is required for this algorithm"),
-                                    save_everystep = true,
-                                    save_start = true,
-                                    adaptive = false,
-                                    dense = false,
-                                    save_end = true,
-                                    kwargs...) where {uType, tType}
+    alg::LoopRK4;
+    dt = error("dt is required for this algorithm"),
+    save_everystep = true,
+    save_start = true,
+    adaptive = false,
+    dense = false,
+    save_end = true,
+    kwargs...) where {uType, tType}
     @assert !adaptive
     @assert !dense
     u0 = prob.u0
@@ -59,11 +59,11 @@ export LoopRK4
     !save_everystep && save_end && (us[end] = u)
 
     sol = DiffEqBase.build_solution(prob, alg, ts, us,
-                                    k = nothing, stats = nothing,
-                                    calculate_error = false)
+        k = nothing, stats = nothing,
+        calculate_error = false)
     DiffEqBase.has_analytic(prob.f) &&
         DiffEqBase.calculate_solution_errors!(sol; timeseries_errors = true,
-                                              dense_errors = false)
+            dense_errors = false)
     sol
 end
 
@@ -71,14 +71,14 @@ end
 # Good for mutable objects like arrays
 # Use DiffEqBase.@.. for simd ivdep
 @muladd function DiffEqBase.solve(prob::ODEProblem{uType, tType, true},
-                                  alg::LoopRK4;
-                                  dt = error("dt is required for this algorithm"),
-                                  save_everystep = true,
-                                  save_start = true,
-                                  adaptive = false,
-                                  dense = false,
-                                  save_end = true,
-                                  kwargs...) where {uType, tType}
+    alg::LoopRK4;
+    dt = error("dt is required for this algorithm"),
+    save_everystep = true,
+    save_start = true,
+    adaptive = false,
+    dense = false,
+    save_end = true,
+    kwargs...) where {uType, tType}
     @assert !adaptive
     @assert !dense
     u0 = prob.u0
@@ -127,10 +127,10 @@ end
     !save_everystep && save_end && (us[end] = u)
 
     sol = DiffEqBase.build_solution(prob, alg, ts, us,
-                                    k = nothing, stats = nothing,
-                                    calculate_error = false)
+        k = nothing, stats = nothing,
+        calculate_error = false)
     DiffEqBase.has_analytic(prob.f) &&
         DiffEqBase.calculate_solution_errors!(sol; timeseries_errors = true,
-                                              dense_errors = false)
+            dense_errors = false)
     sol
 end

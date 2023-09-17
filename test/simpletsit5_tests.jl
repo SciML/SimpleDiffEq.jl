@@ -56,14 +56,14 @@ step!(iip);
 step!(iip);
 
 deoop = DiffEqBase.init(odeoop, Tsit5(); adaptive = false,
-                        save_everystep = false, dt = dt)
+    save_everystep = false, dt = dt)
 step!(deoop);
 step!(deoop);
 @test oop.u == deoop.u
 
 deiip = DiffEqBase.init(odeiip, Tsit5();
-                        adaptive = false, save_everystep = false,
-                        dt = dt)
+    adaptive = false, save_everystep = false,
+    dt = dt)
 step!(deiip);
 step!(deiip);
 @test iip.u≈deiip.u atol=1e-14

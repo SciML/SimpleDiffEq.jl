@@ -7,9 +7,9 @@ struct GPUSimpleVern9 <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleVern9
 
 @muladd function DiffEqBase.solve(prob::ODEProblem,
-                                  alg::GPUSimpleVern9; saveat = nothing,
-                                  save_everystep = true,
-                                  dt = 0.1f0)
+    alg::GPUSimpleVern9; saveat = nothing,
+    save_everystep = true,
+    dt = 0.1f0)
     @assert !isinplace(prob)
     u0 = prob.u0
     tspan = prob.tspan
@@ -61,18 +61,18 @@ export GPUSimpleVern9
         k5 = f(uprev + dt * (a0501 * k1 + a0503 * k3 + a0504 * k4), p, t + c4 * dt)
         k6 = f(uprev + dt * (a0601 * k1 + a0604 * k4 + a0605 * k5), p, t + c5 * dt)
         k7 = f(uprev + dt * (a0701 * k1 + a0704 * k4 + a0705 * k5 + a0706 * k6), p,
-               t + c6 * dt)
+            t + c6 * dt)
         k8 = f(uprev + dt * (a0801 * k1 + a0806 * k6 + a0807 * k7), p, t + c7 * dt)
         k9 = f(uprev + dt * (a0901 * k1 + a0906 * k6 + a0907 * k7 + a0908 * k8), p,
-               t + c8 * dt)
+            t + c8 * dt)
         k10 = f(uprev +
                 dt * (a1001 * k1 + a1006 * k6 + a1007 * k7 + a1008 * k8 + a1009 * k9),
-                p, t + c9 * dt)
+            p, t + c9 * dt)
         k11 = f(uprev +
                 dt *
                 (a1101 * k1 + a1106 * k6 + a1107 * k7 + a1108 * k8 + a1109 * k9 +
                  a1110 * k10),
-                p, t + c10 * dt)
+            p, t + c10 * dt)
         k12 = f(uprev +
                 dt *
                 (a1201 * k1 + a1206 * k6 + a1207 * k7 + a1208 * k8 + a1209 * k9 +
@@ -127,7 +127,7 @@ export GPUSimpleVern9
                 k11 = f(uprev +
                         dt * (a1701 * k1 + a1708 * k2 + a1709 * k3 + a1710 * k4 +
                          a1711 * k5 + a1712 * k6 + a1713 * k7 + a1714 * k8 + a1715 * k9),
-                        p, t + c17 * dt)
+                    p, t + c17 * dt)
                 k12 = f(uprev +
                         dt * (a1801 * k1 + a1808 * k2 + a1809 * k3 + a1810 * k4 +
                          a1811 * k5 + a1812 * k6 + a1813 * k7 + a1814 * k8 +
@@ -140,7 +140,7 @@ export GPUSimpleVern9
                         dt * (a2001 * k1 + a2008 * k2 + a2009 * k3 + a2010 * k4 +
                          a2011 * k5 + a2012 * k6 + a2013 * k7 + a2014 * k8 +
                          a2015 * k9 + a2017 * k11 + a2018 * k12 + a2019 * k13), p,
-                        t + c20 * dt)
+                    t + c20 * dt)
                 k15 = f(uprev +
                         dt * (a2101 * k1 + a2108 * k2 + a2109 * k3 + a2110 * k4 +
                          a2111 * k5 + a2112 * k6 + a2113 * k7 + a2114 * k8 +
@@ -192,11 +192,11 @@ export GPUSimpleVern9
     end
 
     sol = DiffEqBase.build_solution(prob, alg, ts, us,
-                                    k = nothing, stats = nothing,
-                                    calculate_error = false)
+        k = nothing, stats = nothing,
+        calculate_error = false)
     DiffEqBase.has_analytic(prob.f) &&
         DiffEqBase.calculate_solution_errors!(sol; timeseries_errors = true,
-                                              dense_errors = false)
+            dense_errors = false)
     sol
 end
 
@@ -211,10 +211,10 @@ export GPUSimpleAVern9
 SciMLBase.isadaptive(alg::GPUSimpleAVern9) = true
 
 @muladd function DiffEqBase.solve(prob::ODEProblem,
-                                  alg::GPUSimpleAVern9;
-                                  dt = 0.1f0, saveat = nothing,
-                                  save_everystep = true,
-                                  abstol = 1.0f-6, reltol = 1.0f-3)
+    alg::GPUSimpleAVern9;
+    dt = 0.1f0, saveat = nothing,
+    save_everystep = true,
+    abstol = 1.0f-6, reltol = 1.0f-3)
     @assert !isinplace(prob)
     u0 = prob.u0
     tspan = prob.tspan
@@ -271,18 +271,18 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern9) = true
             k5 = f(uprev + dt * (a0501 * k1 + a0503 * k3 + a0504 * k4), p, t + c4 * dt)
             k6 = f(uprev + dt * (a0601 * k1 + a0604 * k4 + a0605 * k5), p, t + c5 * dt)
             k7 = f(uprev + dt * (a0701 * k1 + a0704 * k4 + a0705 * k5 + a0706 * k6), p,
-                   t + c6 * dt)
+                t + c6 * dt)
             k8 = f(uprev + dt * (a0801 * k1 + a0806 * k6 + a0807 * k7), p, t + c7 * dt)
             k9 = f(uprev + dt * (a0901 * k1 + a0906 * k6 + a0907 * k7 + a0908 * k8), p,
-                   t + c8 * dt)
+                t + c8 * dt)
             k10 = f(uprev +
                     dt * (a1001 * k1 + a1006 * k6 + a1007 * k7 + a1008 * k8 + a1009 * k9),
-                    p, t + c9 * dt)
+                p, t + c9 * dt)
             k11 = f(uprev +
                     dt *
                     (a1101 * k1 + a1106 * k6 + a1107 * k7 + a1108 * k8 + a1109 * k9 +
                      a1110 * k10),
-                    p, t + c10 * dt)
+                p, t + c10 * dt)
             k12 = f(uprev +
                     dt *
                     (a1201 * k1 + a1206 * k6 + a1207 * k7 + a1208 * k8 + a1209 * k9 +
@@ -383,7 +383,7 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern9) = true
                                 (a1701 * k1 + a1708 * k2 + a1709 * k3 + a1710 * k4 +
                                  a1711 * k5 + a1712 * k6 + a1713 * k7 + a1714 * k8 +
                                  a1715 * k9),
-                                p, told + c17 * dtold)
+                            p, told + c17 * dtold)
                         k12 = f(uprev +
                                 dtold *
                                 (a1801 * k1 + a1808 * k2 + a1809 * k3 + a1810 * k4 +
@@ -394,13 +394,13 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern9) = true
                                 (a1901 * k1 + a1908 * k2 + a1909 * k3 + a1910 * k4 +
                                  a1911 * k5 + a1912 * k6 + a1913 * k7 + a1914 * k8 +
                                  a1915 * k9 + a1917 * k11 + a1918 * k12), p,
-                                told + c19 * dtold)
+                            told + c19 * dtold)
                         k14 = f(uprev +
                                 dtold *
                                 (a2001 * k1 + a2008 * k2 + a2009 * k3 + a2010 * k4 +
                                  a2011 * k5 + a2012 * k6 + a2013 * k7 + a2014 * k8 +
                                  a2015 * k9 + a2017 * k11 + a2018 * k12 + a2019 * k13), p,
-                                told + c20 * dtold)
+                            told + c20 * dtold)
                         k15 = f(uprev +
                                 dtold *
                                 (a2101 * k1 + a2108 * k2 + a2109 * k3 + a2110 * k4 +
@@ -459,9 +459,9 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern9) = true
         push!(ts, t)
     end
     sol = DiffEqBase.build_solution(prob, alg, ts, us,
-                                    calculate_error = false)
+        calculate_error = false)
     DiffEqBase.has_analytic(prob.f) &&
         DiffEqBase.calculate_solution_errors!(sol; timeseries_errors = true,
-                                              dense_errors = false)
+            dense_errors = false)
     sol
 end

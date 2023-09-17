@@ -7,9 +7,9 @@ struct GPUSimpleVern7 <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleVern7
 
 @muladd function DiffEqBase.solve(prob::ODEProblem,
-                                  alg::GPUSimpleVern7; saveat = nothing,
-                                  save_everystep = true,
-                                  dt = 0.1f0)
+    alg::GPUSimpleVern7; saveat = nothing,
+    save_everystep = true,
+    dt = 0.1f0)
     @assert !isinplace(prob)
     u0 = prob.u0
     tspan = prob.tspan
@@ -63,11 +63,11 @@ export GPUSimpleVern7
         k5 = f(uprev + dt * (a051 * k1 + a053 * k3 + a054 * k4), p, t + c5 * dt)
         k6 = f(uprev + dt * (a061 * k1 + a063 * k3 + a064 * k4 + a065 * k5), p, t + c6 * dt)
         k7 = f(uprev + dt * (a071 * k1 + a073 * k3 + a074 * k4 + a075 * k5 + a076 * k6), p,
-               t + c7 * dt)
+            t + c7 * dt)
         k8 = f(uprev +
                dt * (a081 * k1 + a083 * k3 + a084 * k4 + a085 * k5 + a086 * k6 + a087 * k7),
-               p,
-               t + c8 * dt)
+            p,
+            t + c8 * dt)
         g9 = uprev +
              dt *
              (a091 * k1 + a093 * k3 + a094 * k4 + a095 * k5 + a096 * k6 + a097 * k7 +
@@ -90,7 +90,7 @@ export GPUSimpleVern7
                 θ = (savet - (t - dt)) / dt
 
                 b1Θ, b4Θ, b5Θ, b6Θ, b7Θ, b8Θ, b9Θ, b11Θ, b12Θ, b13Θ, b14Θ, b15Θ, b16Θ = bθs(tab.interp,
-                                                                                            θ)
+                    θ)
 
                 k11 = f(uprev +
                         dt * (a1101 * k1 + a1104 * k4 + a1105 * k5 + a1106 * k6 +
@@ -98,7 +98,7 @@ export GPUSimpleVern7
                 k12 = f(uprev +
                         dt * (a1201 * k1 + a1204 * k4 + a1205 * k5 + a1206 * k6 +
                          a1207 * k7 + a1208 * k8 + a1209 * k9 + a1211 * k11), p,
-                        t + c12 * dt)
+                    t + c12 * dt)
                 k13 = f(uprev +
                         dt * (a1301 * k1 + a1304 * k4 + a1305 * k5 + a1306 * k6 +
                          a1307 * k7 + a1308 * k8 + a1309 * k9 + a1311 * k11 +
@@ -134,11 +134,11 @@ export GPUSimpleVern7
     end
 
     sol = DiffEqBase.build_solution(prob, alg, ts, us,
-                                    k = nothing, stats = nothing,
-                                    calculate_error = false)
+        k = nothing, stats = nothing,
+        calculate_error = false)
     DiffEqBase.has_analytic(prob.f) &&
         DiffEqBase.calculate_solution_errors!(sol; timeseries_errors = true,
-                                              dense_errors = false)
+            dense_errors = false)
     sol
 end
 
@@ -153,10 +153,10 @@ export GPUSimpleAVern7
 SciMLBase.isadaptive(alg::GPUSimpleAVern7) = true
 
 @muladd function DiffEqBase.solve(prob::ODEProblem,
-                                  alg::GPUSimpleAVern7;
-                                  dt = 0.1f0, saveat = nothing,
-                                  save_everystep = true,
-                                  abstol = 1.0f-6, reltol = 1.0f-3)
+    alg::GPUSimpleAVern7;
+    dt = 0.1f0, saveat = nothing,
+    save_everystep = true,
+    abstol = 1.0f-6, reltol = 1.0f-3)
     @assert !isinplace(prob)
     u0 = prob.u0
     tspan = prob.tspan
@@ -215,15 +215,15 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern7) = true
             k4 = f(uprev + dt * (a041 * k1 + a043 * k3), p, t + c4 * dt)
             k5 = f(uprev + dt * (a051 * k1 + a053 * k3 + a054 * k4), p, t + c5 * dt)
             k6 = f(uprev + dt * (a061 * k1 + a063 * k3 + a064 * k4 + a065 * k5), p,
-                   t + c6 * dt)
+                t + c6 * dt)
             k7 = f(uprev + dt * (a071 * k1 + a073 * k3 + a074 * k4 + a075 * k5 + a076 * k6),
-                   p,
-                   t + c7 * dt)
+                p,
+                t + c7 * dt)
             k8 = f(uprev +
                    dt *
                    (a081 * k1 + a083 * k3 + a084 * k4 + a085 * k5 + a086 * k6 + a087 * k7),
-                   p,
-                   t + c8 * dt)
+                p,
+                t + c8 * dt)
             g9 = uprev +
                  dt *
                  (a091 * k1 + a093 * k3 + a094 * k4 + a095 * k5 + a096 * k6 + a097 * k7 +
@@ -274,7 +274,7 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern7) = true
                         savet = ts[cur_t]
                         θ = (savet - told) / dtold
                         b1Θ, b4Θ, b5Θ, b6Θ, b7Θ, b8Θ, b9Θ, b11Θ, b12Θ, b13Θ, b14Θ, b15Θ, b16Θ = bθs(tab.interp,
-                                                                                                    θ)
+                            θ)
 
                         k11 = f(uprev +
                                 dtold *
@@ -284,7 +284,7 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern7) = true
                                 dtold *
                                 (a1201 * k1 + a1204 * k4 + a1205 * k5 + a1206 * k6 +
                                  a1207 * k7 + a1208 * k8 + a1209 * k9 + a1211 * k11), p,
-                                t + c12 * dtold)
+                            t + c12 * dtold)
                         k13 = f(uprev +
                                 dtold *
                                 (a1301 * k1 + a1304 * k4 + a1305 * k5 + a1306 * k6 +
@@ -325,9 +325,9 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern7) = true
         push!(ts, t)
     end
     sol = DiffEqBase.build_solution(prob, alg, ts, us,
-                                    calculate_error = false)
+        calculate_error = false)
     DiffEqBase.has_analytic(prob.f) &&
         DiffEqBase.calculate_solution_errors!(sol; timeseries_errors = true,
-                                              dense_errors = false)
+            dense_errors = false)
     sol
 end

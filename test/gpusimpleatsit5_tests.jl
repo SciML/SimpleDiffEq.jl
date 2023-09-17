@@ -28,7 +28,7 @@ odeoop = ODEProblem{false}(loop, SVector{3}(u0), (0.0, 100.0), [10, 28, 8 / 3])
 sol = solve(odeoop, SimpleATsit5(), dt = dt)
 sol2 = solve(odeoop, GPUSimpleATsit5(), dt = dt, abstol = 1e-6, reltol = 1e-3)
 sol3 = solve(odeoop, GPUSimpleATsit5(), dt = dt, abstol = 1e-6, reltol = 1e-3,
-             save_everystep = false)
+    save_everystep = false)
 
 @test sol.u[5] ≈ sol2.u[5]
 @test sol.t[5] ≈ sol2.t[5]
@@ -38,7 +38,7 @@ sol3 = solve(odeoop, GPUSimpleATsit5(), dt = dt, abstol = 1e-6, reltol = 1e-3,
 
 sol = solve(odeoop, Tsit5(), dt = dt, saveat = 0.0:0.1:100.0)
 sol2 = solve(odeoop, GPUSimpleATsit5(), dt = dt, saveat = 0.0:0.1:100.0, abstol = 1e-6,
-             reltol = 1e-3)
+    reltol = 1e-3)
 sol3 = solve(odeoop, SimpleATsit5(), dt = dt, saveat = 0.0:0.1:100.0)
 
 @test sol[20]≈sol2[20] atol=1e-5
@@ -70,7 +70,7 @@ odeoop = remake(odeoop; tspan = (0.0, 10.0))
 
 sol = solve(odeoop, Tsit5(), reltol = 1e-9, abstol = 1e-9, save_everystep = false)
 sol1 = solve(odeoop, GPUSimpleATsit5(), reltol = 1e-9, abstol = 1e-9,
-             save_everystep = false)
+    save_everystep = false)
 
 @test sol.u≈sol1.u atol=1e-5
 @test sol.t ≈ sol1.t
