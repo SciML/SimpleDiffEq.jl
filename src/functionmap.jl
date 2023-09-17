@@ -4,8 +4,8 @@ SciMLBase.isdiscrete(alg::SimpleFunctionMap) = true
 
 # ConstantCache version
 function DiffEqBase.__solve(prob::DiffEqBase.DiscreteProblem{uType, tupType, false},
-                            alg::SimpleFunctionMap;
-                            calculate_values = true) where {uType, tupType}
+    alg::SimpleFunctionMap;
+    calculate_values = true) where {uType, tupType}
     tType = eltype(tupType)
     tspan = prob.tspan
     f = prob.f
@@ -22,14 +22,14 @@ function DiffEqBase.__solve(prob::DiffEqBase.DiscreteProblem{uType, tupType, fal
         end
     end
     sol = DiffEqBase.build_solution(prob, alg, t, u, dense = false,
-                                    interp = DiffEqBase.ConstantInterpolation(t, u),
-                                    calculate_error = false)
+        interp = DiffEqBase.ConstantInterpolation(t, u),
+        calculate_error = false)
 end
 
 # Cache version
 function DiffEqBase.__solve(prob::DiscreteProblem{uType, tupType, true},
-                            alg::SimpleFunctionMap;
-                            calculate_values = true) where {uType, tupType}
+    alg::SimpleFunctionMap;
+    calculate_values = true) where {uType, tupType}
     tType = eltype(tupType)
     tspan = prob.tspan
     f = prob.f
@@ -47,8 +47,8 @@ function DiffEqBase.__solve(prob::DiscreteProblem{uType, tupType, true},
         end
     end
     sol = DiffEqBase.build_solution(prob, alg, t, u, dense = false,
-                                    interp = DiffEqBase.ConstantInterpolation(t, u),
-                                    calculate_error = false)
+        interp = DiffEqBase.ConstantInterpolation(t, u),
+        calculate_error = false)
 end
 
 ##################################################
@@ -67,7 +67,7 @@ mutable struct DiscreteIntegrator{F, IIP, uType, tType, P, S} <:
 end
 
 function DiffEqBase.__init(prob::DiscreteProblem,
-                           alg::SimpleFunctionMap)
+    alg::SimpleFunctionMap)
     sol = solve(prob, alg; calculate_values = false)
     F = typeof(prob.f)
     IIP = isinplace(prob)
@@ -76,8 +76,8 @@ function DiffEqBase.__init(prob::DiscreteProblem,
     P = typeof(prob.p)
     S = typeof(sol)
     DiscreteIntegrator{F, IIP, uType, tType, P, S}(prob.f, prob.u0, prob.tspan[1],
-                                                   copy(prob.u0), prob.p, sol, 1,
-                                                   one(tType))
+        copy(prob.u0), prob.p, sol, 1,
+        one(tType))
 end
 
 function DiffEqBase.step!(integrator::DiscreteIntegrator)

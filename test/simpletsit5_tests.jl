@@ -56,19 +56,26 @@ step!(iip);
 step!(iip);
 
 deoop = DiffEqBase.init(odeoop, Tsit5(); adaptive = false,
-                        save_everystep = false, dt = dt)
+    save_everystep = false, dt = dt)
 step!(deoop);
 step!(deoop);
 @test oop.u == deoop.u
 
 deiip = DiffEqBase.init(odeiip, Tsit5();
-                        adaptive = false, save_everystep = false,
-                        dt = dt)
+    adaptive = false, save_everystep = false,
+    dt = dt)
 step!(deiip);
 step!(deiip);
 @test iip.u≈deiip.u atol=1e-14
 
 sol = solve(odeoop, SimpleTsit5(), dt = dt)
+
+# https://github.com/SciML/SimpleDiffEq.jl/pull/72
+f(u, p, t) = 1.01 * u
+u0 = 1 / 2
+tspan = (0.0, 1.0)
+prob = ODEProblem(f, u0, tspan)
+sol1 = solve(prob, SimpleTsit5(), dt = dt)
 
 #=
 using BenchmarkTools

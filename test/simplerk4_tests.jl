@@ -44,11 +44,11 @@ end
 u0 = 10ones(3)
 dt = 0.01
 oop = SimpleDiffEq.simplerk4_init(loop,
-                                  false,
-                                  SVector{3}(u0),
-                                  0.0,
-                                  dt,
-                                  [10, 28, 8 / 3])
+    false,
+    SVector{3}(u0),
+    0.0,
+    dt,
+    [10, 28, 8 / 3])
 step!(oop)
 
 for i in 1:10000
@@ -63,11 +63,11 @@ end
 # ---------------------------------
 
 iip = SimpleDiffEq.simplerk4_init(liip,
-                                  true,
-                                  copy(u0),
-                                  0.0,
-                                  dt,
-                                  [10, 28, 8 / 3])
+    true,
+    copy(u0),
+    0.0,
+    dt,
+    [10, 28, 8 / 3])
 
 step!(iip)
 
@@ -89,19 +89,19 @@ u0 = 10ones(3)
 dt = 0.01
 
 odeoop = ODEProblem{false}(loop,
-                           SVector{3}(u0),
-                           (0.0, 100.0),
-                           [10, 28, 8 / 3])
+    SVector{3}(u0),
+    (0.0, 100.0),
+    [10, 28, 8 / 3])
 
 oop = init(odeoop, SimpleRK4(), dt = dt)
 step!(oop)
 step!(oop)
 
 deoop = DiffEqBase.init(odeoop,
-                        RK4();
-                        adaptive = false,
-                        save_everystep = false,
-                        dt = dt)
+    RK4();
+    adaptive = false,
+    save_everystep = false,
+    dt = dt)
 step!(deoop)
 step!(deoop)
 
@@ -119,19 +119,19 @@ sol = solve(odeoop, LoopRK4(), dt = dt)
 # ---------------------------------
 
 odeiip = ODEProblem{true}(liip,
-                          u0,
-                          (0.0, 100.0),
-                          [10, 28, 8 / 3])
+    u0,
+    (0.0, 100.0),
+    [10, 28, 8 / 3])
 
 iip = init(odeiip, SimpleRK4(), dt = dt)
 step!(iip)
 step!(iip)
 
 deiip = DiffEqBase.init(odeiip,
-                        RK4();
-                        adaptive = false,
-                        save_everystep = false,
-                        dt = dt)
+    RK4();
+    adaptive = false,
+    save_everystep = false,
+    dt = dt)
 step!(deiip)
 step!(deiip)
 
@@ -144,3 +144,11 @@ sol = solve(odeiip, SimpleRK4(), dt = dt)
 sol = solve(odeiip, LoopRK4(), dt = dt)
 
 @test iip.u == sol.u[3]
+
+# https://github.com/SciML/SimpleDiffEq.jl/pull/72
+f(u, p, t) = 1.01 * u
+u0 = 1 / 2
+tspan = (0.0, 1.0)
+prob = ODEProblem(f, u0, tspan)
+sol1 = solve(prob, SimpleRK4(), dt = dt)
+sol1 = solve(prob, LoopRK4(), dt = dt)

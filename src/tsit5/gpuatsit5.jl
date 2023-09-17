@@ -7,9 +7,9 @@ struct GPUSimpleTsit5 <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleTsit5
 
 @muladd function DiffEqBase.solve(prob::ODEProblem,
-                                  alg::GPUSimpleTsit5; saveat = nothing,
-                                  save_everystep = true,
-                                  dt = 0.1f0)
+    alg::GPUSimpleTsit5; saveat = nothing,
+    save_everystep = true,
+    dt = 0.1f0)
     @assert !isinplace(prob)
     u0 = prob.u0
     tspan = prob.tspan
@@ -83,11 +83,11 @@ export GPUSimpleTsit5
     end
 
     sol = DiffEqBase.build_solution(prob, alg, ts, us,
-                                    k = nothing, stats = nothing,
-                                    calculate_error = false)
+        k = nothing, stats = nothing,
+        calculate_error = false)
     DiffEqBase.has_analytic(prob.f) &&
         DiffEqBase.calculate_solution_errors!(sol; timeseries_errors = true,
-                                              dense_errors = false)
+            dense_errors = false)
     sol
 end
 
@@ -102,10 +102,10 @@ export GPUSimpleATsit5
 SciMLBase.isadaptive(alg::GPUSimpleATsit5) = true
 
 @muladd function DiffEqBase.solve(prob::ODEProblem,
-                                  alg::GPUSimpleATsit5;
-                                  dt = 0.1f0, saveat = nothing,
-                                  save_everystep = true,
-                                  abstol = 1.0f-6, reltol = 1.0f-3)
+    alg::GPUSimpleATsit5;
+    dt = 0.1f0, saveat = nothing,
+    save_everystep = true,
+    abstol = 1.0f-6, reltol = 1.0f-3)
     @assert !isinplace(prob)
     u0 = prob.u0
     tspan = prob.tspan
@@ -215,9 +215,9 @@ SciMLBase.isadaptive(alg::GPUSimpleATsit5) = true
         push!(ts, t)
     end
     sol = DiffEqBase.build_solution(prob, alg, ts, us,
-                                    calculate_error = false)
+        calculate_error = false)
     DiffEqBase.has_analytic(prob.f) &&
         DiffEqBase.calculate_solution_errors!(sol; timeseries_errors = true,
-                                              dense_errors = false)
+            dense_errors = false)
     sol
 end

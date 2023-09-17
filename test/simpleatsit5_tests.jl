@@ -92,7 +92,7 @@ tmp = [1.0; 1.0]
 tspan = (0.0, 1.0)
 prob = ODEProblem(f, tmp, tspan)
 integ1 = init(prob, SimpleATsit5(), abstol = 1e-6, reltol = 1e-6, save_everystep = false,
-              dt = 0.1)
+    dt = 0.1)
 integ2 = init(prob, Tsit5(), abstol = 1e-6, reltol = 1e-6, save_everystep = false, dt = 0.1)
 step!(integ2)
 step!(integ1)
@@ -125,7 +125,7 @@ end
 
 ran = rand(SVector{3})
 odemoop = ODEProblem{false}(moop, SMatrix{3, 2}(hcat(u0, ran)), (0.0, 100.0),
-                            [10, 28, 8 / 3])
+    [10, 28, 8 / 3])
 odemiip = ODEProblem{true}(miip, hcat(u0, ran), (0.0, 100.0), [10, 28, 8 / 3])
 
 using LinearAlgebra
@@ -158,11 +158,11 @@ end
 
 ran = rand(3)
 odevoop = ODEProblem{true}(vvoop, [SVector{3}(u0), SVector{3}(ran)], (0.0, 100.0),
-                           [10, 28, 8 / 3])
+    [10, 28, 8 / 3])
 odeviip = ODEProblem{true}(vviip, [u0, ran], (0.0, 100.0), [10, 28, 8 / 3])
 
 viip = init(odeviip, SimpleATsit5(), dt = dt;
-            internalnorm = (u, t) -> DiffEqBase.ODE_DEFAULT_NORM(u[1], t))
+    internalnorm = (u, t) -> DiffEqBase.ODE_DEFAULT_NORM(u[1], t))
 step!(viip);
 step!(viip);
 
@@ -173,7 +173,7 @@ step!(iip);
 @test iip.u≈viip.u[1] atol=1e-5
 
 voop = init(odevoop, SimpleATsit5(), dt = dt,
-            internalnorm = (u, t) -> DiffEqBase.ODE_DEFAULT_NORM(u[1], t))
+    internalnorm = (u, t) -> DiffEqBase.ODE_DEFAULT_NORM(u[1], t))
 step!(voop);
 step!(voop);
 
@@ -239,5 +239,14 @@ sol1 = solve(odeiip, SimpleATsit5(), reltol = 1e-9, abstol = 1e-9, save_everyste
 sol = solve(odeoop, Tsit5(), reltol = 1e-9, abstol = 1e-9, save_everystep = false)
 sol1 = solve(odeoop, SimpleATsit5(), reltol = 1e-9, abstol = 1e-9, save_everystep = false)
 
+@test sol.u≈sol1.u atol=1e-5
+@test sol.t ≈ sol1.t
+
+simple_f(u, p, t) = 1.01 * u
+u0 = 1 / 2
+tspan = (0.0, 1.0)
+prob = ODEProblem(simple_f, u0, tspan)
+sol = solve(prob, Tsit5(), reltol = 1e-9, abstol = 1e-9, save_everystep = false)
+sol1 = solve(prob, SimpleATsit5(), reltol = 1e-9, abstol = 1e-9, save_everystep = false)
 @test sol.u≈sol1.u atol=1e-5
 @test sol.t ≈ sol1.t

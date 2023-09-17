@@ -47,18 +47,18 @@ DiffEqBase.u_modified!(i::SAT5I, bool) = (i.u_modified = bool)
 # Initialization
 #######################################################################################
 function DiffEqBase.__init(prob::ODEProblem, alg::SimpleATsit5;
-                           dt = 0.1,
-                           abstol = 1e-6, reltol = 1e-3,
-                           internalnorm = DiffEqBase.ODE_DEFAULT_NORM, kwargs...)
+    dt = 0.1,
+    abstol = 1e-6, reltol = 1e-3,
+    internalnorm = DiffEqBase.ODE_DEFAULT_NORM, kwargs...)
     simpleatsit5_init(prob.f, DiffEqBase.isinplace(prob), prob.u0,
-                      prob.tspan[1], prob.tspan[2], dt, prob.p, abstol, reltol,
-                      internalnorm)
+        prob.tspan[1], prob.tspan[2], dt, prob.p, abstol, reltol,
+        internalnorm)
 end
 
 function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleATsit5;
-                            dt = 0.1, saveat = nothing, save_everystep = true,
-                            abstol = 1e-6, reltol = 1e-3,
-                            internalnorm = DiffEqBase.ODE_DEFAULT_NORM)
+    dt = 0.1, saveat = nothing, save_everystep = true,
+    abstol = 1e-6, reltol = 1e-3,
+    internalnorm = DiffEqBase.ODE_DEFAULT_NORM)
     u0 = prob.u0
     tspan = prob.tspan
     ts = Vector{eltype(dt)}(undef, 1)
@@ -79,7 +79,7 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleATsit5;
     end
 
     integ = simpleatsit5_init(prob.f, DiffEqBase.isinplace(prob), prob.u0,
-                              tspan[1], tspan[2], dt, prob.p, abstol, reltol, internalnorm)
+        tspan[1], tspan[2], dt, prob.p, abstol, reltol, internalnorm)
     # FSAL
     while integ.t < tspan[2]
         step!(integ)
@@ -104,31 +104,32 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleATsit5;
     end
 
     sol = DiffEqBase.build_solution(prob, alg, ts, us,
-                                    calculate_error = false)
+        calculate_error = false)
     DiffEqBase.has_analytic(prob.f) &&
         DiffEqBase.calculate_solution_errors!(sol; timeseries_errors = true,
-                                              dense_errors = false)
+            dense_errors = false)
     sol
 end
 
 @inline function simpleatsit5_init(f::F,
-                                   IIP::Bool, u0::S, t0::T, tf::T, dt::T, p::P,
-                                   abstol, reltol,
-                                   internalnorm::N) where {F, P, S, T, N}
+    IIP::Bool, u0::S, t0::T, tf::T, dt::T, p::P,
+    abstol, reltol,
+    internalnorm::N) where {F, P, S, T, N}
     cs, as, btildes, rs = _build_atsit5_caches(T)
     ks = _initialize_ks(u0)
 
-    !IIP && @assert S <: SArray
-
     integ = SAT5I{IIP, S, T, P, F, N}(f, recursivecopy(u0), recursivecopy(u0),
-                                      recursivecopy(u0), t0, t0, t0, tf, dt, dt,
-                                      sign(tf - t0), p, true, ks, cs, as, btildes, rs,
-                                      qoldinit, abstol, reltol, internalnorm)
+        recursivecopy(u0), t0, t0, t0, tf, dt, dt,
+        sign(tf - t0), p, true, ks, cs, as, btildes, rs,
+        qoldinit, abstol, reltol, internalnorm)
 end
 
 @inline _initialize_ks(u0::AbstractArray{T}) where {T <: Number} = [zero(u0) for i in 1:7]
 @inline function _initialize_ks(u0::Vector{<:AbstractVector})
     return [[zero(u0[j]) for j in 1:length(u0)] for i in 1:7]
+end
+@inline function _initialize_ks(u0::T) where {T <: Number}
+    [zero(u0) for i in 1:7]
 end
 
 #######################################################################################
@@ -338,10 +339,14 @@ end
 # Vector of Vector (always in-place) stepping
 #######################################################################################
 # Vector{Vector}
-@inline @muladd function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {
-                                                                           S <:
-                                                                           Vector{<:Array},
-                                                                           T}
+@inline @muladd function DiffEqBase.step!(integ::SAT5I{
+    true,
+    S,
+    T,
+}) where {
+    S <:
+    Vector{<:Array},
+    T}
     M = length(integ.u) # number of states
     L = length(integ.u[1])
 
@@ -476,10 +481,14 @@ end
 end
 
 # Vector{SVector}
-@inline @muladd function DiffEqBase.step!(integ::SAT5I{true, S, T}) where {
-                                                                           S <:
-                                                                           Vector{<:SVector
-                                                                                  }, T}
+@inline @muladd function DiffEqBase.step!(integ::SAT5I{
+    true,
+    S,
+    T,
+}) where {
+    S <:
+    Vector{<:SVector
+    }, T}
     M = length(integ.u)
     L = length(integ.u[1])
 
@@ -597,10 +606,14 @@ end
 # Interpolation
 #######################################################################################
 # Interpolation function, both OOP and IIP
-@inline @muladd function (integ::SAT5I{IIP, S, T})(t::Real) where {IIP,
-                                                                   S <:
-                                                                   AbstractArray{<:Number},
-                                                                   T}
+@inline @muladd function (integ::SAT5I{
+    IIP,
+    S,
+    T,
+})(t::Real) where {IIP,
+    S <:
+    AbstractArray{<:Number},
+    T}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
 
     θ = (t - tprev) / dt
@@ -625,7 +638,7 @@ end
 
 # Interpolation function, IIP only
 @inline @muladd function (integ::SAT5I{true, S, T})(u,
-                                                    t::Real) where {S <: AbstractArray, T}
+    t::Real) where {S <: AbstractArray, T}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
 
     θ = (t - tprev) / dt
@@ -643,7 +656,7 @@ end
 # Multiple steps at once
 #######################################################################################
 @inline function DiffEqBase.step!(integ::SimpleATsit5Integrator, dt::Real,
-                                  stop_at_tdt::Bool = false)
+    stop_at_tdt::Bool = false)
     t = integ.t
     next_t = t + dt
     while integ.t < next_t
@@ -658,7 +671,7 @@ end
 # reinit!
 #######################################################################################
 @inline function DiffEqBase.reinit!(integrator::SimpleATsit5Integrator, u0 = integrator.u;
-                                    t0 = integrator.t0, dt = integrator.dt)
+    t0 = integrator.t0, dt = integrator.dt)
 
     # Is modifying the `uprev` necessary? We do `u_modified(i, true)`
     if isinplace(integrator)

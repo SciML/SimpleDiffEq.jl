@@ -17,7 +17,7 @@ for (adaptive_alg, non_adaptive_alg) in zip(adaptive_algs, non_adaptive_algs)
 
     sol = solve(prob, non_adaptive_alg, dt = 0.01f0)
     asol = solve(prob, adaptive_alg, dt = 0.1f-1, abstol = 1.0f-7, reltol = 1.0f-7,
-                 save_everystep = false)
+        save_everystep = false)
 
     @test sol.retcode == ReturnCode.Default
     @test asol.retcode == ReturnCode.Default
@@ -26,7 +26,7 @@ for (adaptive_alg, non_adaptive_alg) in zip(adaptive_algs, non_adaptive_algs)
 
     bench_sol = solve(prob, Vern9(), adaptive = false, dt = 0.01f0)
     bench_asol = solve(prob, Vern9(), dt = 0.1f-1, save_everystep = false, abstol = 1.0f-7,
-                       reltol = 1.0f-7)
+        reltol = 1.0f-7)
 
     @test norm(bench_sol.u[end] - sol.u[end]) < 5e-3
     @test norm(bench_asol.u - asol.u) < 5e-4
@@ -38,11 +38,11 @@ for (adaptive_alg, non_adaptive_alg) in zip(adaptive_algs, non_adaptive_algs)
     sol = solve(prob, non_adaptive_alg, dt = 0.01f0, saveat = saveat)
 
     asol = solve(prob, adaptive_alg, dt = 0.1f-1, abstol = 1.0f-7, reltol = 1.0f-7,
-                 saveat = saveat)
+        saveat = saveat)
 
     bench_sol = solve(prob, Vern9(), adaptive = false, dt = 0.01f0, saveat = saveat)
     bench_asol = solve(prob, Vern9(), dt = 0.1f-1, save_everystep = false, abstol = 1.0f-7,
-                       reltol = 1.0f-7, saveat = saveat)
+        reltol = 1.0f-7, saveat = saveat)
 
     @test norm(asol.u[end] - sol.u[end]) < 5e-3
 
@@ -57,12 +57,12 @@ for (adaptive_alg, non_adaptive_alg) in zip(adaptive_algs, non_adaptive_algs)
     sol = solve(prob, non_adaptive_alg, dt = 0.01f0, saveat = saveat)
 
     asol = solve(prob, adaptive_alg, dt = 0.1f-1, save_everystep = false, abstol = 1.0f-7,
-                 reltol = 1.0f-7,
-                 saveat = saveat)
+        reltol = 1.0f-7,
+        saveat = saveat)
 
     bench_sol = solve(prob, Vern9(), adaptive = false, dt = 0.01f0, saveat = saveat)
     bench_asol = solve(prob, Vern9(), dt = 0.1f-1, save_everystep = false, abstol = 1.0f-7,
-                       reltol = 1.0f-7, saveat = saveat)
+        reltol = 1.0f-7, saveat = saveat)
 
     @test norm(asol.u[end] - sol.u[end]) < 6e-3
 
