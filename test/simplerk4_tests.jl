@@ -144,3 +144,11 @@ sol = solve(odeiip, SimpleRK4(), dt = dt)
 sol = solve(odeiip, LoopRK4(), dt = dt)
 
 @test iip.u == sol.u[3]
+
+# https://github.com/SciML/SimpleDiffEq.jl/pull/72
+f(u, p, t) = 1.01 * u
+u0 = 1 / 2
+tspan = (0.0, 1.0)
+prob = ODEProblem(f, u0, tspan)
+sol1 = solve(prob, SimpleRK4(), dt = dt)
+sol1 = solve(prob, LoopRK4(), dt = dt)
