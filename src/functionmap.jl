@@ -67,8 +67,8 @@ mutable struct DiscreteIntegrator{F, IIP, uType, tType, P, S} <:
 end
 
 function DiffEqBase.__init(prob::DiscreteProblem,
-    alg::SimpleFunctionMap)
-    sol = solve(prob, alg; calculate_values = false)
+                           alg::SimpleFunctionMap)
+    sol = DiffEqBase.__solve(prob, alg; calculate_values = false)
     F = typeof(prob.f)
     IIP = isinplace(prob)
     uType = typeof(prob.u0)
