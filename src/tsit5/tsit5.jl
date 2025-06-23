@@ -37,16 +37,25 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleTsit5;
     u0 = prob.u0
     tspan = prob.tspan
     ts = Array(tspan[1]:dt:tspan[2])
-    n = length(ts)
+    n = ts[end] == tspan[2] ? length(ts) : length(ts) + 1
     us = Vector{typeof(u0)}(undef, n)
-    @inbounds us[1] = _copy(u0)
+    us[1] = _copy(u0)
     integ = simpletsit5_init(prob.f, DiffEqBase.isinplace(prob), prob.u0,
         prob.tspan[1], dt, prob.p)
+
     # FSAL
-    for i in 1:(n - 1)
+    for i in 1:(n-1)
         step!(integ)
         us[i + 1] = _copy(integ.u)
     end
+
+    if ts[end] != tspan[2]
+        integ.dt = tspan[2] - integ.t
+        step!(integ)
+        push!(ts, tspan[2])
+        us[end] = _copy(integ.u)
+    end
+
     sol = DiffEqBase.build_solution(prob, alg, ts, us,
         calculate_error = false)
     DiffEqBase.has_analytic(prob.f) &&
