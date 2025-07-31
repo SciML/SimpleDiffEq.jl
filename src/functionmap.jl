@@ -4,8 +4,8 @@ SciMLBase.isdiscrete(alg::SimpleFunctionMap) = true
 
 # ConstantCache version
 function DiffEqBase.__solve(prob::DiffEqBase.DiscreteProblem{uType, tupType, false},
-    alg::SimpleFunctionMap;
-    calculate_values = true) where {uType, tupType}
+        alg::SimpleFunctionMap;
+        calculate_values = true) where {uType, tupType}
     tType = eltype(tupType)
     tspan = prob.tspan
     f = prob.f
@@ -28,8 +28,8 @@ end
 
 # Cache version
 function DiffEqBase.__solve(prob::DiscreteProblem{uType, tupType, true},
-    alg::SimpleFunctionMap;
-    calculate_values = true) where {uType, tupType}
+        alg::SimpleFunctionMap;
+        calculate_values = true) where {uType, tupType}
     tType = eltype(tupType)
     tspan = prob.tspan
     f = prob.f
@@ -67,7 +67,7 @@ mutable struct DiscreteIntegrator{F, IIP, uType, tType, P, S} <:
 end
 
 function DiffEqBase.__init(prob::DiscreteProblem,
-                           alg::SimpleFunctionMap)
+        alg::SimpleFunctionMap)
     sol = DiffEqBase.__solve(prob, alg; calculate_values = false)
     F = typeof(prob.f)
     IIP = isinplace(prob)

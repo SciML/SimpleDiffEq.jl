@@ -7,9 +7,9 @@ struct GPUSimpleVern7 <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleVern7
 
 @muladd function DiffEqBase.solve(prob::ODEProblem,
-    alg::GPUSimpleVern7; saveat = nothing,
-    save_everystep = true,
-    dt = 0.1f0)
+        alg::GPUSimpleVern7; saveat = nothing,
+        save_everystep = true,
+        dt = 0.1f0)
     @assert !isinplace(prob)
     u0 = prob.u0
     tspan = prob.tspan
@@ -64,8 +64,9 @@ export GPUSimpleVern7
         k6 = f(uprev + dt * (a061 * k1 + a063 * k3 + a064 * k4 + a065 * k5), p, t + c6 * dt)
         k7 = f(uprev + dt * (a071 * k1 + a073 * k3 + a074 * k4 + a075 * k5 + a076 * k6), p,
             t + c7 * dt)
-        k8 = f(uprev +
-               dt * (a081 * k1 + a083 * k3 + a084 * k4 + a085 * k5 + a086 * k6 + a087 * k7),
+        k8 = f(
+            uprev +
+            dt * (a081 * k1 + a083 * k3 + a084 * k4 + a085 * k5 + a086 * k6 + a087 * k7),
             p,
             t + c8 * dt)
         g9 = uprev +
@@ -89,32 +90,50 @@ export GPUSimpleVern7
                 savet = ts[cur_t]
                 θ = (savet - (t - dt)) / dt
 
-                b1Θ, b4Θ, b5Θ, b6Θ, b7Θ, b8Θ, b9Θ, b11Θ, b12Θ, b13Θ, b14Θ, b15Θ, b16Θ = bθs(tab.interp,
+                b1Θ, b4Θ, b5Θ, b6Θ, b7Θ, b8Θ, b9Θ, b11Θ, b12Θ,
+                b13Θ, b14Θ, b15Θ, b16Θ = bθs(tab.interp,
                     θ)
 
-                k11 = f(uprev +
-                        dt * (a1101 * k1 + a1104 * k4 + a1105 * k5 + a1106 * k6 +
-                         a1107 * k7 + a1108 * k8 + a1109 * k9), p, t + c11 * dt)
-                k12 = f(uprev +
-                        dt * (a1201 * k1 + a1204 * k4 + a1205 * k5 + a1206 * k6 +
-                         a1207 * k7 + a1208 * k8 + a1209 * k9 + a1211 * k11), p,
+                k11 = f(
+                    uprev +
+                    dt * (a1101 * k1 + a1104 * k4 + a1105 * k5 + a1106 * k6 +
+                     a1107 * k7 + a1108 * k8 + a1109 * k9),
+                    p,
+                    t + c11 * dt)
+                k12 = f(
+                    uprev +
+                    dt * (a1201 * k1 + a1204 * k4 + a1205 * k5 + a1206 * k6 +
+                     a1207 * k7 + a1208 * k8 + a1209 * k9 + a1211 * k11),
+                    p,
                     t + c12 * dt)
-                k13 = f(uprev +
-                        dt * (a1301 * k1 + a1304 * k4 + a1305 * k5 + a1306 * k6 +
-                         a1307 * k7 + a1308 * k8 + a1309 * k9 + a1311 * k11 +
-                         a1312 * k12), p, t + c13 * dt)
-                k14 = f(uprev +
-                        dt * (a1401 * k1 + a1404 * k4 + a1405 * k5 + a1406 * k6 +
-                         a1407 * k7 + a1408 * k8 + a1409 * k9 + a1411 * k11 +
-                         a1412 * k12 + a1413 * k13), p, t + c14 * dt)
-                k15 = f(uprev +
-                        dt * (a1501 * k1 + a1504 * k4 + a1505 * k5 + a1506 * k6 +
-                         a1507 * k7 + a1508 * k8 + a1509 * k9 + a1511 * k11 +
-                         a1512 * k12 + a1513 * k13), p, t + c15 * dt)
-                k16 = f(uprev +
-                        dt * (a1601 * k1 + a1604 * k4 + a1605 * k5 + a1606 * k6 +
-                         a1607 * k7 + a1608 * k8 + a1609 * k9 + a1611 * k11 +
-                         a1612 * k12 + a1613 * k13), p, t + c16 * dt)
+                k13 = f(
+                    uprev +
+                    dt * (a1301 * k1 + a1304 * k4 + a1305 * k5 + a1306 * k6 +
+                     a1307 * k7 + a1308 * k8 + a1309 * k9 + a1311 * k11 +
+                     a1312 * k12),
+                    p,
+                    t + c13 * dt)
+                k14 = f(
+                    uprev +
+                    dt * (a1401 * k1 + a1404 * k4 + a1405 * k5 + a1406 * k6 +
+                     a1407 * k7 + a1408 * k8 + a1409 * k9 + a1411 * k11 +
+                     a1412 * k12 + a1413 * k13),
+                    p,
+                    t + c14 * dt)
+                k15 = f(
+                    uprev +
+                    dt * (a1501 * k1 + a1504 * k4 + a1505 * k5 + a1506 * k6 +
+                     a1507 * k7 + a1508 * k8 + a1509 * k9 + a1511 * k11 +
+                     a1512 * k12 + a1513 * k13),
+                    p,
+                    t + c15 * dt)
+                k16 = f(
+                    uprev +
+                    dt * (a1601 * k1 + a1604 * k4 + a1605 * k5 + a1606 * k6 +
+                     a1607 * k7 + a1608 * k8 + a1609 * k9 + a1611 * k11 +
+                     a1612 * k12 + a1613 * k13),
+                    p,
+                    t + c16 * dt)
 
                 us[cur_t] = uprev +
                             dt * (k1 * b1Θ
@@ -153,16 +172,17 @@ export GPUSimpleAVern7
 SciMLBase.isadaptive(alg::GPUSimpleAVern7) = true
 
 @muladd function DiffEqBase.solve(prob::ODEProblem,
-    alg::GPUSimpleAVern7;
-    dt = 0.1f0, saveat = nothing,
-    save_everystep = true,
-    abstol = 1.0f-6, reltol = 1.0f-3)
+        alg::GPUSimpleAVern7;
+        dt = 0.1f0, saveat = nothing,
+        save_everystep = true,
+        abstol = 1.0f-6, reltol = 1.0f-3)
     @assert !isinplace(prob)
     u0 = prob.u0
     tspan = prob.tspan
     f = prob.f
     p = prob.p
-    beta1, beta2, qmax, qmin, gamma, qoldinit, _ = build_adaptive_controller_cache(eltype(u0))
+    beta1, beta2, qmax, qmin, gamma, qoldinit,
+    _ = build_adaptive_controller_cache(eltype(u0))
 
     t = tspan[1]
     tf = prob.tspan[2]
@@ -216,12 +236,14 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern7) = true
             k5 = f(uprev + dt * (a051 * k1 + a053 * k3 + a054 * k4), p, t + c5 * dt)
             k6 = f(uprev + dt * (a061 * k1 + a063 * k3 + a064 * k4 + a065 * k5), p,
                 t + c6 * dt)
-            k7 = f(uprev + dt * (a071 * k1 + a073 * k3 + a074 * k4 + a075 * k5 + a076 * k6),
+            k7 = f(
+                uprev + dt * (a071 * k1 + a073 * k3 + a074 * k4 + a075 * k5 + a076 * k6),
                 p,
                 t + c7 * dt)
-            k8 = f(uprev +
-                   dt *
-                   (a081 * k1 + a083 * k3 + a084 * k4 + a085 * k5 + a086 * k6 + a087 * k7),
+            k8 = f(
+                uprev +
+                dt *
+                (a081 * k1 + a083 * k3 + a084 * k4 + a085 * k5 + a086 * k6 + a087 * k7),
                 p,
                 t + c8 * dt)
             g9 = uprev +
@@ -273,38 +295,56 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern7) = true
                     while cur_t <= length(ts) && ts[cur_t] <= t
                         savet = ts[cur_t]
                         θ = (savet - told) / dtold
-                        b1Θ, b4Θ, b5Θ, b6Θ, b7Θ, b8Θ, b9Θ, b11Θ, b12Θ, b13Θ, b14Θ, b15Θ, b16Θ = bθs(tab.interp,
+                        b1Θ, b4Θ, b5Θ, b6Θ, b7Θ, b8Θ, b9Θ, b11Θ, b12Θ,
+                        b13Θ, b14Θ, b15Θ, b16Θ = bθs(tab.interp,
                             θ)
 
-                        k11 = f(uprev +
-                                dtold *
-                                (a1101 * k1 + a1104 * k4 + a1105 * k5 + a1106 * k6 +
-                                 a1107 * k7 + a1108 * k8 + a1109 * k9), p, t + c11 * dtold)
-                        k12 = f(uprev +
-                                dtold *
-                                (a1201 * k1 + a1204 * k4 + a1205 * k5 + a1206 * k6 +
-                                 a1207 * k7 + a1208 * k8 + a1209 * k9 + a1211 * k11), p,
+                        k11 = f(
+                            uprev +
+                            dtold *
+                            (a1101 * k1 + a1104 * k4 + a1105 * k5 + a1106 * k6 +
+                             a1107 * k7 + a1108 * k8 + a1109 * k9),
+                            p,
+                            t + c11 * dtold)
+                        k12 = f(
+                            uprev +
+                            dtold *
+                            (a1201 * k1 + a1204 * k4 + a1205 * k5 + a1206 * k6 +
+                             a1207 * k7 + a1208 * k8 + a1209 * k9 + a1211 * k11),
+                            p,
                             t + c12 * dtold)
-                        k13 = f(uprev +
-                                dtold *
-                                (a1301 * k1 + a1304 * k4 + a1305 * k5 + a1306 * k6 +
-                                 a1307 * k7 + a1308 * k8 + a1309 * k9 + a1311 * k11 +
-                                 a1312 * k12), p, t + c13 * dtold)
-                        k14 = f(uprev +
-                                dtold *
-                                (a1401 * k1 + a1404 * k4 + a1405 * k5 + a1406 * k6 +
-                                 a1407 * k7 + a1408 * k8 + a1409 * k9 + a1411 * k11 +
-                                 a1412 * k12 + a1413 * k13), p, t + c14 * dtold)
-                        k15 = f(uprev +
-                                dtold *
-                                (a1501 * k1 + a1504 * k4 + a1505 * k5 + a1506 * k6 +
-                                 a1507 * k7 + a1508 * k8 + a1509 * k9 + a1511 * k11 +
-                                 a1512 * k12 + a1513 * k13), p, t + c15 * dtold)
-                        k16 = f(uprev +
-                                dtold *
-                                (a1601 * k1 + a1604 * k4 + a1605 * k5 + a1606 * k6 +
-                                 a1607 * k7 + a1608 * k8 + a1609 * k9 + a1611 * k11 +
-                                 a1612 * k12 + a1613 * k13), p, t + c16 * dtold)
+                        k13 = f(
+                            uprev +
+                            dtold *
+                            (a1301 * k1 + a1304 * k4 + a1305 * k5 + a1306 * k6 +
+                             a1307 * k7 + a1308 * k8 + a1309 * k9 + a1311 * k11 +
+                             a1312 * k12),
+                            p,
+                            t + c13 * dtold)
+                        k14 = f(
+                            uprev +
+                            dtold *
+                            (a1401 * k1 + a1404 * k4 + a1405 * k5 + a1406 * k6 +
+                             a1407 * k7 + a1408 * k8 + a1409 * k9 + a1411 * k11 +
+                             a1412 * k12 + a1413 * k13),
+                            p,
+                            t + c14 * dtold)
+                        k15 = f(
+                            uprev +
+                            dtold *
+                            (a1501 * k1 + a1504 * k4 + a1505 * k5 + a1506 * k6 +
+                             a1507 * k7 + a1508 * k8 + a1509 * k9 + a1511 * k11 +
+                             a1512 * k12 + a1513 * k13),
+                            p,
+                            t + c15 * dtold)
+                        k16 = f(
+                            uprev +
+                            dtold *
+                            (a1601 * k1 + a1604 * k4 + a1605 * k5 + a1606 * k6 +
+                             a1607 * k7 + a1608 * k8 + a1609 * k9 + a1611 * k11 +
+                             a1612 * k12 + a1613 * k13),
+                            p,
+                            t + c16 * dtold)
 
                         us[cur_t] = uprev +
                                     dtold * (k1 * b1Θ
