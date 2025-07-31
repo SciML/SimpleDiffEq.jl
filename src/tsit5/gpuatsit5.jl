@@ -7,9 +7,9 @@ struct GPUSimpleTsit5 <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleTsit5
 
 @muladd function DiffEqBase.solve(prob::ODEProblem,
-    alg::GPUSimpleTsit5; saveat = nothing,
-    save_everystep = true,
-    dt = 0.1f0)
+        alg::GPUSimpleTsit5; saveat = nothing,
+        save_everystep = true,
+        dt = 0.1f0)
     @assert !isinplace(prob)
     u0 = prob.u0
     tspan = prob.tspan
@@ -102,16 +102,17 @@ export GPUSimpleATsit5
 SciMLBase.isadaptive(alg::GPUSimpleATsit5) = true
 
 @muladd function DiffEqBase.solve(prob::ODEProblem,
-    alg::GPUSimpleATsit5;
-    dt = 0.1f0, saveat = nothing,
-    save_everystep = true,
-    abstol = 1.0f-6, reltol = 1.0f-3)
+        alg::GPUSimpleATsit5;
+        dt = 0.1f0, saveat = nothing,
+        save_everystep = true,
+        abstol = 1.0f-6, reltol = 1.0f-3)
     @assert !isinplace(prob)
     u0 = prob.u0
     tspan = prob.tspan
     f = prob.f
     p = prob.p
-    beta1, beta2, qmax, qmin, gamma, qoldinit, _ = build_adaptive_controller_cache(eltype(u0))
+    beta1, beta2, qmax, qmin, gamma, qoldinit,
+    _ = build_adaptive_controller_cache(eltype(u0))
 
     t = tspan[1]
     tf = prob.tspan[2]

@@ -34,7 +34,7 @@ DiffEqBase.isinplace(::SRK4{IIP}) where {IIP} = IIP
 ################################################################################
 
 function DiffEqBase.__init(prob::ODEProblem, alg::SimpleRK4;
-    dt = error("dt is required for this algorithm"))
+        dt = error("dt is required for this algorithm"))
     simplerk4_init(prob.f,
         DiffEqBase.isinplace(prob),
         prob.u0,
@@ -44,7 +44,7 @@ function DiffEqBase.__init(prob::ODEProblem, alg::SimpleRK4;
 end
 
 function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleRK4;
-    dt = error("dt is required for this algorithm"))
+        dt = error("dt is required for this algorithm"))
     u0 = prob.u0
     tspan = prob.tspan
     ts = Array(tspan[1]:dt:tspan[2])
@@ -73,8 +73,8 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleRK4;
 end
 
 @inline function simplerk4_init(f::F, IIP::Bool, u0::S, t0::T, dt::T,
-    p::P) where
-    {F, P, T, S}
+        p::P) where
+        {F, P, T, S}
 
     # Allocate the vector with the interpolants. For RK4, we need 5.
     ks = [zero(u0) for _ in 1:5]

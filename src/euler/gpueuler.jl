@@ -7,8 +7,8 @@ struct GPUSimpleEuler <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleEuler
 
 @muladd function DiffEqBase.solve(prob::ODEProblem,
-    alg::GPUSimpleEuler;
-    dt = error("dt is required for this algorithm"))
+        alg::GPUSimpleEuler;
+        dt = error("dt is required for this algorithm"))
     @assert !isinplace(prob)
     u0 = prob.u0
     tspan = prob.tspan
