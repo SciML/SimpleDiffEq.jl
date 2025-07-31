@@ -78,12 +78,12 @@ prob = ODEProblem(f, u0, tspan)
 sol1 = solve(prob, SimpleTsit5(), dt = dt)
 
 function ode(x, p, t)
-  dx = sin(x[1])
-  return([dx])
+    dx = sin(x[1])
+    return ([dx])
 end
 prob = ODEProblem(ode, [1.0], (0.0, 0.05), nothing)
 sol = solve(prob, SimpleTsit5(), dt = 0.05/11) # On my PC, the integration ends at 0.04545...
-@test sol.t[end] == 0.05 
+@test sol.t[end] == 0.05
 
 #=
 using BenchmarkTools
