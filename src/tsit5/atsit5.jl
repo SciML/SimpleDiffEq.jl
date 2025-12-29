@@ -71,7 +71,7 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleATsit5;
     else
         ts = saveat
         cur_t = 1
-        us = MVector{length(ts), typeof(u0)}(undef)
+        us = MVector{Int(length(ts)), typeof(u0)}(undef)
         if prob.tspan[1] == ts[1]
             cur_t += 1
             us[1] = u0

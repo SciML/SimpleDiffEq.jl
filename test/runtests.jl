@@ -9,4 +9,5 @@ using SimpleDiffEq, SafeTestsets, Test
     @time @safetestset "SimpleRK4 Tests" include("simplerk4_tests.jl")
     @time @safetestset "SimpleEuler Tests" include("simpleeuler_tests.jl")
     @time @safetestset "GPU Compatible ODE Tests" include("gpu_ode_regression.jl")
+    @time @safetestset "Interface Tests" include("interface_tests.jl")
 end
