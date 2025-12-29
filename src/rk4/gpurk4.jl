@@ -17,7 +17,7 @@ export GPUSimpleRK4
     t = tspan[1]
     tf = prob.tspan[2]
     ts = tspan[1]:dt:tspan[2]
-    us = MVector{length(ts), typeof(u0)}(undef)
+    us = MVector{Int(length(ts)), typeof(u0)}(undef)
     us[1] = u0
     u = u0
     half = convert(eltype(u0), 1 // 2)
