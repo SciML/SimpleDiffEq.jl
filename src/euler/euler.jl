@@ -4,6 +4,45 @@
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+"""
+    SimpleEuler
+
+Forward Euler method for solving ODEs.
+
+This is the simplest explicit ODE solver, using first-order accurate forward Euler steps.
+It requires a fixed time step `dt` and supports both in-place and out-of-place formulations.
+
+## Example
+
+```julia
+using SimpleDiffEq
+
+# Define ODE: du/dt = f(u, p, t)
+f(u, p, t) = -0.5 * u
+
+u0 = 1.0
+tspan = (0.0, 10.0)
+prob = ODEProblem(f, u0, tspan)
+
+sol = solve(prob, SimpleEuler(), dt = 0.1)
+```
+
+## Required Parameters
+
+- `dt`: Fixed time step size
+
+## Features
+
+- 1st order accurate
+- Both in-place and out-of-place support
+- Integrator interface via `init` and `step!`
+- Minimal computational overhead
+
+## See also
+
+- [`LoopEuler`](@ref) for a teaching/benchmarking variant
+- [`SimpleRK4`](@ref) for higher accuracy with 4th order method
+"""
 struct SimpleEuler <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleEuler
 

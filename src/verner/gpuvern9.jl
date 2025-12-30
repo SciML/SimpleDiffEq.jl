@@ -3,6 +3,47 @@
 # Makes the simplest possible method for GPU-compatibility
 # Out of place only
 #######################################################################################
+
+"""
+    GPUSimpleVern9
+
+GPU-compatible Verner 9th order Runge-Kutta method with fixed time step.
+
+This is a 9th order explicit Runge-Kutta method designed for GPU compatibility.
+It only supports out-of-place formulations and provides extremely high accuracy
+for very smooth problems where tight error tolerances are required.
+
+## Example
+
+```julia
+using SimpleDiffEq
+
+# Define ODE (out-of-place only)
+f(u, p, t) = 1.01 * u
+
+u0 = 0.5
+tspan = (0.0, 10.0)
+prob = ODEProblem(f, u0, tspan)
+
+sol = solve(prob, GPUSimpleVern9(), dt = 0.1)
+```
+
+## Parameters
+
+- `dt`: Fixed time step size (default: 0.1)
+- `saveat`: Optional times to save solution at
+- `save_everystep`: Save at every step (default: true)
+
+## Restrictions
+
+- Out-of-place formulations only
+- Optimized for GPU execution
+
+## See also
+
+- [`GPUSimpleAVern9`](@ref) for the adaptive step size version
+- [`GPUSimpleVern7`](@ref) for a lower order but more efficient alternative
+"""
 struct GPUSimpleVern9 <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleVern9
 
@@ -251,6 +292,49 @@ end
 # Makes the simplest possible adaptive method for GPU-compatibility
 # Out of place only
 #######################################################################################
+
+"""
+    GPUSimpleAVern9
+
+GPU-compatible adaptive Verner 9th order Runge-Kutta method.
+
+This is a GPU-optimized adaptive version of the Verner 9th order method with PI-controlled
+adaptive stepping. It only supports out-of-place formulations and provides extremely high
+accuracy with automatic step size control for very smooth problems.
+
+## Example
+
+```julia
+using SimpleDiffEq
+
+# Define ODE (out-of-place only)
+f(u, p, t) = 1.01 * u
+
+u0 = 0.5
+tspan = (0.0, 10.0)
+prob = ODEProblem(f, u0, tspan)
+
+sol = solve(prob, GPUSimpleAVern9(), dt = 0.1, abstol = 1e-9, reltol = 1e-6)
+```
+
+## Parameters
+
+- `dt`: Initial time step size (default: 0.1)
+- `abstol`: Absolute tolerance (default: 1e-6)
+- `reltol`: Relative tolerance (default: 1e-3)
+- `saveat`: Optional times to save solution at
+- `save_everystep`: Save at every step (default: true)
+
+## Restrictions
+
+- Out-of-place formulations only
+- Optimized for GPU execution
+
+## See also
+
+- [`GPUSimpleVern9`](@ref) for the fixed step size version
+- [`GPUSimpleAVern7`](@ref) for a lower order adaptive alternative
+"""
 struct GPUSimpleAVern9 end
 export GPUSimpleAVern9
 

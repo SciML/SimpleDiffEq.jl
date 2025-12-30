@@ -1,3 +1,44 @@
+"""
+    SimpleTsit5
+
+Tsitouras 5th order Runge-Kutta method with fixed time step.
+
+This is a 5th order explicit Runge-Kutta method developed by Tsitouras, using a fixed
+time step. It provides higher accuracy than RK4 while still being efficient. Supports
+both in-place and out-of-place formulations with continuous interpolation.
+
+## Example
+
+```julia
+using SimpleDiffEq
+
+# Define ODE
+f(u, p, t) = 1.01 * u
+
+u0 = 0.5
+tspan = (0.0, 10.0)
+prob = ODEProblem(f, u0, tspan)
+
+sol = solve(prob, SimpleTsit5(), dt = 0.1)
+```
+
+## Required Parameters
+
+- `dt`: Fixed time step size
+
+## Features
+
+- 5th order accurate
+- Continuous interpolation for dense output
+- FSAL optimization
+- Both in-place and out-of-place support
+
+## See also
+
+- [`SimpleATsit5`](@ref) for the adaptive step size version
+- [`GPUSimpleTsit5`](@ref) for GPU-compatible version
+- [`SimpleRK4`](@ref) for a lower order alternative
+"""
 struct SimpleTsit5 <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleTsit5
 

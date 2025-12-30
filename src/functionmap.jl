@@ -1,3 +1,37 @@
+"""
+    SimpleFunctionMap
+
+Simple function iteration for discrete problems.
+
+This algorithm iterates a discrete map of the form `u[n+1] = f(u[n], p, t[n+1])`.
+It is used for discrete dynamical systems and difference equations.
+
+## Example
+
+```julia
+using SimpleDiffEq
+
+# Define discrete map: u[n+1] = f(u[n], p, t)
+f(u, p, t) = p * u * (1 - u)  # Logistic map
+
+u0 = 0.5
+tspan = (0.0, 100.0)  # Will iterate for 101 steps (0 to 100)
+p = 3.2
+
+prob = DiscreteProblem(f, u0, tspan, p)
+sol = solve(prob, SimpleFunctionMap())
+```
+
+## Notes
+
+- The time step is always 1 for discrete problems
+- Both in-place and out-of-place forms are supported
+- Supports the integrator interface via `init` and `step!`
+
+## See also
+
+- [`DiscreteProblem`](@ref) for problem setup
+"""
 struct SimpleFunctionMap end
 export SimpleFunctionMap
 SciMLBase.isdiscrete(alg::SimpleFunctionMap) = true

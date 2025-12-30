@@ -3,6 +3,44 @@
 # Makes the simplest possible method for GPU-compatibility
 # Out of place only
 #######################################################################################
+
+"""
+    GPUSimpleRK4
+
+GPU-compatible classic Runge-Kutta 4th order method.
+
+This is a simplified RK4 implementation designed for GPU compatibility. It only supports
+out-of-place formulations and uses static arrays for efficiency on GPU architectures.
+
+## Example
+
+```julia
+using SimpleDiffEq, StaticArrays
+
+# Define ODE (out-of-place only)
+f(u, p, t) = -u
+
+u0 = 1.0
+tspan = (0.0, 10.0)
+prob = ODEProblem(f, u0, tspan)
+
+sol = solve(prob, GPUSimpleRK4(), dt = 0.1)
+```
+
+## Required Parameters
+
+- `dt`: Fixed time step size
+
+## Restrictions
+
+- Out-of-place formulations only (no in-place mutations)
+- Optimized for GPU execution
+
+## See also
+
+- [`SimpleRK4`](@ref) for the standard CPU-optimized version
+- [`LoopRK4`](@ref) for a teaching-focused variant
+"""
 struct GPUSimpleRK4 <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleRK4
 
