@@ -1,5 +1,50 @@
 using RecursiveArrayTools: recursivecopy
 
+"""
+    SimpleATsit5
+
+Adaptive Tsitouras 5th order Runge-Kutta method.
+
+This is an adaptive step size version of the Tsitouras 5th order method, using PI-controlled
+adaptive stepping based on error estimates. It automatically adjusts the step size to meet
+specified absolute and relative tolerances.
+
+## Example
+
+```julia
+using SimpleDiffEq
+
+# Define ODE
+f(u, p, t) = 1.01 * u
+
+u0 = 0.5
+tspan = (0.0, 10.0)
+prob = ODEProblem(f, u0, tspan)
+
+# Adaptive stepping with tolerance control
+sol = solve(prob, SimpleATsit5(), dt = 0.1, abstol = 1e-6, reltol = 1e-3)
+```
+
+## Parameters
+
+- `dt`: Initial time step size (default: 0.1)
+- `abstol`: Absolute tolerance (default: 1e-6)
+- `reltol`: Relative tolerance (default: 1e-3)
+- `internalnorm`: Norm function for error estimation (default: ODE_DEFAULT_NORM)
+
+## Features
+
+- Adaptive step size control with PI controller
+- 5th order accurate with embedded error estimator
+- Continuous interpolation for dense output
+- Both in-place and out-of-place support
+- Optional `saveat` for saving at specific times
+
+## See also
+
+- [`SimpleTsit5`](@ref) for the fixed step size version
+- [`GPUSimpleATsit5`](@ref) for GPU-compatible version
+"""
 struct SimpleATsit5 <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleATsit5
 

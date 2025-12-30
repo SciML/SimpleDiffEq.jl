@@ -3,6 +3,47 @@
 # Makes the simplest possible method for GPU-compatibility
 # Out of place only
 #######################################################################################
+
+"""
+    GPUSimpleVern7
+
+GPU-compatible Verner 7th order Runge-Kutta method with fixed time step.
+
+This is a 7th order explicit Runge-Kutta method designed for GPU compatibility.
+It only supports out-of-place formulations and provides very high accuracy for
+smooth problems.
+
+## Example
+
+```julia
+using SimpleDiffEq
+
+# Define ODE (out-of-place only)
+f(u, p, t) = 1.01 * u
+
+u0 = 0.5
+tspan = (0.0, 10.0)
+prob = ODEProblem(f, u0, tspan)
+
+sol = solve(prob, GPUSimpleVern7(), dt = 0.1)
+```
+
+## Parameters
+
+- `dt`: Fixed time step size (default: 0.1)
+- `saveat`: Optional times to save solution at
+- `save_everystep`: Save at every step (default: true)
+
+## Restrictions
+
+- Out-of-place formulations only
+- Optimized for GPU execution
+
+## See also
+
+- [`GPUSimpleAVern7`](@ref) for the adaptive step size version
+- [`GPUSimpleVern9`](@ref) for even higher order accuracy
+"""
 struct GPUSimpleVern7 <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleVern7
 
@@ -166,6 +207,50 @@ end
 # Makes the simplest possible adaptive method for GPU-compatibility
 # Out of place only
 #######################################################################################
+
+"""
+    GPUSimpleAVern7
+
+GPU-compatible adaptive Verner 7th order Runge-Kutta method.
+
+This is a GPU-optimized adaptive version of the Verner 7th order method with PI-controlled
+adaptive stepping. It only supports out-of-place formulations and provides very high accuracy
+with automatic step size control.
+
+## Example
+
+```julia
+using SimpleDiffEq
+
+# Define ODE (out-of-place only)
+f(u, p, t) = 1.01 * u
+
+u0 = 0.5
+tspan = (0.0, 10.0)
+prob = ODEProblem(f, u0, tspan)
+
+sol = solve(prob, GPUSimpleAVern7(), dt = 0.1, abstol = 1e-6, reltol = 1e-3)
+```
+
+## Parameters
+
+- `dt`: Initial time step size (default: 0.1)
+- `abstol`: Absolute tolerance (default: 1e-6)
+- `reltol`: Relative tolerance (default: 1e-3)
+- `saveat`: Optional times to save solution at
+- `save_everystep`: Save at every step (default: true)
+
+## Restrictions
+
+- Out-of-place formulations only
+- Optimized for GPU execution
+
+## See also
+
+- [`GPUSimpleVern7`](@ref) for the fixed step size version
+- [`GPUSimpleAVern9`](@ref) for even higher order adaptive method
+- [`GPUSimpleATsit5`](@ref) for a lower order adaptive alternative
+"""
 struct GPUSimpleAVern7 end
 export GPUSimpleAVern7
 

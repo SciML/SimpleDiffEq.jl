@@ -2,6 +2,46 @@
 # Simplest Loop method
 # Makes the simplest possible method for teaching and performance testing
 #######################################################################################
+
+"""
+    LoopEuler
+
+Simplified loop-based forward Euler method for teaching and benchmarking.
+
+This is a minimal forward Euler implementation with explicit loops, designed for educational
+purposes and to benchmark the overhead of more sophisticated integrators. It supports both
+in-place and out-of-place formulations but without advanced features.
+
+## Example
+
+```julia
+using SimpleDiffEq
+
+# Define ODE
+f(u, p, t) = -0.5 * u
+
+u0 = 1.0
+tspan = (0.0, 10.0)
+prob = ODEProblem(f, u0, tspan)
+
+sol = solve(prob, LoopEuler(), dt = 0.1)
+```
+
+## Required Parameters
+
+- `dt`: Fixed time step size
+
+## Use Cases
+
+- Teaching how Euler's method works
+- Benchmarking integrator overhead
+- Minimal dependencies for simple problems
+
+## See also
+
+- [`SimpleEuler`](@ref) for a more optimized version
+- [`LoopRK4`](@ref) for a higher order teaching variant
+"""
 struct LoopEuler <: AbstractSimpleDiffEqODEAlgorithm end
 export LoopEuler
 
