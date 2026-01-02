@@ -2,21 +2,29 @@ __precompile__()
 
 module SimpleDiffEq
 
-using Reexport, MuladdMacro
-@reexport using DiffEqBase
-using StaticArrays
-using RecursiveArrayTools
-using LinearAlgebra
-using Parameters
+using Reexport: @reexport
+using MuladdMacro: @muladd
+@reexport using DiffEqBase: DiffEqBase, ODEProblem, SDEProblem, DiscreteProblem,
+                             isinplace, reinit!, u_modified!, ODE_DEFAULT_NORM,
+                             set_t!, solve, step!, init, DESolution, @..,
+                             AbstractODEIntegrator, DEIntegrator, ConstantInterpolation,
+                             __init, __solve, build_solution, has_analytic,
+                             calculate_solution_errors!, is_diagonal_noise,
+                             AbstractSDEAlgorithm, AbstractODEAlgorithm, isdiscrete, SciMLBase
+import DiffEqBase.SciMLBase: allows_arbitrary_number_types, allowscomplex, isautodifferentiable, isadaptive
+using StaticArrays: SArray, SVector, MVector
+using RecursiveArrayTools: recursivecopy!
+using LinearAlgebra: mul!
+using Parameters: @unpack
 
 @inline _copy(a::SArray) = a
 @inline _copy(a) = copy(a)
 
-abstract type AbstractSimpleDiffEqODEAlgorithm <: SciMLBase.AbstractODEAlgorithm end
-SciMLBase.isautodifferentiable(alg::AbstractSimpleDiffEqODEAlgorithm) = true
-SciMLBase.allows_arbitrary_number_types(alg::AbstractSimpleDiffEqODEAlgorithm) = true
-SciMLBase.allowscomplex(alg::AbstractSimpleDiffEqODEAlgorithm) = true
-SciMLBase.isadaptive(alg::AbstractSimpleDiffEqODEAlgorithm) = false # except 2, handled individually
+abstract type AbstractSimpleDiffEqODEAlgorithm <: AbstractODEAlgorithm end
+isautodifferentiable(alg::AbstractSimpleDiffEqODEAlgorithm) = true
+allows_arbitrary_number_types(alg::AbstractSimpleDiffEqODEAlgorithm) = true
+allowscomplex(alg::AbstractSimpleDiffEqODEAlgorithm) = true
+isadaptive(alg::AbstractSimpleDiffEqODEAlgorithm) = false # except 2, handled individually
 
 function build_adaptive_controller_cache(::Type{T}) where {T}
     beta1 = T(7 / 50)
