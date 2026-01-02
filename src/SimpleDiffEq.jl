@@ -2,12 +2,22 @@ __precompile__()
 
 module SimpleDiffEq
 
-using Reexport, MuladdMacro
+# Explicit imports
+using Reexport: @reexport
+using MuladdMacro: @muladd
 @reexport using DiffEqBase
-using StaticArrays
-using RecursiveArrayTools
-using LinearAlgebra
-using Parameters
+using DiffEqBase: DiffEqBase
+using SciMLBase: SciMLBase, ODEProblem, SDEProblem, DiscreteProblem, isinplace,
+                 reinit!, u_modified!
+using CommonSolve: step!
+using StaticArrays: StaticArrays, SArray, MVector, SVector
+using RecursiveArrayTools: RecursiveArrayTools, recursivecopy!
+using LinearAlgebra: LinearAlgebra, mul!
+using Parameters: Parameters
+using UnPack: @unpack
+
+# Explicit imports from Base
+import Base: /, convert
 
 @inline _copy(a::SArray) = a
 @inline _copy(a) = copy(a)
