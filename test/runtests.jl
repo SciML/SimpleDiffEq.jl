@@ -1,6 +1,7 @@
 using SimpleDiffEq, SafeTestsets, Test
 
 @time begin
+    @time @safetestset "ExplicitImports Tests" include("explicit_imports_tests.jl")
     @time @safetestset "Discrete Tests" include("discrete_tests.jl")
     @time @safetestset "SimpleEM Tests" include("simpleem_tests.jl")
     @time @safetestset "SimpleTsit5 Tests" include("simpletsit5_tests.jl")
