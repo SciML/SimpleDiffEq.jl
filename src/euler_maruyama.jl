@@ -34,10 +34,14 @@ sol = solve(prob, SimpleEM(), dt = 0.01)
 struct SimpleEM <: DiffEqBase.AbstractSDEAlgorithm end
 export SimpleEM
 
-@muladd function DiffEqBase.solve(prob::SDEProblem{uType, tType, false}, alg::SimpleEM,
-    args...;
-    dt = error("dt required for SimpleEM")) where {uType,
-    tType}
+@muladd function DiffEqBase.solve(
+        prob::SDEProblem{uType, tType, false}, alg::SimpleEM,
+        args...;
+        dt = error("dt required for SimpleEM")
+    ) where {
+        uType,
+        tType,
+    }
     f = prob.f
     g = prob.g
     u0 = prob.u0
@@ -60,25 +64,31 @@ export SimpleEM
         if is_diagonal_noise
             if u0 isa Number
                 u[i] = uprev + f(uprev, p, tprev) * dt +
-                       sqdt * g(uprev, p, tprev) * randn(typeof(u0))
+                    sqdt * g(uprev, p, tprev) * randn(typeof(u0))
             else
                 u[i] = uprev + f(uprev, p, tprev) * dt +
-                       sqdt * g(uprev, p, tprev) .* randn(typeof(u0))
+                    sqdt * g(uprev, p, tprev) .* randn(typeof(u0))
             end
         else
             u[i] = uprev + f(uprev, p, tprev) * dt +
-                   sqdt * g(uprev, p, tprev) * randn(size(prob.noise_rate_prototype, 2))
+                sqdt * g(uprev, p, tprev) * randn(size(prob.noise_rate_prototype, 2))
         end
     end
 
-    sol = DiffEqBase.build_solution(prob, alg, t, u,
-        calculate_error = false)
+    sol = DiffEqBase.build_solution(
+        prob, alg, t, u,
+        calculate_error = false
+    )
 end
 
-@muladd function DiffEqBase.solve(prob::SDEProblem{uType, tType, true}, alg::SimpleEM,
-    args...;
-    dt = error("dt required for SimpleEM")) where {uType,
-    tType}
+@muladd function DiffEqBase.solve(
+        prob::SDEProblem{uType, tType, true}, alg::SimpleEM,
+        args...;
+        dt = error("dt required for SimpleEM")
+    ) where {
+        uType,
+        tType,
+    }
     f = prob.f
     g = prob.g
     u0 = prob.u0
@@ -88,7 +98,7 @@ end
     gtmp = DiffEqBase.is_diagonal_noise(prob) ? zero(u0) : zero(prob.noise_rate_prototype)
     gtmp2 = DiffEqBase.is_diagonal_noise(prob) ? nothing : zero(u0)
     dW = DiffEqBase.is_diagonal_noise(prob) ? zero(u0) :
-         false .* prob.noise_rate_prototype[1, :]
+        false .* prob.noise_rate_prototype[1, :]
 
     @inbounds begin
         n = Int((tspan[2] - tspan[1]) / dt) + 1
@@ -112,6 +122,8 @@ end
         end
     end
 
-    sol = DiffEqBase.build_solution(prob, alg, t, u,
-        calculate_error = false)
+    sol = DiffEqBase.build_solution(
+        prob, alg, t, u,
+        calculate_error = false
+    )
 end

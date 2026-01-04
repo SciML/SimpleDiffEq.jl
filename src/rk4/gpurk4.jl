@@ -44,9 +44,11 @@ sol = solve(prob, GPUSimpleRK4(), dt = 0.1)
 struct GPUSimpleRK4 <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleRK4
 
-@muladd function DiffEqBase.solve(prob::ODEProblem,
+@muladd function DiffEqBase.solve(
+        prob::ODEProblem,
         alg::GPUSimpleRK4;
-        dt = error("dt is required for this algorithm"))
+        dt = error("dt is required for this algorithm")
+    )
     @assert !isinplace(prob)
     u0 = prob.u0
     tspan = prob.tspan
@@ -75,11 +77,15 @@ export GPUSimpleRK4
         us[i] = u
     end
 
-    sol = DiffEqBase.build_solution(prob, alg, ts, SArray(us),
+    sol = DiffEqBase.build_solution(
+        prob, alg, ts, SArray(us),
         k = nothing, stats = nothing,
-        calculate_error = false)
+        calculate_error = false
+    )
     DiffEqBase.has_analytic(prob.f) &&
-        DiffEqBase.calculate_solution_errors!(sol; timeseries_errors = true,
-            dense_errors = false)
+        DiffEqBase.calculate_solution_errors!(
+        sol; timeseries_errors = true,
+        dense_errors = false
+    )
     sol
 end

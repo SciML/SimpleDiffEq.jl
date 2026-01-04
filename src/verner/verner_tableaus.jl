@@ -1,4 +1,3 @@
-
 ## Vern7
 struct Vern7ExtraStages{T, T2}
     c11::T2
@@ -125,12 +124,14 @@ function Vern7ExtraStages(T::Type{T1}, T2::Type{T1}) where {T1}
     a1612 = convert(T, -0.17325495908361865)
     a1613 = convert(T, -0.18228156777622026)
 
-    Vern7ExtraStages(c11, a1101, a1104, a1105, a1106, a1107, a1108, a1109, c12, a1201,
+    return Vern7ExtraStages(
+        c11, a1101, a1104, a1105, a1106, a1107, a1108, a1109, c12, a1201,
         a1204, a1205, a1206, a1207, a1208, a1209, a1211, c13, a1301, a1304,
         a1305, a1306, a1307, a1308, a1309, a1311, a1312, c14, a1401, a1404,
         a1405, a1406, a1407, a1408, a1409, a1411, a1412, a1413, c15, a1501,
         a1504, a1505, a1506, a1507, a1508, a1509, a1511, a1512, a1513, c16,
-        a1601, a1604, a1605, a1606, a1607, a1608, a1609, a1611, a1612, a1613)
+        a1601, a1604, a1605, a1606, a1607, a1608, a1609, a1611, a1612, a1613
+    )
 end
 
 struct Vern7InterpolationCoefficients{T}
@@ -296,7 +297,8 @@ function Vern7InterpolationCoefficients(::Type{T}) where {T}
     r166 = convert(T, -606.3044574733512)
     r167 = convert(T, 188.0495196316683)
 
-    Vern7InterpolationCoefficients(r011, r012, r013, r014, r015, r016, r017, r042, r043,
+    return Vern7InterpolationCoefficients(
+        r011, r012, r013, r014, r015, r016, r017, r042, r043,
         r044, r045, r046, r047, r052, r053, r054, r055, r056,
         r057, r062, r063, r064, r065, r066, r067, r072, r073,
         r074, r075, r076, r077, r082, r083, r084, r085, r086,
@@ -304,7 +306,8 @@ function Vern7InterpolationCoefficients(::Type{T}) where {T}
         r114, r115, r116, r117, r122, r123, r124, r125, r126,
         r127, r132, r133, r134, r135, r136, r137, r142, r143,
         r144, r145, r146, r147, r152, r153, r154, r155, r156,
-        r157, r162, r163, r164, r165, r166, r167)
+        r157, r162, r163, r164, r165, r166, r167
+    )
 end
 
 struct Vern7Tableau{T, T2}
@@ -439,12 +442,13 @@ function Vern7Tableau(T::Type{T1}, T2::Type{T1}) where {T1}
     extra = Vern7ExtraStages(T, T2)
     interp = Vern7InterpolationCoefficients(T)
 
-    Vern7Tableau(
+    return Vern7Tableau(
         c2, c3, c4, c5, c6, c7, c8, a021, a031, a032, a041, a043, a051, a053, a054,
         a061, a063, a064, a065, a071, a073, a074, a075, a076, a081, a083, a084,
         a085, a086, a087, a091, a093, a094, a095, a096, a097, a098, a101, a103,
         a104, a105, a106, a107, b1, b4, b5, b6, b7, b8, b9, btilde1, btilde4,
-        btilde5, btilde6, btilde7, btilde8, btilde9, btilde10, extra, interp)
+        btilde5, btilde6, btilde7, btilde8, btilde9, btilde10, extra, interp
+    )
 end
 
 ## Vern9
@@ -728,7 +732,8 @@ function Vern9ExtraStages(T::Type{T1}, T2::Type{T1}) where {T1}
     a2620 = convert(T, -0.03815462365996979)
     a2621 = convert(T, 0.011118785048989178)
 
-    Vern9ExtraStages(c17, a1701, a1708, a1709, a1710, a1711, a1712, a1713, a1714, a1715,
+    return Vern9ExtraStages(
+        c17, a1701, a1708, a1709, a1710, a1711, a1712, a1713, a1714, a1715,
         c18, a1801, a1808, a1809, a1810, a1811, a1812, a1813, a1814, a1815,
         a1817, c19, a1901, a1908, a1909, a1910, a1911, a1912, a1913, a1914,
         a1915, a1917, a1918, c20, a2001, a2008, a2009, a2010, a2011, a2012,
@@ -741,7 +746,8 @@ function Vern9ExtraStages(T::Type{T1}, T2::Type{T1}) where {T1}
         a2417, a2418, a2419, a2420, a2421, c25, a2501, a2508, a2509, a2510,
         a2511, a2512, a2513, a2514, a2515, a2517, a2518, a2519, a2520, a2521,
         c26, a2601, a2608, a2609, a2610, a2611, a2612, a2613, a2614, a2615,
-        a2617, a2618, a2619, a2620, a2621)
+        a2617, a2618, a2619, a2620, a2621
+    )
 end
 
 struct Vern9InterpolationCoefficients{T}
@@ -1055,7 +1061,8 @@ function Vern9InterpolationCoefficients(::Type{T}) where {T}
     r268 = convert(T, 3288.5977751496216)
     r269 = convert(T, -782.8483098245397)
 
-    Vern9InterpolationCoefficients(r011, r012, r013, r014, r015, r016, r017, r018, r019,
+    return Vern9InterpolationCoefficients(
+        r011, r012, r013, r014, r015, r016, r017, r018, r019,
         r082, r083, r084, r085, r086, r087, r088, r089, r092,
         r093, r094, r095, r096, r097, r098, r099, r102, r103,
         r104, r105, r106, r107, r108, r109, r112, r113, r114,
@@ -1071,7 +1078,8 @@ function Vern9InterpolationCoefficients(::Type{T}) where {T}
         r226, r227, r228, r229, r232, r233, r234, r235, r236,
         r237, r238, r239, r242, r243, r244, r245, r246, r247,
         r248, r249, r252, r253, r254, r255, r256, r257, r258,
-        r259, r262, r263, r264, r265, r266, r267, r268, r269)
+        r259, r262, r263, r264, r265, r266, r267, r268, r269
+    )
 end
 
 """
@@ -1311,7 +1319,8 @@ function Vern9Tableau(T::Type{T1}, T2::Type{T1}) where {T1}
     extra = Vern9ExtraStages(T, T2)
     interp = Vern9InterpolationCoefficients(T)
 
-    Vern9Tableau(c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, a0201, a0301,
+    return Vern9Tableau(
+        c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, a0201, a0301,
         a0302, a0401, a0403, a0501, a0503, a0504, a0601, a0604, a0605, a0701,
         a0704, a0705, a0706, a0801, a0806, a0807, a0901, a0906, a0907, a0908,
         a1001, a1006, a1007, a1008, a1009, a1101, a1106, a1107, a1108, a1109,
@@ -1321,16 +1330,17 @@ function Vern9Tableau(T::Type{T1}, T2::Type{T1}) where {T1}
         a1510, a1511, a1512, a1513, a1514, a1601, a1606, a1607, a1608, a1609,
         a1610, a1611, a1612, a1613, b1, b8, b9, b10, b11, b12, b13, b14, b15,
         btilde1, btilde8, btilde9, btilde10, btilde11, btilde12, btilde13,
-        btilde14, btilde15, btilde16, extra, interp)
+        btilde14, btilde15, btilde16, extra, interp
+    )
 end
 
 function bθs(rs::T, θ) where {T <: Vern7InterpolationCoefficients}
     @unpack r011, r012, r013, r014, r015, r016, r017, r042, r043, r044, r045, r046, r047,
-    r052, r053, r054, r055, r056, r057, r062, r063, r064, r065, r066, r067, r072, r073,
-    r074, r075, r076, r077, r082, r083, r084, r085, r086, r087, r092, r093, r094, r095,
-    r096, r097, r112, r113, r114, r115, r116, r117, r122, r123, r124, r125, r126, r127,
-    r132, r133, r134, r135, r136, r137, r142, r143, r144, r145, r146, r147, r152, r153,
-    r154, r155, r156, r157, r162, r163, r164, r165, r166, r167 = rs
+        r052, r053, r054, r055, r056, r057, r062, r063, r064, r065, r066, r067, r072, r073,
+        r074, r075, r076, r077, r082, r083, r084, r085, r086, r087, r092, r093, r094, r095,
+        r096, r097, r112, r113, r114, r115, r116, r117, r122, r123, r124, r125, r126, r127,
+        r132, r133, r134, r135, r136, r137, r142, r143, r144, r145, r146, r147, r152, r153,
+        r154, r155, r156, r157, r162, r163, r164, r165, r166, r167 = rs
 
     b1θ = @evalpoly(θ, 0, r011, r012, r013, r014, r015, r016, r017)
     b4θ = @evalpoly(θ, 0, 0, r042, r043, r044, r045, r046, r047)
@@ -1351,17 +1361,17 @@ end
 
 @inline function bθs(rs::T, θ) where {T <: Vern9InterpolationCoefficients}
     @unpack r011, r012, r013, r014, r015, r016, r017, r018, r019, r082, r083, r084, r085,
-    r086, r087, r088, r089, r092, r093, r094, r095, r096, r097, r098, r099, r102, r103,
-    r104, r105, r106, r107, r108, r109, r112, r113, r114, r115, r116, r117, r118, r119,
-    r122, r123, r124, r125, r126, r127, r128, r129, r132, r133, r134, r135, r136, r137,
-    r138, r139, r142, r143, r144, r145, r146, r147, r148, r149, r152, r153, r154, r155,
-    r156, r157, r158, r159, r172, r173, r174, r175, r176, r177, r178, r179, r182, r183,
-    r184, r185, r186, r187, r188, r189, r192, r193, r194, r195, r196, r197, r198, r199,
-    r202, r203, r204, r205, r206, r207, r208, r209, r212, r213, r214, r215, r216, r217,
-    r218, r219, r222, r223, r224, r225, r226, r227, r228, r229, r232, r233, r234, r235,
-    r236, r237, r238, r239, r242, r243, r244, r245, r246, r247, r248, r249, r252, r253,
-    r254, r255, r256, r257, r258, r259, r262, r263, r264, r265, r266,
-    r267, r268, r269 = rs
+        r086, r087, r088, r089, r092, r093, r094, r095, r096, r097, r098, r099, r102, r103,
+        r104, r105, r106, r107, r108, r109, r112, r113, r114, r115, r116, r117, r118, r119,
+        r122, r123, r124, r125, r126, r127, r128, r129, r132, r133, r134, r135, r136, r137,
+        r138, r139, r142, r143, r144, r145, r146, r147, r148, r149, r152, r153, r154, r155,
+        r156, r157, r158, r159, r172, r173, r174, r175, r176, r177, r178, r179, r182, r183,
+        r184, r185, r186, r187, r188, r189, r192, r193, r194, r195, r196, r197, r198, r199,
+        r202, r203, r204, r205, r206, r207, r208, r209, r212, r213, r214, r215, r216, r217,
+        r218, r219, r222, r223, r224, r225, r226, r227, r228, r229, r232, r233, r234, r235,
+        r236, r237, r238, r239, r242, r243, r244, r245, r246, r247, r248, r249, r252, r253,
+        r254, r255, r256, r257, r258, r259, r262, r263, r264, r265, r266,
+        r267, r268, r269 = rs
 
     b1θ = @evalpoly(θ, 0, r011, r012, r013, r014, r015, r016, r017, r018, r019)
     b8θ = @evalpoly(θ, 0, 0, r082, r083, r084, r085, r086, r087, r088, r089)
@@ -1384,5 +1394,5 @@ end
     b26θ = @evalpoly(θ, 0, 0, r262, r263, r264, r265, r266, r267, r268, r269)
 
     return b1θ, b8θ, b9θ, b10θ, b11θ, b12θ, b13θ, b14θ, b15θ, b17θ, b18θ, b19θ, b20θ,
-    b21θ, b22θ, b23θ, b24θ, b25θ, b26θ
+        b21θ, b22θ, b23θ, b24θ, b25θ, b26θ
 end

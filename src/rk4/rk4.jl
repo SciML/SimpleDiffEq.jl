@@ -51,7 +51,7 @@ struct SimpleRK4 <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleRK4
 
 mutable struct SimpleRK4Integrator{IIP, S, T, P, F} <:
-               DiffEqBase.AbstractODEIntegrator{SimpleRK4, IIP, S, T}
+    DiffEqBase.AbstractODEIntegrator{SimpleRK4, IIP, S, T}
     f::F             # ..................................... Equations of motion
     uprev::S         # .......................................... Previous state
     u::S             # ........................................... Current state
@@ -76,18 +76,24 @@ DiffEqBase.isinplace(::SRK4{IIP}) where {IIP} = IIP
 #                                Initialization
 ################################################################################
 
-function DiffEqBase.__init(prob::ODEProblem, alg::SimpleRK4;
-        dt = error("dt is required for this algorithm"))
-    simplerk4_init(prob.f,
+function DiffEqBase.__init(
+        prob::ODEProblem, alg::SimpleRK4;
+        dt = error("dt is required for this algorithm")
+    )
+    return simplerk4_init(
+        prob.f,
         DiffEqBase.isinplace(prob),
         prob.u0,
         prob.tspan[1],
         dt,
-        prob.p)
+        prob.p
+    )
 end
 
-function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleRK4;
-        dt = error("dt is required for this algorithm"))
+function DiffEqBase.__solve(
+        prob::ODEProblem, alg::SimpleRK4;
+        dt = error("dt is required for this algorithm")
+    )
     u0 = prob.u0
     tspan = prob.tspan
     ts = Array(tspan[1]:dt:tspan[2])
@@ -96,8 +102,10 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleRK4;
 
     @inbounds us[1] = _copy(u0)
 
-    integ = simplerk4_init(prob.f, DiffEqBase.isinplace(prob), prob.u0,
-        prob.tspan[1], dt, prob.p)
+    integ = simplerk4_init(
+        prob.f, DiffEqBase.isinplace(prob), prob.u0,
+        prob.tspan[1], dt, prob.p
+    )
 
     # FSAL
     for i in 1:(n - 1)
@@ -108,21 +116,26 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleRK4;
     sol = DiffEqBase.build_solution(prob, alg, ts, us, calculate_error = false)
 
     DiffEqBase.has_analytic(prob.f) &&
-        DiffEqBase.calculate_solution_errors!(sol;
-            timeseries_errors = true,
-            dense_errors = false)
+        DiffEqBase.calculate_solution_errors!(
+        sol;
+        timeseries_errors = true,
+        dense_errors = false
+    )
 
     return sol
 end
 
-@inline function simplerk4_init(f::F, IIP::Bool, u0::S, t0::T, dt::T,
-        p::P) where
-        {F, P, T, S}
+@inline function simplerk4_init(
+        f::F, IIP::Bool, u0::S, t0::T, dt::T,
+        p::P
+    ) where
+    {F, P, T, S}
 
     # Allocate the vector with the interpolants. For RK4, we need 5.
     ks = [zero(u0) for _ in 1:5]
 
-    integ = SRK4{IIP, S, T, P, F}(f,
+    integ = SRK4{IIP, S, T, P, F}(
+        f,
         _copy(u0),
         _copy(u0),
         _copy(u0),
@@ -133,7 +146,8 @@ end
         sign(dt),
         p,
         true,
-        ks)
+        ks
+    )
 
     return integ
 end
@@ -254,18 +268,22 @@ end
     # Hermite interpolation.
     @inbounds if !isinplace(integ)
         u = (1 - Θ) * y₀ + Θ * y₁ +
-            Θ * (Θ - 1) * ((1 - 2Θ) * (y₁ - y₀) +
-                           (Θ - 1) * dt * ks[1] +
-                           Θ * dt * ks[5])
+            Θ * (Θ - 1) * (
+            (1 - 2Θ) * (y₁ - y₀) +
+                (Θ - 1) * dt * ks[1] +
+                Θ * dt * ks[5]
+        )
         return u
     else
         u = similar(y₁)
         for i in 1:length(u)
             u[i] = (1 - Θ) * y₀[i] + Θ * y₁[i] +
-                   Θ * (Θ - 1) *
-                   ((1 - 2Θ) * (y₁[i] - y₀[i]) +
+                Θ * (Θ - 1) *
+                (
+                (1 - 2Θ) * (y₁[i] - y₀[i]) +
                     (Θ - 1) * dt * ks[1][i] +
-                    Θ * dt * ks[5][i])
+                    Θ * dt * ks[5][i]
+            )
         end
 
         return u
