@@ -22,7 +22,7 @@ function liip(du, u, p, t)
 end
 
 u0 = 10ones(3)
-dt = 1e-2
+dt = 1.0e-2
 
 odeoop = ODEProblem{false}(loop, SVector{3}(u0), (0.0, 100.0), [10, 28, 8 / 3])
 odeiip = ODEProblem{true}(liip, u0, (0.0, 100.0), [10, 28, 8 / 3])
@@ -37,27 +37,27 @@ step!(iip);
 deoop = DiffEqBase.init(odeoop, Tsit5(); dt = dt)
 step!(deoop);
 step!(deoop);
-@test oop.u≈deoop.u atol=1e-5
-@test oop.t≈deoop.t atol=1e-5
+@test oop.u ≈ deoop.u atol = 1.0e-5
+@test oop.t ≈ deoop.t atol = 1.0e-5
 
 deiip = DiffEqBase.init(odeiip, Tsit5(); dt = dt)
 step!(deiip);
 step!(deiip);
-@test iip.u≈deiip.u atol=1e-5
-@test iip.t≈deiip.t atol=1e-5
+@test iip.u ≈ deiip.u atol = 1.0e-5
+@test iip.t ≈ deiip.t atol = 1.0e-5
 
 sol = solve(odeoop, SimpleATsit5(), dt = dt)
 
 # Test keywords:
-oop = init(odeoop, SimpleATsit5(), dt = dt, reltol = 1e-9, abstol = 1e-9)
+oop = init(odeoop, SimpleATsit5(), dt = dt, reltol = 1.0e-9, abstol = 1.0e-9)
 step!(oop);
 step!(oop);
-deoop = DiffEqBase.init(odeoop, Tsit5(); dt = dt, reltol = 1e-9, abstol = 1e-9)
+deoop = DiffEqBase.init(odeoop, Tsit5(); dt = dt, reltol = 1.0e-9, abstol = 1.0e-9)
 step!(deoop);
 step!(deoop);
 
-@test oop.u≈deoop.u atol=1e-5
-@test oop.t≈deoop.t atol=1e-5
+@test oop.u ≈ deoop.u atol = 1.0e-5
+@test oop.t ≈ deoop.t atol = 1.0e-5
 
 # Test reinit!
 reinit!(oop, odeoop.u0; dt = dt)
@@ -67,46 +67,48 @@ step!(oop);
 step!(iip);
 step!(iip);
 
-@test oop.u≈deoop.u atol=1e-5
-@test oop.t≈deoop.t atol=1e-5
-@test iip.u≈deiip.u atol=1e-5
-@test iip.t≈deiip.t atol=1e-5
+@test oop.u ≈ deoop.u atol = 1.0e-5
+@test oop.t ≈ deoop.t atol = 1.0e-5
+@test iip.u ≈ deiip.u atol = 1.0e-5
+@test iip.t ≈ deiip.t atol = 1.0e-5
 
 # Interpolation tests
 uprev = copy(oop.u)
 step!(oop)
-@test uprev≈oop(oop.tprev) atol=1e-12
-@test oop(oop.t)≈oop.u atol=1e-12
+@test uprev ≈ oop(oop.tprev) atol = 1.0e-12
+@test oop(oop.t) ≈ oop.u atol = 1.0e-12
 
 uprev = copy(iip.u)
 step!(iip)
-@test uprev≈iip(iip.tprev) atol=1e-12
-@test iip(iip.t)≈iip.u atol=1e-12
+@test uprev ≈ iip(iip.tprev) atol = 1.0e-12
+@test iip(iip.t) ≈ iip.u atol = 1.0e-12
 
 # Interpolation tests comparing Tsit5 and SimpleATsit5
 function f(du, u, p, t)
     du[1] = 2.0 * u[1] + 3.0 * u[2]
-    du[2] = 4.0 * u[1] + 5.0 * u[2]
+    return du[2] = 4.0 * u[1] + 5.0 * u[2]
 end
 tmp = [1.0; 1.0]
 tspan = (0.0, 1.0)
 prob = ODEProblem(f, tmp, tspan)
-integ1 = init(prob, SimpleATsit5(), abstol = 1e-6, reltol = 1e-6, save_everystep = false,
-    dt = 0.1)
-integ2 = init(prob, Tsit5(), abstol = 1e-6, reltol = 1e-6, save_everystep = false, dt = 0.1)
+integ1 = init(
+    prob, SimpleATsit5(), abstol = 1.0e-6, reltol = 1.0e-6, save_everystep = false,
+    dt = 0.1
+)
+integ2 = init(prob, Tsit5(), abstol = 1.0e-6, reltol = 1.0e-6, save_everystep = false, dt = 0.1)
 step!(integ2)
 step!(integ1)
 for i in 1:9
     x = i / 10
     y = 1 - x
-    @test integ1(x * integ2.t + y * integ2.tprev)≈integ2(x * integ2.t + y * integ2.tprev) atol=1e-7
+    @test integ1(x * integ2.t + y * integ2.tprev) ≈ integ2(x * integ2.t + y * integ2.tprev) atol = 1.0e-7
 end
 step!(integ2)
 step!(integ1)
 for i in 1:9
     x = i / 10
     y = 1 - x
-    @test integ1(x * integ2.t + y * integ2.tprev)≈integ2(x * integ2.t + y * integ2.tprev) atol=1e-7
+    @test integ1(x * integ2.t + y * integ2.tprev) ≈ integ2(x * integ2.t + y * integ2.tprev) atol = 1.0e-7
 end
 ###################################################################################
 # Internal norm test:
@@ -124,8 +126,10 @@ function miip(du, u, p, t)
 end
 
 ran = rand(SVector{3})
-odemoop = ODEProblem{false}(moop, SMatrix{3, 2}(hcat(u0, ran)), (0.0, 100.0),
-    [10, 28, 8 / 3])
+odemoop = ODEProblem{false}(
+    moop, SMatrix{3, 2}(hcat(u0, ran)), (0.0, 100.0),
+    [10, 28, 8 / 3]
+)
 odemiip = ODEProblem{true}(miip, hcat(u0, ran), (0.0, 100.0), [10, 28, 8 / 3])
 
 using LinearAlgebra
@@ -138,8 +142,8 @@ iip = init(odemiip, SimpleATsit5(), dt = dt, internalnorm = (u, t) -> norm(u[:, 
 step!(iip);
 step!(iip);
 
-@test oop.u≈iip.u atol=1e-5
-@test oop.t≈iip.t atol=1e-5
+@test oop.u ≈ iip.u atol = 1.0e-5
+@test oop.t ≈ iip.t atol = 1.0e-5
 
 ###################################################################################
 # VectorVector test:
@@ -157,12 +161,16 @@ function vviip(du, u, p, t) # takes Vector{Vector}
 end
 
 ran = rand(3)
-odevoop = ODEProblem{true}(vvoop, [SVector{3}(u0), SVector{3}(ran)], (0.0, 100.0),
-    [10, 28, 8 / 3])
+odevoop = ODEProblem{true}(
+    vvoop, [SVector{3}(u0), SVector{3}(ran)], (0.0, 100.0),
+    [10, 28, 8 / 3]
+)
 odeviip = ODEProblem{true}(vviip, [u0, ran], (0.0, 100.0), [10, 28, 8 / 3])
 
-viip = init(odeviip, SimpleATsit5(), dt = dt;
-    internalnorm = (u, t) -> DiffEqBase.ODE_DEFAULT_NORM(u[1], t))
+viip = init(
+    odeviip, SimpleATsit5(), dt = dt;
+    internalnorm = (u, t) -> DiffEqBase.ODE_DEFAULT_NORM(u[1], t)
+)
 step!(viip);
 step!(viip);
 
@@ -170,10 +178,12 @@ iip = init(odeiip, SimpleATsit5(), dt = dt)
 step!(iip);
 step!(iip);
 
-@test iip.u≈viip.u[1] atol=1e-5
+@test iip.u ≈ viip.u[1] atol = 1.0e-5
 
-voop = init(odevoop, SimpleATsit5(), dt = dt,
-    internalnorm = (u, t) -> DiffEqBase.ODE_DEFAULT_NORM(u[1], t))
+voop = init(
+    odevoop, SimpleATsit5(), dt = dt,
+    internalnorm = (u, t) -> DiffEqBase.ODE_DEFAULT_NORM(u[1], t)
+)
 step!(voop);
 step!(voop);
 
@@ -181,10 +191,10 @@ oop = init(odeoop, SimpleATsit5(), dt = dt)
 step!(oop);
 step!(oop);
 
-@test oop.u≈voop.u[1] atol=1e-5
+@test oop.u ≈ voop.u[1] atol = 1.0e-5
 
 # Final test that the states of both methods should be the same:
-@test voop.u[2]≈viip.u[2] atol=1e-5
+@test voop.u[2] ≈ viip.u[2] atol = 1.0e-5
 
 # viip = init(odeviip,SimpleATsit5(),dt=dt; internalnorm = u -> SimpleDiffEq.defaultnorm(u[1]))
 # step!(viip); step!(viip)
@@ -208,11 +218,11 @@ using SimpleDiffEq, OrdinaryDiffEq, StaticArrays
     dx2 = f * cos(ω * t) - β * x[1] - x[1]^3 - d * x[2]
     return SVector(dx1, dx2)
 end
-prob = ODEProblem(duffing_rule, SVector(0.1, 0.2), (0.0, 1e12), [0.3, 0.1, 0.2, -1])
+prob = ODEProblem(duffing_rule, SVector(0.1, 0.2), (0.0, 1.0e12), [0.3, 0.1, 0.2, -1])
 
 T = 2π / 0.3 # this is the period of the oscillator
 
-integ2 = init(prob, SimpleATsit5(), reltol = 1e-9)
+integ2 = init(prob, SimpleATsit5(), reltol = 1.0e-9)
 step!(integ2, T * 20, true)
 v = zeros(200, 2)
 for k in 1:200
@@ -230,23 +240,23 @@ hence changing the final tspan to test with save_everystep = false
 odeiip = remake(odeiip; tspan = (0.0, 10.0))
 odeoop = remake(odeoop; tspan = (0.0, 10.0))
 
-sol = solve(odeiip, Tsit5(), reltol = 1e-9, abstol = 1e-9, save_everystep = false)
-sol1 = solve(odeiip, SimpleATsit5(), reltol = 1e-9, abstol = 1e-9, save_everystep = false)
+sol = solve(odeiip, Tsit5(), reltol = 1.0e-9, abstol = 1.0e-9, save_everystep = false)
+sol1 = solve(odeiip, SimpleATsit5(), reltol = 1.0e-9, abstol = 1.0e-9, save_everystep = false)
 
-@test sol.u≈sol1.u atol=1e-5
+@test sol.u ≈ sol1.u atol = 1.0e-5
 @test sol.t ≈ sol1.t
 
-sol = solve(odeoop, Tsit5(), reltol = 1e-9, abstol = 1e-9, save_everystep = false)
-sol1 = solve(odeoop, SimpleATsit5(), reltol = 1e-9, abstol = 1e-9, save_everystep = false)
+sol = solve(odeoop, Tsit5(), reltol = 1.0e-9, abstol = 1.0e-9, save_everystep = false)
+sol1 = solve(odeoop, SimpleATsit5(), reltol = 1.0e-9, abstol = 1.0e-9, save_everystep = false)
 
-@test sol.u≈sol1.u atol=1e-5
+@test sol.u ≈ sol1.u atol = 1.0e-5
 @test sol.t ≈ sol1.t
 
 simple_f(u, p, t) = 1.01 * u
 u0 = 1 / 2
 tspan = (0.0, 1.0)
 prob = ODEProblem(simple_f, u0, tspan)
-sol = solve(prob, Tsit5(), reltol = 1e-9, abstol = 1e-9, save_everystep = false)
-sol1 = solve(prob, SimpleATsit5(), reltol = 1e-9, abstol = 1e-9, save_everystep = false)
-@test sol.u≈sol1.u atol=1e-5
+sol = solve(prob, Tsit5(), reltol = 1.0e-9, abstol = 1.0e-9, save_everystep = false)
+sol1 = solve(prob, SimpleATsit5(), reltol = 1.0e-9, abstol = 1.0e-9, save_everystep = false)
+@test sol.u ≈ sol1.u atol = 1.0e-5
 @test sol.t ≈ sol1.t

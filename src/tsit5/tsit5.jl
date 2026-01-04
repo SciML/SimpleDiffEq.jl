@@ -43,7 +43,7 @@ struct SimpleTsit5 <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleTsit5
 
 mutable struct SimpleTsit5Integrator{IIP, S, T, P, F} <:
-               DiffEqBase.AbstractODEIntegrator{SimpleTsit5, IIP, S, T}
+    DiffEqBase.AbstractODEIntegrator{SimpleTsit5, IIP, S, T}
     f::F                  # eom
     uprev::S              # previous state
     u::S                  # current state
@@ -67,22 +67,30 @@ DiffEqBase.isinplace(::ST5I{IIP}) where {IIP} = IIP
 #######################################################################################
 # Initialization
 #######################################################################################
-function DiffEqBase.__init(prob::ODEProblem, alg::SimpleTsit5;
-        dt = error("dt is required for this algorithm"))
-    simpletsit5_init(prob.f, DiffEqBase.isinplace(prob), prob.u0,
-        prob.tspan[1], dt, prob.p)
+function DiffEqBase.__init(
+        prob::ODEProblem, alg::SimpleTsit5;
+        dt = error("dt is required for this algorithm")
+    )
+    return simpletsit5_init(
+        prob.f, DiffEqBase.isinplace(prob), prob.u0,
+        prob.tspan[1], dt, prob.p
+    )
 end
 
-function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleTsit5;
-        dt = error("dt is required for this algorithm"))
+function DiffEqBase.__solve(
+        prob::ODEProblem, alg::SimpleTsit5;
+        dt = error("dt is required for this algorithm")
+    )
     u0 = prob.u0
     tspan = prob.tspan
     ts = Array(tspan[1]:dt:tspan[2])
     n = ts[end] == tspan[2] ? length(ts) : length(ts) + 1
     us = Vector{typeof(u0)}(undef, n)
     us[1] = _copy(u0)
-    integ = simpletsit5_init(prob.f, DiffEqBase.isinplace(prob), prob.u0,
-        prob.tspan[1], dt, prob.p)
+    integ = simpletsit5_init(
+        prob.f, DiffEqBase.isinplace(prob), prob.u0,
+        prob.tspan[1], dt, prob.p
+    )
 
     # FSAL
     for i in 1:(n - 1)
@@ -97,28 +105,37 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleTsit5;
         us[end] = _copy(integ.u)
     end
 
-    sol = DiffEqBase.build_solution(prob, alg, ts, us,
-        calculate_error = false)
+    sol = DiffEqBase.build_solution(
+        prob, alg, ts, us,
+        calculate_error = false
+    )
     DiffEqBase.has_analytic(prob.f) &&
-        DiffEqBase.calculate_solution_errors!(sol; timeseries_errors = true,
-            dense_errors = false)
-    sol
+        DiffEqBase.calculate_solution_errors!(
+        sol; timeseries_errors = true,
+        dense_errors = false
+    )
+    return sol
 end
 
-@inline function simpletsit5_init(f::F,
+@inline function simpletsit5_init(
+        f::F,
         IIP::Bool, u0::S, t0::T, dt::T,
-        p::P) where {F, P, T, S}
+        p::P
+    ) where {F, P, T, S}
     cs, as, rs = _build_tsit5_caches(T)
     ks = [zero(u0) for i in 1:7]
 
-    integ = ST5I{IIP, S, T, P, F}(f, _copy(u0), _copy(u0), _copy(u0), t0, t0, t0, dt,
-        sign(dt), p, true, ks, cs, as, rs)
+    return integ = ST5I{IIP, S, T, P, F}(
+        f, _copy(u0), _copy(u0), _copy(u0), t0, t0, t0, dt,
+        sign(dt), p, true, ks, cs, as, rs
+    )
 end
 
 @inline function _build_tsit5_caches(::Type{T}) where {T}
     cs = SVector{6, T}(0.161, 0.327, 0.9, 0.9800255409045097, 1.0, 1.0)
 
-    as = SVector{21, T}(convert(T, 0.161),
+    as = SVector{21, T}(
+        convert(T, 0.161),
         #=a21=#
         convert(T, -0.008480655492356989),
         #=a31=#
@@ -158,9 +175,11 @@ end
         #=a74=#
         convert(T, -3.290069515436081),
         #=a75=#
-        convert(T, 2.324710524099774))
+        convert(T, 2.324710524099774)
+    )
 
-    rs = SVector{22, T}(convert(T, 1.0),
+    rs = SVector{22, T}(
+        convert(T, 1.0),
         #=r11=#
         convert(T, -2.763706197274826),
         #=r12=#
@@ -202,7 +221,8 @@ end
         #=r72=#
         convert(T, -4),
         #=r73=#
-        convert(T, 2.5))
+        convert(T, 2.5)
+    )
 
     return cs, as, rs
 end
@@ -219,7 +239,7 @@ end
     t = integ.t
     p = integ.p
     a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
-    a61, a62, a63, a64, a65, a71, a72, a73, a74, a75, a76 = integ.as
+        a61, a62, a63, a64, a65, a71, a72, a73, a74, a75, a76 = integ.as
 
     k1, k2, k3, k4, k5, k6 = integ.ks
     k7 = k1
@@ -255,14 +275,16 @@ end
         f!(k5, tmp, p, t + c4 * dt)
         for i in 1:L
             tmp[i] = uprev[i] +
-                     dt *
-                     (a61 * k1[i] + a62 * k2[i] + a63 * k3[i] + a64 * k4[i] + a65 * k5[i])
+                dt *
+                (a61 * k1[i] + a62 * k2[i] + a63 * k3[i] + a64 * k4[i] + a65 * k5[i])
         end
         f!(k6, tmp, p, t + dt)
         for i in 1:L
             integ.u[i] = uprev[i] +
-                         dt * (a71 * k1[i] + a72 * k2[i] + a73 * k3[i] + a74 * k4[i] +
-                          a75 * k5[i] + a76 * k6[i])
+                dt * (
+                a71 * k1[i] + a72 * k2[i] + a73 * k3[i] + a74 * k4[i] +
+                    a75 * k5[i] + a76 * k6[i]
+            )
         end
     end
     f!(k7, integ.u, p, t + dt)
@@ -280,7 +302,7 @@ end
     t = integ.t
     p = integ.p
     a21, a31, a32, a41, a42, a43, a51, a52, a53, a54,
-    a61, a62, a63, a64, a65, a71, a72, a73, a74, a75, a76 = integ.as
+        a61, a62, a63, a64, a65, a71, a72, a73, a74, a75, a76 = integ.as
 
     tmp = integ.tmp
     f = integ.f
@@ -306,7 +328,7 @@ end
     k6 = f(tmp, p, t + dt)
 
     integ.u = uprev +
-              dt * ((a71 * k1 + a72 * k2 + a73 * k3 + a74 * k4) + a75 * k5 + a76 * k6)
+        dt * ((a71 * k1 + a72 * k2 + a73 * k3 + a74 * k4) + a75 * k5 + a76 * k6)
     k7 = f(integ.u, p, t + dt)
 
     @inbounds begin # Necessary for interpolation
@@ -338,15 +360,19 @@ end
     ks = integ.ks
     if !isinplace(integ)
         u = @inbounds integ.uprev +
-                      dt * (b1θ * ks[1] + b2θ * ks[2] + b3θ * ks[3] + b4θ * ks[4] +
-                       b5θ * ks[5] + b6θ * ks[6] + b7θ * ks[7])
+            dt * (
+            b1θ * ks[1] + b2θ * ks[2] + b3θ * ks[3] + b4θ * ks[4] +
+                b5θ * ks[5] + b6θ * ks[6] + b7θ * ks[7]
+        )
         return u
     else
         u = similar(integ.u)
         @inbounds for i in 1:length(u)
             u[i] = integ.uprev[i] +
-                   dt * (b1θ * ks[1][i] + b2θ * ks[2][i] + b3θ * ks[3][i] +
-                    b4θ * ks[4][i] + b5θ * ks[5][i] + b6θ * ks[6][i] + b7θ * ks[7][i])
+                dt * (
+                b1θ * ks[1][i] + b2θ * ks[2][i] + b3θ * ks[3][i] +
+                    b4θ * ks[4][i] + b5θ * ks[5][i] + b6θ * ks[6][i] + b7θ * ks[7][i]
+            )
         end
         return u
     end
@@ -355,7 +381,7 @@ end
 @inline function bθs(rs::SVector{22, T}, θ::T) where {T}
     # θ in (0, 1) !
     r11, r12, r13, r14, r22, r23, r24, r32, r33, r34, r42, r43, r44, r52, r53,
-    r54, r62, r63, r64, r72, r73, r74 = rs
+        r54, r62, r63, r64, r72, r73, r74 = rs
 
     b1θ::T = @evalpoly(θ, zero(T), r11, r12, r13, r14)
     b2θ::T = @evalpoly(θ, zero(T), zero(T), r22, r23, r24)

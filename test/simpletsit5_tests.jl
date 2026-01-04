@@ -55,18 +55,22 @@ iip = init(odeiip, SimpleTsit5(), dt = dt)
 step!(iip);
 step!(iip);
 
-deoop = DiffEqBase.init(odeoop, Tsit5(); adaptive = false,
-    save_everystep = false, dt = dt)
+deoop = DiffEqBase.init(
+    odeoop, Tsit5(); adaptive = false,
+    save_everystep = false, dt = dt
+)
 step!(deoop);
 step!(deoop);
 @test oop.u == deoop.u
 
-deiip = DiffEqBase.init(odeiip, Tsit5();
+deiip = DiffEqBase.init(
+    odeiip, Tsit5();
     adaptive = false, save_everystep = false,
-    dt = dt)
+    dt = dt
+)
 step!(deiip);
 step!(deiip);
-@test iip.u≈deiip.u atol=1e-14
+@test iip.u ≈ deiip.u atol = 1.0e-14
 
 sol = solve(odeoop, SimpleTsit5(), dt = dt)
 
@@ -82,7 +86,7 @@ function ode(x, p, t)
     return ([dx])
 end
 prob = ODEProblem(ode, [1.0], (0.0, 0.05), nothing)
-sol = solve(prob, SimpleTsit5(), dt = 0.05/11) # On my PC, the integration ends at 0.04545...
+sol = solve(prob, SimpleTsit5(), dt = 0.05 / 11) # On my PC, the integration ends at 0.04545...
 @test sol.t[end] == 0.05
 
 #=

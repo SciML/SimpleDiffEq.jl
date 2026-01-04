@@ -43,12 +43,14 @@ end
 
 u0 = 10ones(3)
 dt = 0.01
-oop = SimpleDiffEq.simplerk4_init(loop,
+oop = SimpleDiffEq.simplerk4_init(
+    loop,
     false,
     SVector{3}(u0),
     0.0,
     dt,
-    [10, 28, 8 / 3])
+    [10, 28, 8 / 3]
+)
 step!(oop)
 
 for i in 1:10000
@@ -62,12 +64,14 @@ end
 # In-place version of the algorithm
 # ---------------------------------
 
-iip = SimpleDiffEq.simplerk4_init(liip,
+iip = SimpleDiffEq.simplerk4_init(
+    liip,
     true,
     copy(u0),
     0.0,
     dt,
-    [10, 28, 8 / 3])
+    [10, 28, 8 / 3]
+)
 
 step!(iip)
 
@@ -88,20 +92,24 @@ end
 u0 = 10ones(3)
 dt = 0.01
 
-odeoop = ODEProblem{false}(loop,
+odeoop = ODEProblem{false}(
+    loop,
     SVector{3}(u0),
     (0.0, 100.0),
-    [10, 28, 8 / 3])
+    [10, 28, 8 / 3]
+)
 
 oop = init(odeoop, SimpleRK4(), dt = dt)
 step!(oop)
 step!(oop)
 
-deoop = DiffEqBase.init(odeoop,
+deoop = DiffEqBase.init(
+    odeoop,
     RK4();
     adaptive = false,
     save_everystep = false,
-    dt = dt)
+    dt = dt
+)
 step!(deoop)
 step!(deoop)
 
@@ -118,20 +126,24 @@ sol = solve(odeoop, LoopRK4(), dt = dt)
 # In-place version of the algorithm
 # ---------------------------------
 
-odeiip = ODEProblem{true}(liip,
+odeiip = ODEProblem{true}(
+    liip,
     u0,
     (0.0, 100.0),
-    [10, 28, 8 / 3])
+    [10, 28, 8 / 3]
+)
 
 iip = init(odeiip, SimpleRK4(), dt = dt)
 step!(iip)
 step!(iip)
 
-deiip = DiffEqBase.init(odeiip,
+deiip = DiffEqBase.init(
+    odeiip,
     RK4();
     adaptive = false,
     save_everystep = false,
-    dt = dt)
+    dt = dt
+)
 step!(deiip)
 step!(deiip)
 

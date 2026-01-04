@@ -47,7 +47,7 @@ struct SimpleEuler <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleEuler
 
 mutable struct SimpleEulerIntegrator{IIP, S, T, P, F} <:
-               DiffEqBase.AbstractODEIntegrator{SimpleEuler, IIP, S, T}
+    DiffEqBase.AbstractODEIntegrator{SimpleEuler, IIP, S, T}
     f::F             # ..................................... Equations of motion
     uprev::S         # .......................................... Previous state
     u::S             # ........................................... Current state
@@ -71,18 +71,24 @@ DiffEqBase.isinplace(::SEI{IIP}) where {IIP} = IIP
 #                                Initialization
 ################################################################################
 
-function DiffEqBase.__init(prob::ODEProblem, alg::SimpleEuler;
-        dt = error("dt is required for this algorithm"))
-    simpleeuler_init(prob.f,
+function DiffEqBase.__init(
+        prob::ODEProblem, alg::SimpleEuler;
+        dt = error("dt is required for this algorithm")
+    )
+    return simpleeuler_init(
+        prob.f,
         DiffEqBase.isinplace(prob),
         prob.u0,
         prob.tspan[1],
         dt,
-        prob.p)
+        prob.p
+    )
 end
 
-function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleEuler;
-        dt = error("dt is required for this algorithm"))
+function DiffEqBase.__solve(
+        prob::ODEProblem, alg::SimpleEuler;
+        dt = error("dt is required for this algorithm")
+    )
     u0 = prob.u0
     tspan = prob.tspan
     ts = Array(tspan[1]:dt:tspan[2])
@@ -91,8 +97,10 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleEuler;
 
     @inbounds us[1] = _copy(u0)
 
-    integ = simpleeuler_init(prob.f, DiffEqBase.isinplace(prob), prob.u0,
-        prob.tspan[1], dt, prob.p)
+    integ = simpleeuler_init(
+        prob.f, DiffEqBase.isinplace(prob), prob.u0,
+        prob.tspan[1], dt, prob.p
+    )
 
     for i in 1:(n - 1)
         step!(integ)
@@ -102,17 +110,22 @@ function DiffEqBase.__solve(prob::ODEProblem, alg::SimpleEuler;
     sol = DiffEqBase.build_solution(prob, alg, ts, us, calculate_error = false)
 
     DiffEqBase.has_analytic(prob.f) &&
-        DiffEqBase.calculate_solution_errors!(sol;
-            timeseries_errors = true,
-            dense_errors = false)
+        DiffEqBase.calculate_solution_errors!(
+        sol;
+        timeseries_errors = true,
+        dense_errors = false
+    )
 
     return sol
 end
 
-@inline function simpleeuler_init(f::F, IIP::Bool, u0::S, t0::T, dt::T,
-        p::P) where
-        {F, P, T, S}
-    integ = SEI{IIP, S, T, P, F}(f,
+@inline function simpleeuler_init(
+        f::F, IIP::Bool, u0::S, t0::T, dt::T,
+        p::P
+    ) where
+    {F, P, T, S}
+    integ = SEI{IIP, S, T, P, F}(
+        f,
         _copy(u0),
         _copy(u0),
         _copy(u0),
@@ -122,7 +135,8 @@ end
         dt,
         sign(dt),
         p,
-        true)
+        true
+    )
 
     return integ
 end
