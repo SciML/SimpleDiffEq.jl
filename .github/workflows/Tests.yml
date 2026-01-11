@@ -25,4 +25,13 @@ jobs:
     uses: "SciML/.github/.github/workflows/tests.yml@v1"
     with:
       julia-version: "${{ matrix.version }}"
+      group: "Core"
+    secrets: "inherit"
+
+  jet:
+    name: "JET"
+    uses: "SciML/.github/.github/workflows/tests.yml@v1"
+    with:
+      julia-version: "1"
+      group: "JET"
     secrets: "inherit"
