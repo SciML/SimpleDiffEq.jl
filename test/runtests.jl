@@ -16,8 +16,8 @@ const GROUP = get(ENV, "GROUP", "Core")
         @time @safetestset "Interface Tests" include("interface_tests.jl")
     end
 
-    if GROUP == "JET"
-        using Pkg
+    if GROUP == "nopre"
+        import Pkg
         Pkg.add("JET")
         @time @safetestset "JET Static Analysis Tests" include("jet_tests.jl")
     end

@@ -18,20 +18,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        group:
+          - "Core"
+          - "nopre"
         version:
           - "1"
           - "lts"
           - "pre"
+        exclude:
+          - group: "nopre"
+            version: "lts"
+          - group: "nopre"
+            version: "pre"
     uses: "SciML/.github/.github/workflows/tests.yml@v1"
     with:
       julia-version: "${{ matrix.version }}"
-      group: "Core"
-    secrets: "inherit"
-
-  jet:
-    name: "JET"
-    uses: "SciML/.github/.github/workflows/tests.yml@v1"
-    with:
-      julia-version: "1"
-      group: "JET"
+      group: "${{ matrix.group }}"
     secrets: "inherit"
