@@ -692,25 +692,16 @@ end
 # Interpolation
 #######################################################################################
 # Interpolation function, both OOP and IIP
-@inline @muladd function (
-        integ::SAT5I{
-            IIP,
-            S,
-            T,
-        }
-    )(t::Real) where {
-        IIP,
-        S <:
-        AbstractArray{<:Number},
-        T,
-    }
+@inline @muladd function (integ::SAT5I{IIP, S, T})(
+        t::Real
+    ) where {IIP, S <: AbstractArray{<:Number}, T}
     tnext, tprev, dt = integ.t, integ.tprev, integ.dt
 
     θ = (t - tprev) / dt
     b1θ, b2θ, b3θ, b4θ, b5θ, b6θ, b7θ = bθs(integ.rs, θ)
 
     ks = integ.ks
-    if !IIP
+    if !isinplace(integ)
         u = @inbounds integ.uprev +
             dt * (
             b1θ * ks[1] + b2θ * ks[2] + b3θ * ks[3] + b4θ * ks[4] +
