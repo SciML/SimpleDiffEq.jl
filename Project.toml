@@ -1,6 +1,6 @@
 name = "SimpleDiffEq"
 uuid = "05bca326-078c-5bf0-a5bf-ce7c7982d7fd"
-version = "1.12.0"
+version = "1.13.0"
 repo = "https://github.com/SciML/SimpleDiffEq.jl.git"
 
 [deps]
