@@ -20,5 +20,6 @@ const GROUP = get(ENV, "GROUP", "Core")
         import Pkg
         Pkg.add("JET")
         @time @safetestset "JET Static Analysis Tests" include("jet_tests.jl")
+        @time @safetestset "Allocation Tests" include("alloc_tests.jl")
     end
 end
