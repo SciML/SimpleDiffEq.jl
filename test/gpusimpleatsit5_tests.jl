@@ -45,7 +45,7 @@ sol2 = solve(
 )
 sol3 = solve(odeoop, SimpleATsit5(), dt = dt, saveat = 0.0:0.1:100.0)
 
-@test sol[20] ≈ sol2[20] atol = 1.0e-5
+@test sol.u[20] ≈ sol2.u[20] atol = 1.0e-5
 @test sol2.u[20] ≈ sol3.u[20]
 @test sol.t ≈ sol2.t
 
