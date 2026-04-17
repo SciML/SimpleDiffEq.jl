@@ -78,7 +78,7 @@ DiffEqBase.isinplace(::SRK4{IIP}) where {IIP} = IIP
 
 function DiffEqBase.__init(
         prob::ODEProblem, alg::SimpleRK4;
-        dt = error("dt is required for this algorithm")
+        dt = error("dt is required for this algorithm"), kwargs...
     )
     return simplerk4_init(
         prob.f,
@@ -92,7 +92,7 @@ end
 
 function DiffEqBase.__solve(
         prob::ODEProblem, alg::SimpleRK4;
-        dt = error("dt is required for this algorithm")
+        dt = error("dt is required for this algorithm"), kwargs...
     )
     u0 = prob.u0
     tspan = prob.tspan
