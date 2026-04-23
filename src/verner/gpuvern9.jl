@@ -51,7 +51,8 @@ export GPUSimpleVern9
         prob::ODEProblem,
         alg::GPUSimpleVern9; saveat = nothing,
         save_everystep = true,
-        dt = 0.1f0
+        dt = 0.1f0,
+        kwargs...
     )
     @assert !isinplace(prob)
     u0 = prob.u0
@@ -404,7 +405,8 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern9) = true
         alg::GPUSimpleAVern9;
         dt = 0.1f0, saveat = nothing,
         save_everystep = true,
-        abstol = 1.0f-6, reltol = 1.0f-3
+        abstol = 1.0f-6, reltol = 1.0f-3,
+        kwargs...
     )
     @assert !isinplace(prob)
     u0 = prob.u0
