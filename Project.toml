@@ -13,11 +13,11 @@ Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
-DiffEqBase = "6.122"
+DiffEqBase = "6.122, 7"
 ExplicitImports = "1.14.0"
 JLArrays = "0.1, 0.2, 0.3"
 MuladdMacro = "0.2"
-OrdinaryDiffEq = "6"
+OrdinaryDiffEq = "6, 7"
 Parameters = "0.12"
 RecursiveArrayTools = "2, 3, 4"
 Reexport = "0.2, 1.0"

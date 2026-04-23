@@ -40,7 +40,7 @@ SciMLBase.isdiscrete(alg::SimpleFunctionMap) = true
 function DiffEqBase.__solve(
         prob::DiffEqBase.DiscreteProblem{uType, tupType, false},
         alg::SimpleFunctionMap;
-        calculate_values = true
+        calculate_values = true, kwargs...
     ) where {uType, tupType}
     tType = eltype(tupType)
     tspan = prob.tspan
@@ -68,7 +68,7 @@ end
 function DiffEqBase.__solve(
         prob::DiscreteProblem{uType, tupType, true},
         alg::SimpleFunctionMap;
-        calculate_values = true
+        calculate_values = true, kwargs...
     ) where {uType, tupType}
     tType = eltype(tupType)
     tspan = prob.tspan
@@ -110,7 +110,8 @@ end
 
 function DiffEqBase.__init(
         prob::DiscreteProblem,
-        alg::SimpleFunctionMap
+        alg::SimpleFunctionMap;
+        kwargs...
     )
     sol = DiffEqBase.__solve(prob, alg; calculate_values = false)
     F = typeof(prob.f)

@@ -11,7 +11,7 @@ sol = solve(prob, SimpleEM(), dt = 0.25)
 
 @test sol.t == collect(0:0.25:1.0)
 @test length(sol.u) == 5
-@test typeof(sol) <: DESolution
+@test typeof(sol) <: SciMLBase.AbstractSciMLSolution
 
 u0 = @SVector [0.1, 0.2]
 prob = SDEProblem(f, g, u0, tspan)
@@ -51,7 +51,7 @@ prob = SDEProblem(f_oop, g_oop, u0, (0.0, 1.0), noise_rate_prototype = noise_rat
 sol = solve(prob, SimpleEM(), dt = 0.25)
 
 @test length(sol.u) == 5
-@test typeof(sol) <: DESolution
+@test typeof(sol) <: SciMLBase.AbstractSciMLSolution
 
 @info "Non-Diagonal Noise IIP"
 
@@ -71,4 +71,4 @@ prob = SDEProblem(f_oop, g_oop, ones(2), (0.0, 1.0), noise_rate_prototype = zero
 sol = solve(prob, SimpleEM(), dt = 0.25)
 
 @test length(sol.u) == 5
-@test typeof(sol) <: DESolution
+@test typeof(sol) <: SciMLBase.AbstractSciMLSolution

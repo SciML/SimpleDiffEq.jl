@@ -5,13 +5,29 @@ module SimpleDiffEq
     using Reexport: @reexport
     using MuladdMacro: @muladd
     @reexport using DiffEqBase: DiffEqBase, ODEProblem, SDEProblem, DiscreteProblem,
-        isinplace, reinit!, u_modified!, ODE_DEFAULT_NORM,
-        set_t!, solve, step!, init, DESolution, @..,
+        isinplace, reinit!, ODE_DEFAULT_NORM,
+        set_t!, solve, step!, init, @..,
         AbstractODEIntegrator, DEIntegrator, ConstantInterpolation,
         __init, __solve, build_solution, has_analytic,
         calculate_solution_errors!, is_diagonal_noise,
         AbstractSDEAlgorithm, AbstractODEAlgorithm, isdiscrete, SciMLBase
     import DiffEqBase.SciMLBase: allows_arbitrary_number_types, allowscomplex, isautodifferentiable, isadaptive
+    # `derivative_discontinuity!` was introduced in DiffEqBase v7 / SciMLBase v3,
+    # replacing the older `u_modified!`. Support both branches so the package can
+    # be used with either DiffEqBase v6 or v7.
+    @static if isdefined(DiffEqBase, :derivative_discontinuity!)
+        using DiffEqBase: derivative_discontinuity!
+        export derivative_discontinuity!
+    else
+        const derivative_discontinuity! = DiffEqBase.u_modified!
+        export derivative_discontinuity!
+    end
+    # Keep `u_modified!` re-exported for backwards compatibility with any user
+    # code that still calls it.
+    @static if isdefined(DiffEqBase, :u_modified!)
+        using DiffEqBase: u_modified!
+        export u_modified!
+    end
     using StaticArrays: SArray, SVector, MVector
     using RecursiveArrayTools: recursivecopy!
     using LinearAlgebra: mul!

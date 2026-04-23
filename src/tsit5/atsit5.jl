@@ -86,7 +86,14 @@ end
 const SAT5I = SimpleATsit5Integrator
 
 DiffEqBase.isinplace(::SAT5I{IIP}) where {IIP} = IIP
-DiffEqBase.u_modified!(i::SAT5I, bool) = (i.u_modified = bool)
+# Extend the integrator-interface hook on whichever name the installed
+# DiffEqBase provides. DiffEqBase v7+ uses `derivative_discontinuity!`;
+# v6 used `u_modified!`.
+@static if isdefined(DiffEqBase, :derivative_discontinuity!)
+    DiffEqBase.derivative_discontinuity!(i::SAT5I, bool) = (i.u_modified = bool)
+else
+    DiffEqBase.u_modified!(i::SAT5I, bool) = (i.u_modified = bool)
+end
 
 #######################################################################################
 # Initialization
@@ -108,7 +115,7 @@ function DiffEqBase.__solve(
         prob::ODEProblem, alg::SimpleATsit5;
         dt = 0.1, saveat = nothing, save_everystep = true,
         abstol = 1.0e-6, reltol = 1.0e-3,
-        internalnorm = DiffEqBase.ODE_DEFAULT_NORM
+        internalnorm = DiffEqBase.ODE_DEFAULT_NORM, kwargs...
     )
     u0 = prob.u0
     tspan = prob.tspan
@@ -767,7 +774,7 @@ end
         t0 = integrator.t0, dt = integrator.dt
     )
 
-    # Is modifying the `uprev` necessary? We do `u_modified(i, true)`
+    # Is modifying the `uprev` necessary? We do `derivative_discontinuity!(i, true)`
     if isinplace(integrator)
         recursivecopy!(integrator.u, u0)
         recursivecopy!(integrator.uprev, integrator.u)
@@ -775,7 +782,7 @@ end
         integrator.u = u0
         integrator.uprev = integrator.u
     end
-    u_modified!(integrator, true)
+    derivative_discontinuity!(integrator, true)
 
     integrator.t = t0
     integrator.tprev = t0

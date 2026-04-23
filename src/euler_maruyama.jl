@@ -37,7 +37,8 @@ export SimpleEM
 @muladd function DiffEqBase.solve(
         prob::SDEProblem{uType, tType, false}, alg::SimpleEM,
         args...;
-        dt = error("dt required for SimpleEM")
+        dt = error("dt required for SimpleEM"),
+        kwargs...
     ) where {
         uType,
         tType,
@@ -84,7 +85,8 @@ end
 @muladd function DiffEqBase.solve(
         prob::SDEProblem{uType, tType, true}, alg::SimpleEM,
         args...;
-        dt = error("dt required for SimpleEM")
+        dt = error("dt required for SimpleEM"),
+        kwargs...
     ) where {
         uType,
         tType,
