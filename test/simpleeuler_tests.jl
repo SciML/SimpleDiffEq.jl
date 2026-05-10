@@ -4,7 +4,7 @@
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-using SimpleDiffEq, StaticArrays, OrdinaryDiffEq, Test
+using SimpleDiffEq, StaticArrays, OrdinaryDiffEq, OrdinaryDiffEqLowOrderRK, Test
 
 function loop(u, p, t)
     @inbounds begin
