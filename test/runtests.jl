@@ -1,26 +1,2 @@
-using SimpleDiffEq, SafeTestsets, Test
-
-const GROUP = get(ENV, "GROUP", "Core")
-
-@time begin
-    if GROUP == "Core" || GROUP == "All"
-        @time @safetestset "Discrete Tests" include("discrete_tests.jl")
-        @time @safetestset "SimpleEM Tests" include("simpleem_tests.jl")
-        @time @safetestset "SimpleTsit5 Tests" include("simpletsit5_tests.jl")
-        @time @safetestset "SimpleATsit5 Tests" include("simpleatsit5_tests.jl")
-        @time @safetestset "GPUSimpleATsit5 Tests" include("gpusimpleatsit5_tests.jl")
-        @time @safetestset "SimpleRK4 Tests" include("simplerk4_tests.jl")
-        @time @safetestset "SimpleEuler Tests" include("simpleeuler_tests.jl")
-        @time @safetestset "GPU Compatible ODE Tests" include("gpu_ode_regression.jl")
-        @time @safetestset "Interface Tests" include("interface_tests.jl")
-        @time @safetestset "Allocation Tests" include("alloc_tests.jl")
-    end
-
-    if GROUP == "QA"
-        import Pkg
-        Pkg.activate(joinpath(@__DIR__, "qa"))
-        Pkg.develop(Pkg.PackageSpec(path = dirname(@__DIR__)))
-        Pkg.instantiate()
-        include(joinpath(@__DIR__, "qa", "qa.jl"))
-    end
-end
+using SciMLTesting
+run_tests()
