@@ -92,7 +92,7 @@ export LoopEuler
 
     !save_everystep && save_end && (us[end] = u)
 
-    sol = DiffEqBase.build_solution(
+    sol = SciMLBase.build_solution(
         prob, alg, ts, us,
         k = nothing, stats = nothing,
         calculate_error = false
@@ -153,7 +153,7 @@ end
 
     !save_everystep && save_end && (us[end] = u)
 
-    sol = DiffEqBase.build_solution(
+    sol = SciMLBase.build_solution(
         prob, alg, ts, us,
         k = nothing, stats = nothing,
         calculate_error = false

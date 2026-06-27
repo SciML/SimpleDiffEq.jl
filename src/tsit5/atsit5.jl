@@ -163,7 +163,7 @@ function DiffEqBase.__solve(
         push!(ts, integ.t)
     end
 
-    sol = DiffEqBase.build_solution(
+    sol = SciMLBase.build_solution(
         prob, alg, ts, us,
         calculate_error = false
     )

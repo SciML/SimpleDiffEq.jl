@@ -57,7 +57,7 @@ function DiffEqBase.__solve(
             u[i] = f(u[i - 1], p, t[i])
         end
     end
-    return sol = DiffEqBase.build_solution(
+    return sol = SciMLBase.build_solution(
         prob, alg, t, u, dense = false,
         interp = DiffEqBase.ConstantInterpolation(t, u),
         calculate_error = false
@@ -86,7 +86,7 @@ function DiffEqBase.__solve(
             f(u[i], u[i - 1], p, t[i])
         end
     end
-    return sol = DiffEqBase.build_solution(
+    return sol = SciMLBase.build_solution(
         prob, alg, t, u, dense = false,
         interp = DiffEqBase.ConstantInterpolation(t, u),
         calculate_error = false

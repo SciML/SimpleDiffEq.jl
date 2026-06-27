@@ -70,7 +70,7 @@ export GPUSimpleEuler
         us[i] = u
     end
 
-    sol = DiffEqBase.build_solution(
+    sol = SciMLBase.build_solution(
         prob, alg, ts, SArray(us),
         k = nothing, stats = nothing,
         calculate_error = false

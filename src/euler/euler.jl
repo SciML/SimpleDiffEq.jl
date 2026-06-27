@@ -107,7 +107,7 @@ function DiffEqBase.__solve(
         us[i + 1] = _copy(integ.u)
     end
 
-    sol = DiffEqBase.build_solution(prob, alg, ts, us, calculate_error = false)
+    sol = SciMLBase.build_solution(prob, alg, ts, us, calculate_error = false)
 
     DiffEqBase.has_analytic(prob.f) &&
         DiffEqBase.calculate_solution_errors!(

@@ -105,7 +105,7 @@ function DiffEqBase.__solve(
         us[end] = _copy(integ.u)
     end
 
-    sol = DiffEqBase.build_solution(
+    sol = SciMLBase.build_solution(
         prob, alg, ts, us,
         calculate_error = false
     )

@@ -223,7 +223,7 @@ export GPUSimpleVern7
         push!(ts, t)
     end
 
-    sol = DiffEqBase.build_solution(
+    sol = SciMLBase.build_solution(
         prob, alg, ts, us,
         k = nothing, stats = nothing,
         calculate_error = false
@@ -516,7 +516,7 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern7) = true
         push!(us, u)
         push!(ts, t)
     end
-    sol = DiffEqBase.build_solution(
+    sol = SciMLBase.build_solution(
         prob, alg, ts, us,
         calculate_error = false
     )
