@@ -47,7 +47,7 @@ struct SimpleEuler <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleEuler
 
 mutable struct SimpleEulerIntegrator{IIP, S, T, P, F} <:
-    DiffEqBase.AbstractODEIntegrator{SimpleEuler, IIP, S, T}
+    SciMLBase.AbstractODEIntegrator{SimpleEuler, IIP, S, T}
     f::F             # ..................................... Equations of motion
     uprev::S         # .......................................... Previous state
     u::S             # ........................................... Current state
@@ -71,7 +71,7 @@ DiffEqBase.isinplace(::SEI{IIP}) where {IIP} = IIP
 #                                Initialization
 ################################################################################
 
-function DiffEqBase.__init(
+function SciMLBase.__init(
         prob::ODEProblem, alg::SimpleEuler;
         dt = error("dt is required for this algorithm"), kwargs...
     )
@@ -85,7 +85,7 @@ function DiffEqBase.__init(
     )
 end
 
-function DiffEqBase.__solve(
+function SciMLBase.__solve(
         prob::ODEProblem, alg::SimpleEuler;
         dt = error("dt is required for this algorithm"), kwargs...
     )
@@ -109,8 +109,8 @@ function DiffEqBase.__solve(
 
     sol = SciMLBase.build_solution(prob, alg, ts, us, calculate_error = false)
 
-    DiffEqBase.has_analytic(prob.f) &&
-        DiffEqBase.calculate_solution_errors!(
+    SciMLBase.has_analytic(prob.f) &&
+        SciMLBase.calculate_solution_errors!(
         sol;
         timeseries_errors = true,
         dense_errors = false

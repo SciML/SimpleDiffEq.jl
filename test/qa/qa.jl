@@ -1,12 +1,6 @@
 using SciMLTesting, SimpleDiffEq, Test
 using JET
 
-# `@..` is owned by FastBroadcast and the remaining ignored names are SciMLBase's
-# solver-extension API; SimpleDiffEq imports/accesses both surfaces through
-# DiffEqBase, which re-exports them. The owner/public ExplicitImports checks flag
-# the names that are not exported / declared public in their owner packages.
-const at = Symbol("@..")
-
 # JET `report_package(; mode = :typo)` is clean on Julia 1.10/1.11 (JET 0.9.x) but
 # surfaces 36 reports on Julia 1.12 (JET 0.11.x): one genuine latent bug
 # (src/euler/euler.jl:199, an inplace-interpolation path that reads `length(u)`
@@ -25,37 +19,4 @@ run_qa(
     SimpleDiffEq;
     explicit_imports = true,
     jet_broken = jet_broken,
-    ei_kwargs = (;
-        # owner is FastBroadcast (@..) / SciMLBase (the rest), imported via DiffEqBase
-        all_explicit_imports_via_owners = (;
-            ignore = (
-                at, :AbstractODEAlgorithm, :AbstractODEIntegrator, :AbstractSDEAlgorithm,
-                :ConstantInterpolation, :DEIntegrator, :__init, :__solve, :build_solution,
-                :calculate_solution_errors!, :has_analytic, :is_diagonal_noise,
-            ),
-        ),
-        all_qualified_accesses_via_owners = (;
-            ignore = (
-                at, :AbstractODEIntegrator, :AbstractSDEAlgorithm, :ConstantInterpolation,
-                :DEIntegrator, :__init, :__solve, :build_solution, :calculate_solution_errors!,
-                :has_analytic, :is_diagonal_noise,
-            ),
-        ),
-        # Still non-public in their accessed module (DiffEqBase): `@..` is
-        # FastBroadcast's and re-exported by DiffEqBase; the rest are SciMLBase's
-        # solver-extension internals (not among the names SciMLBase declared public)
-        # that DiffEqBase re-exports.
-        all_qualified_accesses_are_public = (;
-            ignore = (
-                at, :AbstractODEIntegrator, :ConstantInterpolation, :DEIntegrator,
-                :__init, :__solve, :calculate_solution_errors!, :has_analytic,
-            ),
-        ),
-        all_explicit_imports_are_public = (;
-            ignore = (
-                at, :AbstractODEIntegrator, :ConstantInterpolation, :DEIntegrator,
-                :__init, :__solve, :calculate_solution_errors!, :has_analytic,
-            ),
-        ),
-    ),
 )

@@ -47,7 +47,7 @@ export LoopEuler
 
 # Out-of-place
 # No caching, good for static arrays, bad for arrays
-@muladd function DiffEqBase.__solve(
+@muladd function SciMLBase.__solve(
         prob::ODEProblem{uType, tType, false},
         alg::LoopEuler;
         dt = error("dt is required for this algorithm"),
@@ -97,8 +97,8 @@ export LoopEuler
         k = nothing, stats = nothing,
         calculate_error = false
     )
-    DiffEqBase.has_analytic(prob.f) &&
-        DiffEqBase.calculate_solution_errors!(
+    SciMLBase.has_analytic(prob.f) &&
+        SciMLBase.calculate_solution_errors!(
         sol; timeseries_errors = true,
         dense_errors = false
     )
@@ -107,7 +107,7 @@ end
 
 # In-place
 # Good for mutable objects like arrays
-# Use DiffEqBase.@.. for simd ivdep
+# Use @.. for simd ivdep
 @muladd function DiffEqBase.solve(
         prob::ODEProblem{uType, tType, true},
         alg::LoopEuler;
@@ -147,7 +147,7 @@ end
     for i in 2:length(ts)
         t = ts[i]
         f(k, u, p, t)
-        DiffEqBase.@.. u = u + dt * k
+        @.. u = u + dt * k
         save_everystep && (us[i] = copy(u))
     end
 
@@ -158,8 +158,8 @@ end
         k = nothing, stats = nothing,
         calculate_error = false
     )
-    DiffEqBase.has_analytic(prob.f) &&
-        DiffEqBase.calculate_solution_errors!(
+    SciMLBase.has_analytic(prob.f) &&
+        SciMLBase.calculate_solution_errors!(
         sol; timeseries_errors = true,
         dense_errors = false
     )

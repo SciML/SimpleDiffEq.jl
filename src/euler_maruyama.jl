@@ -117,10 +117,10 @@ end
         @. dW = randn(eltype(dW))
 
         if SciMLBase.is_diagonal_noise(prob)
-            DiffEqBase.@.. u[i] = uprev + ftmp * dt + sqdt * gtmp * dW
+            @.. u[i] = uprev + ftmp * dt + sqdt * gtmp * dW
         else
             mul!(gtmp2, gtmp, dW)
-            DiffEqBase.@.. u[i] = uprev + ftmp * dt + sqdt * gtmp2
+            @.. u[i] = uprev + ftmp * dt + sqdt * gtmp2
         end
     end
 

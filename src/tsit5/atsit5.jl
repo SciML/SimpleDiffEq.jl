@@ -59,7 +59,7 @@ const gamma = 9 / 10
 const qoldinit = 1.0e-4
 
 mutable struct SimpleATsit5Integrator{IIP, S, T, P, F, N} <:
-    DiffEqBase.AbstractODEIntegrator{SimpleATsit5, IIP, S, T}
+    SciMLBase.AbstractODEIntegrator{SimpleATsit5, IIP, S, T}
     f::F                  # eom
     uprev::S              # previous state
     u::S                  # current state
@@ -98,7 +98,7 @@ end
 #######################################################################################
 # Initialization
 #######################################################################################
-function DiffEqBase.__init(
+function SciMLBase.__init(
         prob::ODEProblem, alg::SimpleATsit5;
         dt = 0.1,
         abstol = 1.0e-6, reltol = 1.0e-3,
@@ -111,7 +111,7 @@ function DiffEqBase.__init(
     )
 end
 
-function DiffEqBase.__solve(
+function SciMLBase.__solve(
         prob::ODEProblem, alg::SimpleATsit5;
         dt = 0.1, saveat = nothing, save_everystep = true,
         abstol = 1.0e-6, reltol = 1.0e-3,
@@ -167,8 +167,8 @@ function DiffEqBase.__solve(
         prob, alg, ts, us,
         calculate_error = false
     )
-    DiffEqBase.has_analytic(prob.f) &&
-        DiffEqBase.calculate_solution_errors!(
+    SciMLBase.has_analytic(prob.f) &&
+        SciMLBase.calculate_solution_errors!(
         sol; timeseries_errors = true,
         dense_errors = false
     )

@@ -4,14 +4,14 @@ module SimpleDiffEq
 
     using Reexport: @reexport
     using MuladdMacro: @muladd
+    @reexport using FastBroadcast: @..
     @reexport using DiffEqBase: DiffEqBase, ODEProblem, SDEProblem, DiscreteProblem,
         isinplace, reinit!, ODE_DEFAULT_NORM,
-        set_t!, solve, step!, init, @..,
-        AbstractODEIntegrator, DEIntegrator, ConstantInterpolation,
-        __init, __solve, has_analytic,
-        calculate_solution_errors!, isdiscrete
+        set_t!, solve, step!, init, isdiscrete
     @reexport using SciMLBase: SciMLBase, build_solution, is_diagonal_noise,
-        AbstractSDEAlgorithm, AbstractODEAlgorithm
+        AbstractSDEAlgorithm, AbstractODEAlgorithm,
+        AbstractODEIntegrator, DEIntegrator, ConstantInterpolation,
+        __init, __solve, has_analytic, calculate_solution_errors!
     import SciMLBase: allows_arbitrary_number_types, allowscomplex, isautodifferentiable, isadaptive
     # `derivative_discontinuity!` was introduced in DiffEqBase v7 / SciMLBase v3,
     # replacing the older `u_modified!`. Support both branches so the package can
