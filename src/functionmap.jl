@@ -37,7 +37,7 @@ export SimpleFunctionMap
 SciMLBase.isdiscrete(alg::SimpleFunctionMap) = true
 
 # ConstantCache version
-function DiffEqBase.__solve(
+function SciMLBase.__solve(
         prob::DiffEqBase.DiscreteProblem{uType, tupType, false},
         alg::SimpleFunctionMap;
         calculate_values = true, kwargs...
@@ -57,15 +57,15 @@ function DiffEqBase.__solve(
             u[i] = f(u[i - 1], p, t[i])
         end
     end
-    return sol = DiffEqBase.build_solution(
+    return sol = SciMLBase.build_solution(
         prob, alg, t, u, dense = false,
-        interp = DiffEqBase.ConstantInterpolation(t, u),
+        interp = SciMLBase.ConstantInterpolation(t, u),
         calculate_error = false
     )
 end
 
 # Cache version
-function DiffEqBase.__solve(
+function SciMLBase.__solve(
         prob::DiscreteProblem{uType, tupType, true},
         alg::SimpleFunctionMap;
         calculate_values = true, kwargs...
@@ -86,9 +86,9 @@ function DiffEqBase.__solve(
             f(u[i], u[i - 1], p, t[i])
         end
     end
-    return sol = DiffEqBase.build_solution(
+    return sol = SciMLBase.build_solution(
         prob, alg, t, u, dense = false,
-        interp = DiffEqBase.ConstantInterpolation(t, u),
+        interp = SciMLBase.ConstantInterpolation(t, u),
         calculate_error = false
     )
 end
@@ -97,7 +97,7 @@ end
 
 # Integrator version
 mutable struct DiscreteIntegrator{F, IIP, uType, tType, P, S} <:
-    DiffEqBase.DEIntegrator{SimpleFunctionMap, IIP, uType, tType}
+    SciMLBase.DEIntegrator{SimpleFunctionMap, IIP, uType, tType}
     f::F
     u::uType
     t::tType
@@ -108,12 +108,12 @@ mutable struct DiscreteIntegrator{F, IIP, uType, tType, P, S} <:
     tdir::tType
 end
 
-function DiffEqBase.__init(
+function SciMLBase.__init(
         prob::DiscreteProblem,
         alg::SimpleFunctionMap;
         kwargs...
     )
-    sol = DiffEqBase.__solve(prob, alg; calculate_values = false)
+    sol = SciMLBase.__solve(prob, alg; calculate_values = false)
     F = typeof(prob.f)
     IIP = isinplace(prob)
     uType = typeof(prob.u0)

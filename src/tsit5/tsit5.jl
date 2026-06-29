@@ -43,7 +43,7 @@ struct SimpleTsit5 <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleTsit5
 
 mutable struct SimpleTsit5Integrator{IIP, S, T, P, F} <:
-    DiffEqBase.AbstractODEIntegrator{SimpleTsit5, IIP, S, T}
+    SciMLBase.AbstractODEIntegrator{SimpleTsit5, IIP, S, T}
     f::F                  # eom
     uprev::S              # previous state
     u::S                  # current state
@@ -67,7 +67,7 @@ DiffEqBase.isinplace(::ST5I{IIP}) where {IIP} = IIP
 #######################################################################################
 # Initialization
 #######################################################################################
-function DiffEqBase.__init(
+function SciMLBase.__init(
         prob::ODEProblem, alg::SimpleTsit5;
         dt = error("dt is required for this algorithm"), kwargs...
     )
@@ -77,7 +77,7 @@ function DiffEqBase.__init(
     )
 end
 
-function DiffEqBase.__solve(
+function SciMLBase.__solve(
         prob::ODEProblem, alg::SimpleTsit5;
         dt = error("dt is required for this algorithm"), kwargs...
     )
@@ -105,12 +105,12 @@ function DiffEqBase.__solve(
         us[end] = _copy(integ.u)
     end
 
-    sol = DiffEqBase.build_solution(
+    sol = SciMLBase.build_solution(
         prob, alg, ts, us,
         calculate_error = false
     )
-    DiffEqBase.has_analytic(prob.f) &&
-        DiffEqBase.calculate_solution_errors!(
+    SciMLBase.has_analytic(prob.f) &&
+        SciMLBase.calculate_solution_errors!(
         sol; timeseries_errors = true,
         dense_errors = false
     )

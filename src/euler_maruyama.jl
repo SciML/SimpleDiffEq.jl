@@ -31,7 +31,7 @@ sol = solve(prob, SimpleEM(), dt = 0.01)
 
 - [`SDEProblem`](@ref) for problem setup
 """
-struct SimpleEM <: DiffEqBase.AbstractSDEAlgorithm end
+struct SimpleEM <: SciMLBase.AbstractSDEAlgorithm end
 export SimpleEM
 
 @muladd function DiffEqBase.solve(
@@ -76,7 +76,7 @@ export SimpleEM
         end
     end
 
-    sol = DiffEqBase.build_solution(
+    sol = SciMLBase.build_solution(
         prob, alg, t, u,
         calculate_error = false
     )
@@ -97,9 +97,9 @@ end
     tspan = prob.tspan
     p = prob.p
     ftmp = zero(u0)
-    gtmp = DiffEqBase.is_diagonal_noise(prob) ? zero(u0) : zero(prob.noise_rate_prototype)
-    gtmp2 = DiffEqBase.is_diagonal_noise(prob) ? nothing : zero(u0)
-    dW = DiffEqBase.is_diagonal_noise(prob) ? zero(u0) :
+    gtmp = SciMLBase.is_diagonal_noise(prob) ? zero(u0) : zero(prob.noise_rate_prototype)
+    gtmp2 = SciMLBase.is_diagonal_noise(prob) ? nothing : zero(u0)
+    dW = SciMLBase.is_diagonal_noise(prob) ? zero(u0) :
         false .* prob.noise_rate_prototype[1, :]
 
     @inbounds begin
@@ -116,15 +116,15 @@ end
         g(gtmp, uprev, p, tprev)
         @. dW = randn(eltype(dW))
 
-        if DiffEqBase.is_diagonal_noise(prob)
-            DiffEqBase.@.. u[i] = uprev + ftmp * dt + sqdt * gtmp * dW
+        if SciMLBase.is_diagonal_noise(prob)
+            @.. u[i] = uprev + ftmp * dt + sqdt * gtmp * dW
         else
             mul!(gtmp2, gtmp, dW)
-            DiffEqBase.@.. u[i] = uprev + ftmp * dt + sqdt * gtmp2
+            @.. u[i] = uprev + ftmp * dt + sqdt * gtmp2
         end
     end
 
-    sol = DiffEqBase.build_solution(
+    sol = SciMLBase.build_solution(
         prob, alg, t, u,
         calculate_error = false
     )

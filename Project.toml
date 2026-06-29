@@ -5,17 +5,20 @@ repo = "https://github.com/SciML/SimpleDiffEq.jl.git"
 
 [deps]
 DiffEqBase = "2b5f629d-d688-5b77-993f-72d75c75574e"
+FastBroadcast = "7034ab61-46d4-4ed7-9d0f-46aef9175898"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 MuladdMacro = "46d2c3a1-f734-5fdb-9937-b9b9aeba4221"
 Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
 RecursiveArrayTools = "731186ca-8d62-57ce-b412-fbd966d074cd"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
-DiffEqBase = "6.194.0, 7"
-ExplicitImports = "1.14.0"
+DiffEqBase = "7"
+FastBroadcast = "0.3, 0.4, 1, 2"
 JLArrays = "0.1, 0.2, 0.3"
+LinearAlgebra = "1"
 MuladdMacro = "0.2.4"
 OrdinaryDiffEq = "6.106.0, 7"
 OrdinaryDiffEqLowOrderRK = "1, 2"
@@ -25,13 +28,13 @@ Parameters = "0.12, 0.13"
 RecursiveArrayTools = "3.37.0, 4"
 Reexport = "1.2.2"
 SafeTestsets = "0.1"
-SciMLTesting = "1"
+SciMLBase = "3.27"
+SciMLTesting = "1.6"
 StaticArrays = "1.9.14"
 Test = "1"
 julia = "1.10"
 
 [extras]
-ExplicitImports = "7d51a73a-1435-4ff3-83d9-f097790105c7"
 JLArrays = "27aeb0d3-9eb9-45fb-866b-73c2ecf80fcb"
 OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
 OrdinaryDiffEqLowOrderRK = "1344f307-1e59-4825-a18e-ace9aa3fa4c6"
@@ -42,4 +45,4 @@ SciMLTesting = "09d9d899-5365-40a9-917a-5f67fddea283"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["ExplicitImports", "JLArrays", "OrdinaryDiffEq", "OrdinaryDiffEqLowOrderRK", "OrdinaryDiffEqTsit5", "OrdinaryDiffEqVerner", "SafeTestsets", "SciMLTesting", "Test"]
+test = ["JLArrays", "OrdinaryDiffEq", "OrdinaryDiffEqLowOrderRK", "OrdinaryDiffEqTsit5", "OrdinaryDiffEqVerner", "SafeTestsets", "SciMLTesting", "Test"]
