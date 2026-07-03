@@ -61,6 +61,7 @@ export GPUSimpleVern7
     p = prob.p
     t = tspan[1]
     tf = tspan[2]
+    cur_t = 1
 
     if saveat === nothing
         ts = Vector{eltype(dt)}(undef, 1)
@@ -69,7 +70,6 @@ export GPUSimpleVern7
         push!(us, recursivecopy(u0))
     else
         ts = saveat
-        cur_t = 1
         us = MVector{Int(length(ts)), typeof(u0)}(undef)
         if prob.tspan[1] == ts[1]
             cur_t += 1
@@ -308,6 +308,7 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern7) = true
 
     t = tspan[1]
     tf = prob.tspan[2]
+    cur_t = 1
 
     if saveat === nothing
         ts = Vector{eltype(dt)}(undef, 1)
@@ -316,7 +317,6 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern7) = true
         push!(us, recursivecopy(u0))
     else
         ts = saveat
-        cur_t = 1
         us = MVector{Int(length(ts)), typeof(u0)}(undef)
         if prob.tspan[1] == ts[1]
             cur_t += 1
@@ -396,10 +396,10 @@ SciMLBase.isadaptive(alg::GPUSimpleAVern7) = true
             tmp = tmp ./ (abstol .+ max.(abs.(uprev), abs.(u)) * reltol)
             EEst = DiffEqBase.ODE_DEFAULT_NORM(tmp, t)
 
+            @fastmath q11 = EEst^beta1
             if iszero(EEst)
                 q = inv(qmax)
             else
-                @fastmath q11 = EEst^beta1
                 @fastmath q = q11 / (qold^beta2)
             end
 

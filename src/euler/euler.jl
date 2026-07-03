@@ -196,8 +196,9 @@ end
         u = (1 - Θ) * y₀ + Θ * y₁
         return u
     else
+        u = similar(y₁)
         for i in 1:length(u)
-            u = @. (1 - Θ) * y₀ + Θ * y₁
+            u[i] = (1 - Θ) * y₀[i] + Θ * y₁[i]
         end
         return u
     end
