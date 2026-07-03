@@ -120,6 +120,7 @@ function SciMLBase.__solve(
     u0 = prob.u0
     tspan = prob.tspan
     ts = Vector{eltype(dt)}(undef, 1)
+    cur_t = 1
 
     if saveat === nothing
         ts = Vector{eltype(dt)}(undef, 1)
@@ -128,7 +129,6 @@ function SciMLBase.__solve(
         push!(us, recursivecopy(u0))
     else
         ts = saveat
-        cur_t = 1
         us = MVector{Int(length(ts)), typeof(u0)}(undef)
         if prob.tspan[1] == ts[1]
             cur_t += 1
@@ -282,10 +282,10 @@ end
 
         EEst = integ.internalnorm(tmp, integ.t)
 
+        @fastmath q11 = EEst^beta1
         if iszero(EEst)
             q = inv(qmax)
         else
-            @fastmath q11 = EEst^beta1
             @fastmath q = q11 / (qold^beta2)
         end
 
@@ -367,10 +367,10 @@ end
         tmp = tmp ./ (abstol .+ max.(abs.(uprev), abs.(u)) * reltol)
         EEst = integ.internalnorm(tmp, integ.t)
 
+        @fastmath q11 = EEst^beta1
         if iszero(EEst)
             q = inv(qmax)
         else
-            @fastmath q11 = EEst^beta1
             @fastmath q = q11 / (qold^beta2)
         end
 
@@ -535,10 +535,10 @@ end
 
         EEst = integ.internalnorm(tmp, integ.t)
 
+        @fastmath q11 = EEst^beta1
         if iszero(EEst)
             q = inv(qmax)
         else
-            @fastmath q11 = EEst^beta1
             @fastmath q = q11 / (qold^beta2)
         end
 
@@ -665,10 +665,10 @@ end
 
         EEst = integ.internalnorm(tmp, integ.t)
 
+        @fastmath q11 = EEst^beta1
         if iszero(EEst)
             q = inv(qmax)
         else
-            @fastmath q11 = EEst^beta1
             @fastmath q = q11 / (qold^beta2)
         end
 

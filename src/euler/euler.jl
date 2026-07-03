@@ -192,13 +192,6 @@ end
     Θ = (t - t₀) / dt
 
     # Hermite interpolation.
-    @inbounds if !isinplace(integ)
-        u = (1 - Θ) * y₀ + Θ * y₁
-        return u
-    else
-        for i in 1:length(u)
-            u = @. (1 - Θ) * y₀ + Θ * y₁
-        end
-        return u
-    end
+    @inbounds u = (1 - Θ) * y₀ + Θ * y₁
+    return u
 end
