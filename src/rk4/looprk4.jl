@@ -47,7 +47,7 @@ export LoopRK4
 
 # Out-of-place
 # No caching, good for static arrays, bad for arrays
-@muladd function DiffEqBase.__solve(
+@muladd function SciMLBase.__solve(
         prob::ODEProblem{uType, tType, false},
         alg::LoopRK4;
         dt = error("dt is required for this algorithm"),
@@ -100,13 +100,13 @@ export LoopRK4
 
     !save_everystep && save_end && (us[end] = u)
 
-    sol = DiffEqBase.build_solution(
+    sol = SciMLBase.build_solution(
         prob, alg, ts, us,
         k = nothing, stats = nothing,
         calculate_error = false
     )
-    DiffEqBase.has_analytic(prob.f) &&
-        DiffEqBase.calculate_solution_errors!(
+    SciMLBase.has_analytic(prob.f) &&
+        SciMLBase.calculate_solution_errors!(
         sol; timeseries_errors = true,
         dense_errors = false
     )
@@ -115,7 +115,7 @@ end
 
 # In-place
 # Good for mutable objects like arrays
-# Use DiffEqBase.@.. for simd ivdep
+# Use @.. for simd ivdep
 @muladd function DiffEqBase.solve(
         prob::ODEProblem{uType, tType, true},
         alg::LoopRK4;
@@ -162,25 +162,25 @@ end
         uprev .= u
         t = ts[i]
         f(k1, u, p, t)
-        DiffEqBase.@.. u = uprev + dt * half * k1
+        @.. u = uprev + dt * half * k1
         f(k2, u, p, t + half * dt)
-        DiffEqBase.@.. u = uprev + dt * half * k2
+        @.. u = uprev + dt * half * k2
         f(k3, u, p, t + half * dt)
-        DiffEqBase.@.. u = uprev + dt * k3
+        @.. u = uprev + dt * k3
         f(k4, u, p, t + dt)
-        DiffEqBase.@.. u = uprev + dt * sixth * (k1 + 2k2 + 2k3 + k4)
+        @.. u = uprev + dt * sixth * (k1 + 2k2 + 2k3 + k4)
         save_everystep && (us[i] = copy(u))
     end
 
     !save_everystep && save_end && (us[end] = u)
 
-    sol = DiffEqBase.build_solution(
+    sol = SciMLBase.build_solution(
         prob, alg, ts, us,
         k = nothing, stats = nothing,
         calculate_error = false
     )
-    DiffEqBase.has_analytic(prob.f) &&
-        DiffEqBase.calculate_solution_errors!(
+    SciMLBase.has_analytic(prob.f) &&
+        SciMLBase.calculate_solution_errors!(
         sol; timeseries_errors = true,
         dense_errors = false
     )
