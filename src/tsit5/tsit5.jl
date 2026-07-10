@@ -1,18 +1,30 @@
 """
-    SimpleTsit5
+    SimpleTsit5()
 
-Tsitouras 5th order Runge-Kutta method with fixed time step.
+Construct a fixed-step Tsitouras fifth-order Runge-Kutta algorithm.
 
-This is a 5th order explicit Runge-Kutta method developed by Tsitouras, using a fixed
-time step. It provides higher accuracy than RK4 while still being efficient. Supports
-both in-place and out-of-place formulations with continuous interpolation.
+`SimpleTsit5` solves `ODEProblem`s with the Tsitouras 5/4 explicit Runge-Kutta
+method using a fixed step size. It supports in-place and out-of-place problem
+functions, continuous interpolation, and the SciML integrator interface.
 
-## Example
+# Arguments
+
+No positional arguments are accepted.
+
+# Keywords
+
+No constructor keywords are accepted. Pass `dt` to `solve` or
+`init`.
+
+# Returns
+
+A `SimpleTsit5` algorithm object for use with `ODEProblem`.
+
+# Example
 
 ```julia
 using SimpleDiffEq
 
-# Define ODE
 f(u, p, t) = 1.01 * u
 
 u0 = 0.5
@@ -22,22 +34,14 @@ prob = ODEProblem(f, u0, tspan)
 sol = solve(prob, SimpleTsit5(), dt = 0.1)
 ```
 
-## Required Parameters
+# Notes
 
-- `dt`: Fixed time step size
+`dt` is required. Use [`SimpleATsit5`](@ref) when adaptive step sizes are
+needed.
 
-## Features
+# See Also
 
-- 5th order accurate
-- Continuous interpolation for dense output
-- FSAL optimization
-- Both in-place and out-of-place support
-
-## See also
-
-- [`SimpleATsit5`](@ref) for the adaptive step size version
-- [`GPUSimpleTsit5`](@ref) for GPU-compatible version
-- [`SimpleRK4`](@ref) for a lower order alternative
+[`SimpleATsit5`](@ref), [`GPUSimpleTsit5`](@ref), [`SimpleRK4`](@ref)
 """
 struct SimpleTsit5 <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleTsit5

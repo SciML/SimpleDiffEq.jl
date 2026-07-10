@@ -1,17 +1,29 @@
 """
-    SimpleEM
+    SimpleEM()
 
-Euler-Maruyama method for solving stochastic differential equations (SDEs).
+Construct a fixed-step Euler-Maruyama algorithm for `SDEProblem`s.
 
-This is a simple, first-order strong convergence method for SDEs. It supports both
-diagonal and non-diagonal noise. The algorithm requires a fixed time step `dt`.
+`SimpleEM` applies the Euler-Maruyama method to stochastic differential
+equations. It supports in-place and out-of-place drift/diffusion functions, and
+handles diagonal and non-diagonal noise.
 
-## Example
+# Arguments
+
+No positional arguments are accepted.
+
+# Keywords
+
+No constructor keywords are accepted. Pass `dt` to `solve`.
+
+# Returns
+
+A `SimpleEM` algorithm object for use with `SDEProblem`.
+
+# Example
 
 ```julia
 using SimpleDiffEq
 
-# Define SDE: du = f(u,p,t)dt + g(u,p,t)dW
 f(u, p, t) = 0.1u
 g(u, p, t) = 0.2u
 
@@ -19,17 +31,16 @@ u0 = 1.0
 tspan = (0.0, 1.0)
 prob = SDEProblem(f, g, u0, tspan)
 
-# Solve with fixed step size
 sol = solve(prob, SimpleEM(), dt = 0.01)
 ```
 
-## Required Parameters
+# Notes
 
-- `dt`: Fixed time step size
+`dt` is required. The method has strong order `1/2` for general SDEs.
 
-## See also
+# See Also
 
-- [`SDEProblem`](@ref) for problem setup
+`SDEProblem`
 """
 struct SimpleEM <: SciMLBase.AbstractSDEAlgorithm end
 export SimpleEM

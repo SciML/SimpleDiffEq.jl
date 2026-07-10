@@ -5,47 +5,48 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 """
-    SimpleRK4
+    SimpleRK4()
 
-Classic Runge-Kutta 4th order method for solving ODEs.
+Construct a fixed-step classical fourth-order Runge-Kutta algorithm.
 
-This is the standard RK4 method, a widely-used explicit Runge-Kutta method with
-4th order accuracy. It requires a fixed time step `dt` and supports both in-place
-and out-of-place formulations. The implementation uses FSAL (First Same As Last)
-optimization and supports interpolation via Hermite polynomials.
+`SimpleRK4` solves `ODEProblem`s with the classical explicit RK4 method. It
+supports in-place and out-of-place problem functions, dense interpolation over
+the most recent step, and the SciML integrator interface.
 
-## Example
+# Arguments
+
+No positional arguments are accepted.
+
+# Keywords
+
+No constructor keywords are accepted. Pass `dt` to `solve` or
+`init`.
+
+# Returns
+
+A `SimpleRK4` algorithm object for use with `ODEProblem`.
+
+# Example
 
 ```julia
 using SimpleDiffEq
 
-# Define ODE: du/dt = f(u, p, t)
 f(u, p, t) = 1.01 * u
 
 u0 = 0.5
 tspan = (0.0, 10.0)
 prob = ODEProblem(f, u0, tspan)
 
-# Solve with fixed step size
 sol = solve(prob, SimpleRK4(), dt = 0.1)
 ```
 
-## Required Parameters
+# Notes
 
-- `dt`: Fixed time step size
+`dt` is required. Use `init` and `step!` for manual stepping.
 
-## Features
+# See Also
 
-- 4th order accurate
-- FSAL optimization for efficiency
-- Hermite interpolation for dense output
-- Both in-place and out-of-place support
-- Integrator interface via `init` and `step!`
-
-## See also
-
-- [`LoopRK4`](@ref) for a simpler teaching/benchmarking variant
-- [`GPUSimpleRK4`](@ref) for GPU-compatible version
+[`LoopRK4`](@ref), [`GPUSimpleRK4`](@ref)
 """
 struct SimpleRK4 <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleRK4

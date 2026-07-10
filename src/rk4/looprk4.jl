@@ -4,20 +4,32 @@
 #######################################################################################
 
 """
-    LoopRK4
+    LoopRK4()
 
-Simplified loop-based Runge-Kutta 4th order method for teaching and benchmarking.
+Construct a minimal loop-based fourth-order Runge-Kutta algorithm.
 
-This is a minimal RK4 implementation with explicit loops, designed for educational purposes
-and to benchmark the overhead of more sophisticated integrators. It supports both in-place
-and out-of-place formulations but without advanced features like interpolation or FSAL.
+`LoopRK4` uses direct loops to expose the RK4 method structure for teaching and
+benchmarking. It supports in-place and out-of-place `ODEProblem`s but omits the
+integrator features provided by `SimpleRK4`.
 
-## Example
+# Arguments
+
+No positional arguments are accepted.
+
+# Keywords
+
+No constructor keywords are accepted. Pass solve-time keywords such as `dt`,
+`save_everystep`, and `save_start` to `solve`.
+
+# Returns
+
+A `LoopRK4` algorithm object for use with `ODEProblem`.
+
+# Example
 
 ```julia
 using SimpleDiffEq
 
-# Define ODE
 f(u, p, t) = 1.01 * u
 
 u0 = 0.5
@@ -27,20 +39,13 @@ prob = ODEProblem(f, u0, tspan)
 sol = solve(prob, LoopRK4(), dt = 0.1)
 ```
 
-## Required Parameters
+# Notes
 
-- `dt`: Fixed time step size
+`dt` is required. `adaptive = true` and `dense = true` are not supported.
 
-## Use Cases
+# See Also
 
-- Teaching how RK4 works
-- Benchmarking integrator overhead
-- Minimal dependencies for simple problems
-
-## See also
-
-- [`SimpleRK4`](@ref) for a more optimized version with FSAL and interpolation
-- [`GPUSimpleRK4`](@ref) for GPU-compatible version
+[`SimpleRK4`](@ref), [`GPUSimpleRK4`](@ref)
 """
 struct LoopRK4 <: AbstractSimpleDiffEqODEAlgorithm end
 export LoopRK4

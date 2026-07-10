@@ -40,6 +40,7 @@ These solvers are designed for GPU compatibility (out-of-place only):
 
 | Algorithm | Description |
 |-----------|-------------|
+| `GPUSimpleEuler` | GPU-compatible forward Euler |
 | `GPUSimpleRK4` | GPU-compatible RK4 |
 | `GPUSimpleTsit5` | GPU-compatible Tsit5 (fixed step) |
 | `GPUSimpleATsit5` | GPU-compatible adaptive Tsit5 |

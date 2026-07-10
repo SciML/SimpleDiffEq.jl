@@ -1,49 +1,52 @@
 using RecursiveArrayTools: recursivecopy
 
 """
-    SimpleATsit5
+    SimpleATsit5()
 
-Adaptive Tsitouras 5th order Runge-Kutta method.
+Construct an adaptive Tsitouras fifth-order Runge-Kutta algorithm.
 
-This is an adaptive step size version of the Tsitouras 5th order method, using PI-controlled
-adaptive stepping based on error estimates. It automatically adjusts the step size to meet
-specified absolute and relative tolerances.
+`SimpleATsit5` solves `ODEProblem`s with the Tsitouras 5/4 embedded
+Runge-Kutta method and PI-controlled adaptive step sizes. It supports in-place
+and out-of-place problem functions, interpolation, and optional `saveat`
+sampling.
 
-## Example
+# Arguments
+
+No positional arguments are accepted.
+
+# Keywords
+
+No constructor keywords are accepted. Pass solve-time keywords such as `dt`,
+`abstol`, `reltol`, `internalnorm`, `saveat`, and `save_everystep` to
+`solve` or `init`.
+
+# Returns
+
+A `SimpleATsit5` algorithm object for use with `ODEProblem`.
+
+# Example
 
 ```julia
 using SimpleDiffEq
 
-# Define ODE
 f(u, p, t) = 1.01 * u
 
 u0 = 0.5
 tspan = (0.0, 10.0)
 prob = ODEProblem(f, u0, tspan)
 
-# Adaptive stepping with tolerance control
 sol = solve(prob, SimpleATsit5(), dt = 0.1, abstol = 1e-6, reltol = 1e-3)
 ```
 
-## Parameters
+# Notes
 
-- `dt`: Initial time step size (default: 0.1)
-- `abstol`: Absolute tolerance (default: 1e-6)
-- `reltol`: Relative tolerance (default: 1e-3)
-- `internalnorm`: Norm function for error estimation (default: ODE_DEFAULT_NORM)
+The default initial step is `dt = 0.1`, with `abstol = 1e-6` and
+`reltol = 1e-3`. The integrator hook `derivative_discontinuity!` marks
+the cached derivative as stale after external state changes.
 
-## Features
+# See Also
 
-- Adaptive step size control with PI controller
-- 5th order accurate with embedded error estimator
-- Continuous interpolation for dense output
-- Both in-place and out-of-place support
-- Optional `saveat` for saving at specific times
-
-## See also
-
-- [`SimpleTsit5`](@ref) for the fixed step size version
-- [`GPUSimpleATsit5`](@ref) for GPU-compatible version
+[`SimpleTsit5`](@ref), [`GPUSimpleATsit5`](@ref)
 """
 struct SimpleATsit5 <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleATsit5

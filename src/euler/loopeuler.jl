@@ -4,20 +4,32 @@
 #######################################################################################
 
 """
-    LoopEuler
+    LoopEuler()
 
-Simplified loop-based forward Euler method for teaching and benchmarking.
+Construct a minimal loop-based forward Euler algorithm.
 
-This is a minimal forward Euler implementation with explicit loops, designed for educational
-purposes and to benchmark the overhead of more sophisticated integrators. It supports both
-in-place and out-of-place formulations but without advanced features.
+`LoopEuler` uses direct loops to expose the method structure for teaching and
+benchmarking. It supports in-place and out-of-place `ODEProblem`s but omits the
+integrator features provided by `SimpleEuler`.
 
-## Example
+# Arguments
+
+No positional arguments are accepted.
+
+# Keywords
+
+No constructor keywords are accepted. Pass solve-time keywords such as `dt`,
+`save_everystep`, and `save_start` to `solve`.
+
+# Returns
+
+A `LoopEuler` algorithm object for use with `ODEProblem`.
+
+# Example
 
 ```julia
 using SimpleDiffEq
 
-# Define ODE
 f(u, p, t) = -0.5 * u
 
 u0 = 1.0
@@ -27,20 +39,13 @@ prob = ODEProblem(f, u0, tspan)
 sol = solve(prob, LoopEuler(), dt = 0.1)
 ```
 
-## Required Parameters
+# Notes
 
-- `dt`: Fixed time step size
+`dt` is required. `adaptive = true` and `dense = true` are not supported.
 
-## Use Cases
+# See Also
 
-- Teaching how Euler's method works
-- Benchmarking integrator overhead
-- Minimal dependencies for simple problems
-
-## See also
-
-- [`SimpleEuler`](@ref) for a more optimized version
-- [`LoopRK4`](@ref) for a higher order teaching variant
+[`SimpleEuler`](@ref), [`LoopRK4`](@ref)
 """
 struct LoopEuler <: AbstractSimpleDiffEqODEAlgorithm end
 export LoopEuler

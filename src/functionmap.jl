@@ -1,36 +1,49 @@
 """
-    SimpleFunctionMap
+    SimpleFunctionMap()
 
-Simple function iteration for discrete problems.
+Construct a simple function-map algorithm for `DiscreteProblem`s.
 
-This algorithm iterates a discrete map of the form `u[n+1] = f(u[n], p, t[n+1])`.
-It is used for discrete dynamical systems and difference equations.
+`SimpleFunctionMap` advances discrete dynamical systems with
+`u[n+1] = f(u[n], p, t[n+1])` for out-of-place maps, or
+`f!(u[n+1], u[n], p, t[n+1])` for in-place maps. The time step is fixed at one
+unit of the problem time axis.
 
-## Example
+# Arguments
+
+No positional arguments are accepted.
+
+# Keywords
+
+No constructor keywords are accepted. Pass solve-time options such as
+`calculate_values` to `solve` or `init`.
+
+# Returns
+
+A `SimpleFunctionMap` algorithm object for use with `DiscreteProblem`.
+
+# Example
 
 ```julia
 using SimpleDiffEq
 
-# Define discrete map: u[n+1] = f(u[n], p, t)
-f(u, p, t) = p * u * (1 - u)  # Logistic map
+f(u, p, t) = p * u * (1 - u)
 
 u0 = 0.5
-tspan = (0.0, 100.0)  # Will iterate for 101 steps (0 to 100)
+tspan = (0.0, 100.0)
 p = 3.2
 
 prob = DiscreteProblem(f, u0, tspan, p)
 sol = solve(prob, SimpleFunctionMap())
 ```
 
-## Notes
+# Notes
 
-- The time step is always 1 for discrete problems
-- Both in-place and out-of-place forms are supported
-- Supports the integrator interface via `init` and `step!`
+Both in-place and out-of-place maps are supported. The algorithm also supports
+the integrator interface through `init` and `step!`.
 
-## See also
+# See Also
 
-- [`DiscreteProblem`](@ref) for problem setup
+`DiscreteProblem`
 """
 struct SimpleFunctionMap end
 export SimpleFunctionMap
