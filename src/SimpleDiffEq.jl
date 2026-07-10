@@ -28,6 +28,27 @@ module SimpleDiffEq
     @static if isdefined(DiffEqBase, :u_modified!)
         using DiffEqBase: u_modified!
         export u_modified!
+        @doc """
+            u_modified!(integrator, modified::Bool)
+
+        Mark whether an integrator state was externally modified.
+
+        # Arguments
+
+        - `integrator`: A SciML integrator that supports the mutation hook.
+        - `modified::Bool`: Whether the current state should be treated as modified.
+
+        # Returns
+
+        Returns the implementation-defined result of the integrator hook.
+
+        # Notes
+
+        This is the legacy DiffEqBase compatibility name for
+        `derivative_discontinuity!`. SimpleDiffEq reexports it when the
+        installed DiffEqBase/SciMLBase stack still provides the binding.
+        """
+        SciMLBase.u_modified!
     end
     using StaticArrays: SArray, SVector, MVector
     using RecursiveArrayTools: recursivecopy!

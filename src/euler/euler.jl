@@ -5,19 +5,32 @@
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 """
-    SimpleEuler
+    SimpleEuler()
 
-Forward Euler method for solving ODEs.
+Construct a fixed-step forward Euler algorithm for `ODEProblem`s.
 
-This is the simplest explicit ODE solver, using first-order accurate forward Euler steps.
-It requires a fixed time step `dt` and supports both in-place and out-of-place formulations.
+`SimpleEuler` advances ordinary differential equations with first-order explicit
+Euler steps. It supports in-place and out-of-place problem functions and the
+SciML integrator interface.
 
-## Example
+# Arguments
+
+No positional arguments are accepted.
+
+# Keywords
+
+No constructor keywords are accepted. Pass `dt` to `solve` or
+`init`.
+
+# Returns
+
+A `SimpleEuler` algorithm object for use with `ODEProblem`.
+
+# Example
 
 ```julia
 using SimpleDiffEq
 
-# Define ODE: du/dt = f(u, p, t)
 f(u, p, t) = -0.5 * u
 
 u0 = 1.0
@@ -27,21 +40,14 @@ prob = ODEProblem(f, u0, tspan)
 sol = solve(prob, SimpleEuler(), dt = 0.1)
 ```
 
-## Required Parameters
+# Notes
 
-- `dt`: Fixed time step size
+`dt` is required. Use `init` and `step!` for manual stepping or
+dense interpolation over the most recent step.
 
-## Features
+# See Also
 
-- 1st order accurate
-- Both in-place and out-of-place support
-- Integrator interface via `init` and `step!`
-- Minimal computational overhead
-
-## See also
-
-- [`LoopEuler`](@ref) for a teaching/benchmarking variant
-- [`SimpleRK4`](@ref) for higher accuracy with 4th order method
+[`LoopEuler`](@ref), [`SimpleRK4`](@ref)
 """
 struct SimpleEuler <: AbstractSimpleDiffEqODEAlgorithm end
 export SimpleEuler

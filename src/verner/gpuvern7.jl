@@ -5,20 +5,32 @@
 #######################################################################################
 
 """
-    GPUSimpleVern7
+    GPUSimpleVern7()
 
-GPU-compatible Verner 7th order Runge-Kutta method with fixed time step.
+Construct a GPU-compatible fixed-step Verner seventh-order algorithm.
 
-This is a 7th order explicit Runge-Kutta method designed for GPU compatibility.
-It only supports out-of-place formulations and provides very high accuracy for
-smooth problems.
+`GPUSimpleVern7` is an out-of-place Verner 7/6 explicit Runge-Kutta
+implementation intended for GPU kernels and static-array workloads.
 
-## Example
+# Arguments
+
+No positional arguments are accepted.
+
+# Keywords
+
+No constructor keywords are accepted. Pass solve-time keywords such as `dt`,
+`saveat`, and `save_everystep` to `solve`.
+
+# Returns
+
+A `GPUSimpleVern7` algorithm object for use with out-of-place
+`ODEProblem` definitions.
+
+# Example
 
 ```julia
 using SimpleDiffEq
 
-# Define ODE (out-of-place only)
 f(u, p, t) = 1.01 * u
 
 u0 = 0.5
@@ -28,21 +40,14 @@ prob = ODEProblem(f, u0, tspan)
 sol = solve(prob, GPUSimpleVern7(), dt = 0.1)
 ```
 
-## Parameters
+# Notes
 
-- `dt`: Fixed time step size (default: 0.1)
-- `saveat`: Optional times to save solution at
-- `save_everystep`: Save at every step (default: true)
+The default step size is `dt = 0.1f0`. In-place problem functions are not
+supported.
 
-## Restrictions
+# See Also
 
-- Out-of-place formulations only
-- Optimized for GPU execution
-
-## See also
-
-- [`GPUSimpleAVern7`](@ref) for the adaptive step size version
-- [`GPUSimpleVern9`](@ref) for even higher order accuracy
+[`GPUSimpleAVern7`](@ref), [`GPUSimpleVern9`](@ref)
 """
 struct GPUSimpleVern7 <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleVern7
@@ -243,20 +248,32 @@ end
 #######################################################################################
 
 """
-    GPUSimpleAVern7
+    GPUSimpleAVern7()
 
-GPU-compatible adaptive Verner 7th order Runge-Kutta method.
+Construct a GPU-compatible adaptive Verner seventh-order algorithm.
 
-This is a GPU-optimized adaptive version of the Verner 7th order method with PI-controlled
-adaptive stepping. It only supports out-of-place formulations and provides very high accuracy
-with automatic step size control.
+`GPUSimpleAVern7` is an out-of-place adaptive Verner 7/6 explicit Runge-Kutta
+implementation intended for GPU kernels and static-array workloads.
 
-## Example
+# Arguments
+
+No positional arguments are accepted.
+
+# Keywords
+
+No constructor keywords are accepted. Pass solve-time keywords such as `dt`,
+`abstol`, `reltol`, `saveat`, and `save_everystep` to `solve`.
+
+# Returns
+
+A `GPUSimpleAVern7` algorithm object for use with out-of-place
+`ODEProblem` definitions.
+
+# Example
 
 ```julia
 using SimpleDiffEq
 
-# Define ODE (out-of-place only)
 f(u, p, t) = 1.01 * u
 
 u0 = 0.5
@@ -266,24 +283,14 @@ prob = ODEProblem(f, u0, tspan)
 sol = solve(prob, GPUSimpleAVern7(), dt = 0.1, abstol = 1e-6, reltol = 1e-3)
 ```
 
-## Parameters
+# Notes
 
-- `dt`: Initial time step size (default: 0.1)
-- `abstol`: Absolute tolerance (default: 1e-6)
-- `reltol`: Relative tolerance (default: 1e-3)
-- `saveat`: Optional times to save solution at
-- `save_everystep`: Save at every step (default: true)
+The default initial step is `dt = 0.1f0`, with `abstol = 1f-6` and
+`reltol = 1f-3`. In-place problem functions are not supported.
 
-## Restrictions
+# See Also
 
-- Out-of-place formulations only
-- Optimized for GPU execution
-
-## See also
-
-- [`GPUSimpleVern7`](@ref) for the fixed step size version
-- [`GPUSimpleAVern9`](@ref) for even higher order adaptive method
-- [`GPUSimpleATsit5`](@ref) for a lower order adaptive alternative
+[`GPUSimpleVern7`](@ref), [`GPUSimpleAVern9`](@ref), [`GPUSimpleATsit5`](@ref)
 """
 struct GPUSimpleAVern7 end
 export GPUSimpleAVern7

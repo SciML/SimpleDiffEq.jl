@@ -5,19 +5,31 @@
 #######################################################################################
 
 """
-    GPUSimpleEuler
+    GPUSimpleEuler()
 
-GPU-compatible forward Euler method.
+Construct a GPU-compatible fixed-step forward Euler algorithm.
 
-This is a simplified forward Euler implementation designed for GPU compatibility. It only
-supports out-of-place formulations and uses static arrays for efficiency on GPU architectures.
+`GPUSimpleEuler` is a small out-of-place Euler implementation intended for GPU
+kernels and static-array workloads.
 
-## Example
+# Arguments
+
+No positional arguments are accepted.
+
+# Keywords
+
+No constructor keywords are accepted. Pass `dt` to `solve`.
+
+# Returns
+
+A `GPUSimpleEuler` algorithm object for use with out-of-place `ODEProblem`
+definitions.
+
+# Example
 
 ```julia
 using SimpleDiffEq
 
-# Define ODE (out-of-place only)
 f(u, p, t) = -0.5 * u
 
 u0 = 1.0
@@ -27,19 +39,13 @@ prob = ODEProblem(f, u0, tspan)
 sol = solve(prob, GPUSimpleEuler(), dt = 0.1)
 ```
 
-## Required Parameters
+# Notes
 
-- `dt`: Fixed time step size
+`dt` is required. In-place problem functions are not supported.
 
-## Restrictions
+# See Also
 
-- Out-of-place formulations only
-- Optimized for GPU execution
-
-## See also
-
-- [`SimpleEuler`](@ref) for the standard CPU-optimized version
-- [`GPUSimpleRK4`](@ref) for higher accuracy GPU solver
+[`SimpleEuler`](@ref), [`GPUSimpleRK4`](@ref)
 """
 struct GPUSimpleEuler <: AbstractSimpleDiffEqODEAlgorithm end
 export GPUSimpleEuler
