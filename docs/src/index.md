@@ -36,31 +36,34 @@ u_modified!
 SimpleDiffEq also reexports these upstream SciML interface names for
 convenience:
 
-<!-- public-api-reexports-start -->
-- `@..`
-- `AbstractODEAlgorithm`
-- `AbstractODEIntegrator`
-- `AbstractSDEAlgorithm`
-- `ConstantInterpolation`
-- `DEIntegrator`
-- `DiffEqBase`
-- `DiscreteProblem`
-- `ODEProblem`
-- `ODE_DEFAULT_NORM`
-- `SDEProblem`
-- `SciMLBase`
-- `__init`
-- `__solve`
-- `build_solution`
-- `calculate_solution_errors!`
-- `derivative_discontinuity!`
-- `has_analytic`
-- `init`
-- `is_diagonal_noise`
-- `isdiscrete`
-- `isinplace`
-- `reinit!`
-- `set_t!`
-- `solve`
-- `step!`
-<!-- public-api-reexports-end -->
+```@docs
+AbstractODEAlgorithm
+AbstractODEIntegrator
+AbstractSDEAlgorithm
+ConstantInterpolation
+DEIntegrator
+DiffEqBase
+DiscreteProblem
+ODEProblem
+ODE_DEFAULT_NORM
+SDEProblem
+SciMLBase
+__init
+__solve
+build_solution
+calculate_solution_errors!
+derivative_discontinuity!
+has_analytic
+init
+is_diagonal_noise
+isdiscrete
+isinplace
+reinit!
+set_t!
+solve
+step!
+```
+
+```@autodocs
+Modules = [SimpleDiffEq]
+```
