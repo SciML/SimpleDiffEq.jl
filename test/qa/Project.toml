@@ -8,9 +8,6 @@ SciMLTesting = "09d9d899-5365-40a9-917a-5f67fddea283"
 SimpleDiffEq = "05bca326-078c-5bf0-a5bf-ce7c7982d7fd"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
-[sources]
-SimpleDiffEq = { path = "../.." }
-
 [compat]
 Aqua = "0.8"
 DiffEqBase = "7"
