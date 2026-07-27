@@ -1,4 +1,4 @@
-using SimpleDiffEq, OrdinaryDiffEq, OrdinaryDiffEqVerner, StaticArrays, LinearAlgebra
+using SimpleDiffEq, DiffEqBase, OrdinaryDiffEq, OrdinaryDiffEqVerner, StaticArrays, LinearAlgebra
 function test(u, p, t)
     return -u
 end
