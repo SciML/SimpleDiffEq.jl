@@ -1,4 +1,4 @@
-using SimpleDiffEq, StaticArrays, OrdinaryDiffEq, Test
+using SimpleDiffEq, DiffEqBase, StaticArrays, OrdinaryDiffEq, Test
 
 function loop(u, p, t)
     @inbounds begin

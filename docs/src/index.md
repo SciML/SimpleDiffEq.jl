@@ -25,45 +25,11 @@ SimpleEM
 SimpleFunctionMap
 ```
 
-## Compatibility Hooks
+## SciML Interface
 
-```@docs
-u_modified!
-```
-
-## Reexported SciML Interface
-
-SimpleDiffEq also reexports these upstream SciML interface names for
-convenience:
-
-```@docs
-AbstractODEAlgorithm
-AbstractODEIntegrator
-AbstractSDEAlgorithm
-ConstantInterpolation
-DEIntegrator
-DiffEqBase
-DiscreteProblem
-ODEProblem
-ODE_DEFAULT_NORM
-SDEProblem
-SciMLBase
-__init
-__solve
-build_solution
-calculate_solution_errors!
-derivative_discontinuity!
-has_analytic
-init
-is_diagonal_noise
-isdiscrete
-isinplace
-reinit!
-set_t!
-solve
-step!
-```
-
-```@autodocs
-Modules = [SimpleDiffEq]
-```
+SimpleDiffEq algorithms are used through the public SciMLBase problem and
+solve interfaces. Construct an `ODEProblem`, `SDEProblem`, or
+`DiscreteProblem` with SciMLBase, then pass one of the algorithms above to
+`solve`. For manual ODE stepping, use the documented SciMLBase `init` and
+`step!` interface. The extension and mutation rules for those shared
+interfaces are defined by [SciMLBase](https://docs.sciml.ai/SciMLBase/stable/).

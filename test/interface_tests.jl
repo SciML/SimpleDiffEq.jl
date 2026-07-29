@@ -1,4 +1,4 @@
-using SimpleDiffEq, StaticArrays, JLArrays, Test
+using SimpleDiffEq, DiffEqBase, StaticArrays, JLArrays, Test
 
 # Test interface compatibility with different number types
 

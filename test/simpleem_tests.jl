@@ -1,4 +1,4 @@
-using SimpleDiffEq, Test, StaticArrays
+using SimpleDiffEq, DiffEqBase, Test, StaticArrays
 
 # dX_t = 2u dt + dW_t
 f(u, p, t) = 2u

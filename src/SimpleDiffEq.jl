@@ -2,54 +2,12 @@ __precompile__()
 
 module SimpleDiffEq
 
-    using Reexport: @reexport
     using MuladdMacro: @muladd
-    @reexport using FastBroadcast: @..
-    @reexport using DiffEqBase: DiffEqBase, ODEProblem, SDEProblem, DiscreteProblem,
-        isinplace, reinit!, ODE_DEFAULT_NORM,
-        set_t!, solve, step!, init, isdiscrete
-    @reexport using SciMLBase: SciMLBase, build_solution, is_diagonal_noise,
-        AbstractSDEAlgorithm, AbstractODEAlgorithm,
-        AbstractODEIntegrator, DEIntegrator, ConstantInterpolation,
-        __init, __solve, has_analytic, calculate_solution_errors!
+    using FastBroadcast: @..
+    using DiffEqBase: DiffEqBase, ODEProblem, SDEProblem, DiscreteProblem,
+        isinplace, reinit!, step!
+    using SciMLBase: SciMLBase, AbstractODEAlgorithm
     import SciMLBase: allows_arbitrary_number_types, allowscomplex, isautodifferentiable, isadaptive
-    # `derivative_discontinuity!` was introduced in DiffEqBase v7 / SciMLBase v3,
-    # replacing the older `u_modified!`. Support both branches so the package can
-    # be used with either DiffEqBase v6 or v7.
-    @static if isdefined(DiffEqBase, :derivative_discontinuity!)
-        using DiffEqBase: derivative_discontinuity!
-        export derivative_discontinuity!
-    else
-        const derivative_discontinuity! = DiffEqBase.u_modified!
-        export derivative_discontinuity!
-    end
-    # Keep `u_modified!` re-exported for backwards compatibility with any user
-    # code that still calls it.
-    @static if isdefined(DiffEqBase, :u_modified!)
-        using DiffEqBase: u_modified!
-        export u_modified!
-        @doc """
-            u_modified!(integrator, modified::Bool)
-
-        Mark whether an integrator state was externally modified.
-
-        # Arguments
-
-        - `integrator`: A SciML integrator that supports the mutation hook.
-        - `modified::Bool`: Whether the current state should be treated as modified.
-
-        # Returns
-
-        Returns the implementation-defined result of the integrator hook.
-
-        # Notes
-
-        This is the legacy DiffEqBase compatibility name for
-        `derivative_discontinuity!`. SimpleDiffEq reexports it when the
-        installed DiffEqBase/SciMLBase stack still provides the binding.
-        """
-        SciMLBase.u_modified!
-    end
     using StaticArrays: SArray, SVector, MVector
     using RecursiveArrayTools: recursivecopy!
     using LinearAlgebra: mul!

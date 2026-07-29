@@ -1,4 +1,4 @@
-using SimpleDiffEq, Test
+using SimpleDiffEq, DiffEqBase, Test
 
 prob = DiscreteProblem(0.5, (0.0, 1.0))
 sol = solve(prob, SimpleFunctionMap())
