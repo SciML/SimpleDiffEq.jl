@@ -13,6 +13,5 @@ makedocs(;
     pages = [
         "Home" => "index.md",
     ],
-    checkdocs = :exports,
-    warnonly = false
+    checkdocs = :exports
 )
