@@ -12,6 +12,7 @@ module SimpleDiffEq
     using RecursiveArrayTools: recursivecopy!
     using LinearAlgebra: mul!
     using Parameters: @unpack
+    using PrecompileTools: @compile_workload, @setup_workload
 
     @inline _copy(a::SArray) = a
     @inline _copy(a) = copy(a)
@@ -49,5 +50,6 @@ module SimpleDiffEq
     include("verner/verner_tableaus.jl")
     include("verner/gpuvern7.jl")
     include("verner/gpuvern9.jl")
+    include("precompile.jl")
 
 end # module
