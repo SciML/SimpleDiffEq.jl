@@ -4,15 +4,17 @@ module SimpleDiffEq
 
     using MuladdMacro: @muladd
     using FastBroadcast: @..
-    using DiffEqBase: DiffEqBase, ODEProblem, SDEProblem, DiscreteProblem,
-        isinplace, reinit!, step!
-    using SciMLBase: SciMLBase, AbstractODEAlgorithm
+    using DiffEqBase: DiffEqBase, isinplace
+    using SciMLBase: SciMLBase, AbstractODEAlgorithm, DiscreteProblem, ODEProblem,
+        SDEProblem, init, reinit!, solve, step!
     import SciMLBase: allows_arbitrary_number_types, allowscomplex, isautodifferentiable, isadaptive
     using StaticArrays: SArray, SVector, MVector
     using RecursiveArrayTools: recursivecopy!
     using LinearAlgebra: mul!
     using Parameters: @unpack
     using PrecompileTools: @compile_workload, @setup_workload
+
+    export DiscreteProblem, ODEProblem, SDEProblem, init, reinit!, solve, step!
 
     @inline _copy(a::SArray) = a
     @inline _copy(a) = copy(a)
