@@ -12,6 +12,7 @@ makedocs(;
     ),
     pages = [
         "Home" => "index.md",
+        "Reexported interface" => "reexports.md",
     ],
     checkdocs = :exports
 )
